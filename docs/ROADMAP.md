@@ -56,8 +56,8 @@ Do not begin the remaining Day 2 database models or migrations until every requi
 - [x] Apply migrations without changing existing account/session records.
 - [x] Verify spatial operations, model constraints, fresh upgrades, downgrade behavior, and auth regressions.
 - [x] Document schema inspection and migration commands.
-- [ ] Commit Day 2 and push it to GitHub.
-- [ ] Verify the remote commit before Day 3.
+- [x] Commit Day 2 and push it to GitHub (`4ae8200`).
+- [x] Verify the remote implementation commit before Day 3.
 
 ## Choices to resolve at the relevant milestone
 

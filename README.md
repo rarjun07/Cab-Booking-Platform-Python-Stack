@@ -36,4 +36,4 @@ Learning preference: step-by-step guidance with explanations.
 
 ## Current state
 
-Day 1 is committed and pushed. Day 2 adds PostgreSQL/PostGIS models for drivers, rides, payments, and reviews, plus versioned Alembic migrations that preserve existing auth data. The backend suite passes 43 tests, including authentication, spatial operations, database constraints, and migration checks. See the progress log for the Day 2 Git checkpoint. Ride request and fare-estimate APIs remain Day 3 work.
+Days 1 and 2 are complete and pushed. Day 2 adds PostgreSQL/PostGIS models for drivers, rides, payments, and reviews, plus versioned Alembic migrations that preserve existing auth data. The backend suite passes 43 tests, including authentication, spatial operations, database constraints, and migration checks. The Day 2 implementation commit `4ae8200` is verified on GitHub; see the progress log for its following documentation checkpoint. Ride request and fare-estimate APIs remain Day 3 work.

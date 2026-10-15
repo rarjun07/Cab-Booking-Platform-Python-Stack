@@ -2,7 +2,7 @@
 
 ## Current checkpoint
 
-- Active milestone: Day 2 implementation verified; commit/push checkpoint in progress.
+- Active milestone: Day 2 complete; Day 3 has not started.
 - Completed: read all nine PDF pages, checked the daily schedule, confirmed stack compatibility, and prepared the roadmap.
 - Learning preference: guide the user step by step with explanations.
 - Day 1 implementation: complete; custom FastAPI + PostgreSQL authentication is verified with real database tests and browser flows.
@@ -15,7 +15,9 @@
 - Day 1 application commit: `dcf934062abca7bab47464104d13ca2b7a94bb45` (`feat: complete day 1 setup and PostgreSQL authentication`).
 - Verified application push: `git ls-remote origin refs/heads/main` returned that exact SHA after the first push.
 - This completion record is saved in a following documentation commit. For the latest checkpoint commit, compare `git rev-parse HEAD` with `git ls-remote origin refs/heads/main`.
-- Next action: commit/push Day 2 and verify the remote SHA. Do not begin Day 3 yet.
+- Day 2 implementation commit: `4ae8200b1345a202c18a4ab4ea2296f3e9a82030` (`feat: complete day 2 PostGIS models and Alembic migrations`).
+- Verified Day 2 push: GitHub `refs/heads/main` matched that exact SHA. This completion record follows in a documentation commit; compare current HEAD and the remote for the latest checkpoint.
+- Next action: Day 3 when the user requests it: configure the routing/maps provider, implement fare estimates, and persist ride requests. Day 3 work has not started.
 
 ## Day 1, step 1: local Git setup
 
@@ -84,9 +86,21 @@
 - Final targeted migration checks: all 5 passed after explicitly testing successful adoption of an unversioned Day 1 schema. Database status output now recognizes geometry columns without reflection warnings.
 - Tests now initialize schema with Alembic. Migration downgrade checks are confined to the dedicated test database and rolled back; the development database was not downgraded.
 - Replaced the old auth `create_all` initializer with an Alembic compatibility command. Added a safe database status command and beginner walkthrough; frontend code and Day 3 APIs were not changed.
-- Day 2 commit and verified push are pending below.
+- Day 2 implementation commit `4ae8200b1345a202c18a4ab4ea2296f3e9a82030` was pushed; `git ls-remote` returned the same SHA.
 
 ## Daily completion record
+
+Day 2:
+
+- Scope delivered: PostGIS core for the existing PostgreSQL 14 server; driver/ride/payment/review models; user profile fields; spatial indexes; Alembic baseline adoption and booking-schema migration.
+- Verification: 43 backend tests passed; final 5 targeted migration tests passed; no schema drift; clean database status output; dependency consistency check passed.
+- Data preservation: existing development user and session records compared equal before and after migration.
+- Source review: actual local credentials absent from all 19 changed/new candidate files; ignored local configuration remains untracked.
+- Implementation commit: `4ae8200b1345a202c18a4ab4ea2296f3e9a82030`.
+- Remote: `https://github.com/rarjun07/Cab-Booking-Platform-Python-Stack.git`, branch `main`.
+- Push result: succeeded; exact remote implementation SHA verified.
+- Known environment detail: PostGIS was manually compiled for PostgreSQL 14 and must be rebuilt if that major installation changes. Existing TestClient deprecation warning remains documented.
+- Ready for Day 3: yes, once this completion-record commit is also pushed and verified. No Day 3 feature work is included.
 
 Day 1:
 
