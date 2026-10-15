@@ -2,6 +2,8 @@
 
 The user chose custom authentication instead of the mentor guide's Clerk/Supabase Auth options. The database connection and the `users` / `auth_sessions` tables therefore move into Day 1. PostGIS, the remaining application models, and Alembic migrations stay on Day 2.
 
+Day 2 update: [the database walkthrough](DATABASE.md) now covers PostGIS and Alembic. The old `scripts.init_auth_db` command delegates to migrations and requires PostGIS to have been enabled by an administrator. Follow the updated database setup when installing on another machine.
+
 ## Understand the flow
 
 1. React sends the sign-up form to FastAPI over our local Vite proxy.
@@ -105,7 +107,7 @@ python -m pip install -r requirements-dev.txt
 python -m pytest -q
 ```
 
-Tests require `TEST_DATABASE_URL` for a separate PostgreSQL database whose name ends in `_test`. They refuse the development database, create only required test tables, and roll back each test's records. They do not delete databases or truncate tables.
+Tests require `TEST_DATABASE_URL` for a separate PostgreSQL database whose name ends in `_test`. They refuse the development database and roll back each test's records. Since Day 2, they initialize tables using Alembic; migration downgrade checks also run inside rollback transactions in that test database. They do not delete databases or truncate development tables.
 
 Checks cover password hashes, cookie attributes, duplicate/case-insensitive emails, invalid inputs, incorrect credentials, missing/tampered/expired tokens, invalid token claims, missing database sessions, origin checks, and logout revocation.
 

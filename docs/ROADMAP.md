@@ -46,6 +46,19 @@ Days 4 and 5 are explicitly optional in the guide. The guide also labels geospat
 
 Do not begin the remaining Day 2 database models or migrations until every required Day 1 item, including the push, is complete. Authentication must work with real PostgreSQL persistence; placeholder screens or mocked tokens do not satisfy it.
 
+## Day 2 checklist
+
+- [x] Confirm the Day 1 commit/push checkpoint before starting.
+- [x] Install and enable PostGIS for the existing project PostgreSQL server.
+- [x] Extend user fields and add driver, ride, payment, and review models.
+- [x] Add foreign keys, uniqueness/check constraints, exact money types, and spatial indexes.
+- [x] Introduce Alembic with checked adoption of the existing auth schema.
+- [x] Apply migrations without changing existing account/session records.
+- [x] Verify spatial operations, model constraints, fresh upgrades, downgrade behavior, and auth regressions.
+- [x] Document schema inspection and migration commands.
+- [ ] Commit Day 2 and push it to GitHub.
+- [ ] Verify the remote commit before Day 3.
+
 ## Choices to resolve at the relevant milestone
 
 - Day 1 choices resolved: step-by-step teaching, confirmed GitHub repository, custom FastAPI/PostgreSQL authentication, and SQLAlchemy with local PostgreSQL.

@@ -2,6 +2,8 @@
 
 The original health endpoint below is now joined by PostgreSQL-backed registration, login, session verification, and logout. See [the authentication walkthrough](../docs/AUTHENTICATION.md) for database setup, the new files, and tests.
 
+Day 2 adds the booking models, PostGIS, and Alembic migrations. Follow [the database walkthrough](../docs/DATABASE.md) to enable PostGIS, apply migrations, and inspect the schema. Database initialization is now handled by `python -m alembic upgrade head`.
+
 ## What we added
 
 - `.venv/`: this project's isolated Python environment. It holds installed libraries locally and is ignored by Git.
@@ -59,6 +61,6 @@ The root URL `/` currently returns 404 because we only defined `/api/health`.
 
 ## Scope of this checkpoint
 
-The health endpoint checks API availability only. Custom authentication now uses PostgreSQL user/session tables, as requested by the user. PostGIS, remaining application models, and migrations belong to Day 2. See the progress log for the current Git checkpoint.
+The health endpoint checks API availability only. Custom authentication uses PostgreSQL user/session tables. Day 2 adds PostGIS and the driver, ride, payment, and review models through Alembic; their feature APIs remain on their scheduled days. See the progress log for the current Git checkpoint.
 
 Reference: [FastAPI's official first-steps tutorial](https://fastapi.tiangolo.com/tutorial/first-steps/).

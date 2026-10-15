@@ -2,7 +2,7 @@
 
 ## Current checkpoint
 
-- Active milestone: Day 1 complete; Day 2 has not started.
+- Active milestone: Day 2 implementation verified; commit/push checkpoint in progress.
 - Completed: read all nine PDF pages, checked the daily schedule, confirmed stack compatibility, and prepared the roadmap.
 - Learning preference: guide the user step by step with explanations.
 - Day 1 implementation: complete; custom FastAPI + PostgreSQL authentication is verified with real database tests and browser flows.
@@ -15,7 +15,7 @@
 - Day 1 application commit: `dcf934062abca7bab47464104d13ca2b7a94bb45` (`feat: complete day 1 setup and PostgreSQL authentication`).
 - Verified application push: `git ls-remote origin refs/heads/main` returned that exact SHA after the first push.
 - This completion record is saved in a following documentation commit. For the latest checkpoint commit, compare `git rev-parse HEAD` with `git ls-remote origin refs/heads/main`.
-- Next action: Day 2, when the user requests the next step: PostGIS, remaining SQLAlchemy models, and Alembic migrations.
+- Next action: commit/push Day 2 and verify the remote SHA. Do not begin Day 3 yet.
 
 ## Day 1, step 1: local Git setup
 
@@ -68,6 +68,23 @@
 - Signed out the generated browser demo account after verification. Its random password was not written to source or documentation.
 - See `docs/AUTHENTICATION.md` for the step-by-step flow, setup, endpoints, files, testing, and current scope.
 - Remaining Day 2 work is untouched: PostGIS, driver/ride/payment/review models, and Alembic migrations.
+
+## Day 2: models, PostGIS, and migrations
+
+- The user requested the next day after Day 1 completion. Local `main` and `origin/main` matched the previously verified Day 1 documentation checkpoint `93318c0da7e3ae4b47648dcebc57bc6296034e64` before starting.
+- Retained the existing PostgreSQL 14.21 service. Compiled and installed PostGIS 3.6.4 core for it, after verifying the official source checksum. Enabled the extension only in `cab_booking_dev` and `cab_booking_test`; no service restart or other project database migration was performed.
+- Installed GEOS/PROJ/libxml2/pkgconf and their Homebrew dependencies. Restored the missing version-specific PostgreSQL 14 header link. Details and build reproduction notes are in `docs/DATABASE.md`.
+- Added Alembic 1.20.0 and GeoAlchemy2 0.20.0 with recorded production dependency versions.
+- Added driver, ride, payment, and review models, plus optional user profile fields, rating defaults, and timestamps. Money uses Decimal/NUMERIC; points use geometry(Point, 4326) with GiST indexes.
+- Added foreign keys, bounded coordinate/rating values, non-negative money/distance/duration values, and duplicate payment/review protection. Business-flow APIs remain on their scheduled days.
+- Introduced `0001_auth_baseline` and `0002_booking_models`. The baseline validates an existing unversioned auth schema before adopting it and also supports fresh databases. It rejects column/key/index/constraint drift.
+- Applied the development migrations and compared all original user fields and session rows before/after: preserved the existing 1 user and 2 sessions unchanged.
+- `alembic current` reports `0002_booking_models (head)`; `alembic check` reports no new upgrade operations.
+- Full backend suite: 43 tests passed, with the previously documented TestClient/HTTPX deprecation warning. Coverage includes auth regressions, spatial distances/indexes, data constraints, migration round trips, existing-account preservation, schema-drift refusal, and offline SQL output.
+- Final targeted migration checks: all 5 passed after explicitly testing successful adoption of an unversioned Day 1 schema. Database status output now recognizes geometry columns without reflection warnings.
+- Tests now initialize schema with Alembic. Migration downgrade checks are confined to the dedicated test database and rolled back; the development database was not downgraded.
+- Replaced the old auth `create_all` initializer with an Alembic compatibility command. Added a safe database status command and beginner walkthrough; frontend code and Day 3 APIs were not changed.
+- Day 2 commit and verified push are pending below.
 
 ## Daily completion record
 

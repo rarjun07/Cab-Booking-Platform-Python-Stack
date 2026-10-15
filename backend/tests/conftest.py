@@ -4,6 +4,8 @@ from pathlib import Path
 import os
 
 from dotenv import dotenv_values
+from alembic import command
+from alembic.config import Config
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -11,7 +13,7 @@ from sqlalchemy.engine import make_url
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
-from app.database import Base, get_db
+from app.database import get_db
 from app.main import app
 
 
@@ -27,7 +29,10 @@ def test_engine():
             or (dev_url and parsed.database == make_url(dev_url).database)):
         pytest.fail("Refusing to run tests outside a separate PostgreSQL _test database.")
     engine = create_engine(url, connect_args={"connect_timeout": 5})
-    Base.metadata.create_all(engine)
+    with engine.begin() as connection:
+        config = Config(str(Path(__file__).resolve().parents[1] / "alembic.ini"))
+        config.attributes["connection"] = connection
+        command.upgrade(config, "head")
     yield engine
     engine.dispose()
 

@@ -32,7 +32,8 @@ Learning preference: step-by-step guidance with explanations.
 - [Backend setup and code explanation](backend/README.md)
 - [Frontend setup and code explanation](frontend/README.md)
 - [Authentication setup and walkthrough](docs/AUTHENTICATION.md)
+- [Database models, PostGIS, and migrations](docs/DATABASE.md)
 
 ## Current state
 
-Day 1 is complete: the monorepo, FastAPI health endpoint, React frontend, and PostgreSQL-backed authentication are implemented and verified. All 24 backend tests and the frontend build pass; browser authentication flows pass. The application commit `dcf9340` is pushed to GitHub and its remote SHA verified. See the progress log for details and the following documentation checkpoint. PostGIS, remaining application models, and Alembic migrations remain Day 2 work.
+Day 1 is committed and pushed. Day 2 adds PostgreSQL/PostGIS models for drivers, rides, payments, and reviews, plus versioned Alembic migrations that preserve existing auth data. The backend suite passes 43 tests, including authentication, spatial operations, database constraints, and migration checks. See the progress log for the Day 2 Git checkpoint. Ride request and fare-estimate APIs remain Day 3 work.
