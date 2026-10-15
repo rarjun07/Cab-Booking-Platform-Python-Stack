@@ -35,4 +35,4 @@ Learning preference: step-by-step guidance with explanations.
 
 ## Current state
 
-Day 1 application work includes the monorepo, FastAPI health endpoint, React frontend, and PostgreSQL-backed authentication. Registration, login, session verification, expiry checks, and logout revocation are implemented. See the progress log for validation and Git checkpoint status. PostGIS, remaining application models, and Alembic migrations remain Day 2 work.
+Day 1 is complete: the monorepo, FastAPI health endpoint, React frontend, and PostgreSQL-backed authentication are implemented and verified. All 24 backend tests and the frontend build pass; browser authentication flows pass. The application commit `dcf9340` is pushed to GitHub and its remote SHA verified. See the progress log for details and the following documentation checkpoint. PostGIS, remaining application models, and Alembic migrations remain Day 2 work.

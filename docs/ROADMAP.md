@@ -41,8 +41,8 @@ Days 4 and 5 are explicitly optional in the guide. The guide also labels geospat
 - [x] Check frontend-to-backend connectivity and authentication success and failure paths.
 - [x] Document local startup steps and explain the files added.
 - [x] Record verification results in `PROGRESS.md`.
-- [ ] Commit Day 1 with a descriptive commit message.
-- [ ] Push Day 1 to the confirmed repository and verify the remote commit.
+- [x] Commit Day 1 with a descriptive commit message.
+- [x] Push Day 1 to the confirmed repository and verify the remote application commit (`dcf9340`).
 
 Do not begin the remaining Day 2 database models or migrations until every required Day 1 item, including the push, is complete. Authentication must work with real PostgreSQL persistence; placeholder screens or mocked tokens do not satisfy it.
 

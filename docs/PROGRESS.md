@@ -2,19 +2,20 @@
 
 ## Current checkpoint
 
-- Active milestone: Day 1, final verification and Git checkpoint.
+- Active milestone: Day 1 complete; Day 2 has not started.
 - Completed: read all nine PDF pages, checked the daily schedule, confirmed stack compatibility, and prepared the roadmap.
 - Learning preference: guide the user step by step with explanations.
-- Day 1 implementation: custom FastAPI + PostgreSQL authentication implemented and verified in the browser; final checks and commit/push checkpoint in progress.
-- Git repository: initialized locally with branch `main`; no commits yet.
+- Day 1 implementation: complete; custom FastAPI + PostgreSQL authentication is verified with real database tests and browser flows.
+- Git repository: local `main` tracks `origin/main`.
 - GitHub account supplied by user: `rarjun07`.
 - GitHub access: verified with `gh auth status`; `rarjun07` is the active account.
 - Repository URL: https://github.com/rarjun07/Cab-Booking-Platform-Python-Stack (supplied by user).
 - Remote: `origin` -> `https://github.com/rarjun07/Cab-Booking-Platform-Python-Stack.git` (fetch and push verified locally).
 - Repository verification: `gh repo view` confirmed the intended owner/name and that the repository was empty before our first push.
-- Last daily commit: none.
-- Last verified push: none.
-- Next action: finish the Day 1 review, commit and push, then verify the remote SHA. Do not start Day 2 yet.
+- Day 1 application commit: `dcf934062abca7bab47464104d13ca2b7a94bb45` (`feat: complete day 1 setup and PostgreSQL authentication`).
+- Verified application push: `git ls-remote origin refs/heads/main` returned that exact SHA after the first push.
+- This completion record is saved in a following documentation commit. For the latest checkpoint commit, compare `git rev-parse HEAD` with `git ls-remote origin refs/heads/main`.
+- Next action: Day 2, when the user requests the next step: PostGIS, remaining SQLAlchemy models, and Alembic migrations.
 
 ## Day 1, step 1: local Git setup
 
@@ -69,6 +70,18 @@
 - Remaining Day 2 work is untouched: PostGIS, driver/ride/payment/review models, and Alembic migrations.
 
 ## Daily completion record
+
+Day 1:
+
+- Scope delivered: Git monorepo; FastAPI; React/Vite; local PostgreSQL development/test databases; real registration, login, protected sessions, and logout.
+- Automated verification: 24 PostgreSQL-backed tests passed; frontend production build passed; dependency consistency check passed.
+- Browser verification: API connectivity, signup, login, bad-password rejection, session verification, reload restoration, and sign-out passed.
+- Source review: generated local credentials and signing secret are absent from tracked candidates; `.env`, installed dependencies, and build output are ignored.
+- Known limits: no email verification, password reset, or refresh-token flow yet; session lifetime is 30 minutes. Login throttling is scheduled for Day 12. The test suite emits one HTTPX compatibility deprecation warning.
+- Application commit: `dcf934062abca7bab47464104d13ca2b7a94bb45`.
+- Remote: `https://github.com/rarjun07/Cab-Booking-Platform-Python-Stack.git`, branch `main`.
+- Push result: succeeded; remote application SHA verified with `git ls-remote`.
+- Ready for Day 2: yes, after the completion-record commit is also pushed and verified. No Day 2 implementation is included.
 
 For each day, record the following using observed results. Do not mark a day complete on the strength of a plan or scaffold.
 
