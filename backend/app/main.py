@@ -1,0 +1,23 @@
+"""Application entry point for the Cab Booking Platform API."""
+
+from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+
+from app.auth import router as auth_router
+
+app = FastAPI(title="Cab Booking Platform API", version="0.1.0")
+app.include_router(auth_router)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_error_handler(request, exc):
+    # FastAPI's default validation errors echo invalid inputs, which can include passwords.
+    errors = [{key: error[key] for key in ("loc", "msg", "type")} for error in exc.errors()]
+    return JSONResponse(status_code=422, content={"detail": errors})
+
+
+@app.get("/api/health", tags=["Health"])
+async def health_check() -> dict[str, str]:
+    """Confirm the API is running; this does not check a database yet."""
+    return {"status": "ok"}

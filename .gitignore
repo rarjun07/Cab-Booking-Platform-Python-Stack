@@ -1,0 +1,35 @@
+# Local credentials and configuration. Track safe examples only.
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Python environments and generated files.
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# React dependencies and build output. Keep dependency lockfiles in Git.
+node_modules/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# Local logs, editor files, and macOS metadata.
+*.log
+.DS_Store
+.idea/
+.vscode/
+
+# Local document-processing output.
+tmp/
