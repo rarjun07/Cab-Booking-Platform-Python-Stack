@@ -35,7 +35,8 @@ Learning preference: step-by-step guidance with explanations.
 - [Authentication setup and walkthrough](docs/AUTHENTICATION.md)
 - [Database models, PostGIS, and migrations](docs/DATABASE.md)
 - [Fare estimates and ride requests](docs/RIDE_BOOKING.md)
+- [Driver dashboard and nearby matching](docs/RIDE_MATCHING.md)
 
 ## Current state
 
-Days 1-3 are implemented and pushed. Day 3 adds authenticated OSRM fare estimates, signed quotes, PostgreSQL ride requests, and a React booking form. All 71 backend tests and the frontend build pass. A live API check verified a real route, ride persistence, duplicate-request protection, and owned status access. Browser visual verification is pending because the browser URL policy blocked the preview reload; the user has not yet tried the form manually. Day 3 implementation commit `ef48c41` is verified on GitHub; see the progress log for its following documentation checkpoint. Day 4 has not started.
+Days 1-3 are implemented and pushed. The user chose to include Day 4, which adds the driver dashboard, fresh online availability, nearby PostGIS queries, accept/decline matching, and recovery of the latest open ride. All 91 backend tests and the React build pass. Live API checks verified setup, a real route, matching, safe acceptance retries, assignment recovery, offline behavior, and logout. Automated visual verification remains unavailable after a browser URL-policy rejection; manual feedback is tracked in the progress log. The Day 4 commit/push checkpoint is pending. Day 5 has not started and remains optional.

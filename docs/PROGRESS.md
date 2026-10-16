@@ -2,7 +2,7 @@
 
 ## Current checkpoint
 
-- Active milestone: Day 3 implemented and pushed; automated and live API checks passed. Visual/manual UI follow-up remains unverified.
+- Active milestone: Day 4 in progress; the user chose to include the optional driver dashboard, availability, and matching. Day 3 visual/manual UI follow-up remains unverified.
 - Completed: read all nine PDF pages, checked the daily schedule, confirmed stack compatibility, and prepared the roadmap.
 - Learning preference: guide the user step by step with explanations.
 - Day 1 implementation: complete; custom FastAPI + PostgreSQL authentication is verified with real database tests and browser flows.
@@ -19,7 +19,8 @@
 - Verified Day 2 push: GitHub `refs/heads/main` matched that exact SHA. This completion record follows in a documentation commit; compare current HEAD and the remote for the latest checkpoint.
 - Day 2 documentation checkpoint: `af94813132f8a08456d8ed90062d29cd730fe701`, verified against GitHub before Day 3 started.
 - Day 3 implementation commit: `ef48c41770db6eedb4392f350176f9fb379049ec`, pushed and verified against GitHub `refs/heads/main`.
-- Next action: push and verify this completion-record commit, then let the user try the manual ride form. Day 4 has not started; its optional scope will be resolved when the user requests the next milestone.
+- Day 3 documentation checkpoint: `8d59f1c5b04fcf3687beba196e58d2b6c57f29aa`, confirmed equal to GitHub before Day 4 started; working tree was clean.
+- Next action: implement and verify Day 4 only. Day 5 has not started and remains optional.
 
 ## Day 1, step 1: local Git setup
 
@@ -105,6 +106,22 @@
 - Setup, code explanation, service limitations, and the manual walkthrough are in `docs/RIDE_BOOKING.md`.
 - Source review: actual local database passwords and JWT secret are absent from all 24 changed/new files. `.env` remains owner-only and ignored; virtual environment, dependencies, and frontend build output are ignored. `git diff --check` passed.
 - Day 3 implementation commit `ef48c41770db6eedb4392f350176f9fb379049ec` was pushed; `git ls-remote origin refs/heads/main` returned that exact SHA. Day 4 has not started.
+
+## Day 4: driver dashboard, availability, and matching
+
+- The user requested the next milestone and explicitly selected “Include Day 4 (recommended).” Verified the Day 3 documentation checkpoint `8d59f1c5b04fcf3687beba196e58d2b6c57f29aa` against GitHub and confirmed a clean working tree before beginning.
+- Added driver-only owned vehicle setup and online/offline endpoints. Online requires a valid vehicle and explicit coordinates; offline clears the matching location. Locations expire after five minutes by default and require an explicit refresh.
+- Added PostGIS geography radius filtering (default 5 km), nearby-driver candidates for owned rider requests, and sorted nearby offers for drivers. Stale, offline, busy, and declining drivers are excluded. Candidate responses omit exact driver points and account emails.
+- Added accept/decline endpoints. Acceptance locks driver then ride, rechecks eligibility, assigns a single winner, and returns the same assignment on an owned retry. Declines persist per driver/request and do not hide requests from other drivers.
+- Migration `0004_driver_matching` adds location timestamps, geography expression indexes, `ride_declines`, and a partial unique index preventing multiple active rides for one driver. Applied to development; Alembic check reports no drift. Existing Day 3 data preservation is tested.
+- Added the React driver dashboard and rider nearby list. Rider sign-in restores the latest open ride; driver sign-in restores the profile and active assignment. Updates use explicit refresh controls; Day 5 realtime has not started.
+- Verification: **91 backend tests passed**, React production build passed, and pip check passed. Separate-connection concurrency tests verify exactly one winner for two drivers/one ride and one driver/two rides; committed synthetic test fixtures are cleaned up. One existing TestClient/HTTPX deprecation warning remains.
+- Live local API demo passed: synthetic rider/driver registration, vehicle setup, online location, real OSRM estimate, persisted ride, nearby candidate at 12 meters, offer/acceptance, same-ride repeat acceptance, rider/driver restoration, offline location clearing while retaining assignment, and logout revocation. Demo ride `cde03821-ad85-4f26-8958-7cb2141e615e` is accepted; its synthetic driver was left offline. These records are local development test data.
+- Preview HTTP response: 200. Automated visual interaction remains unverified because of the earlier browser URL-policy rejection. A manual driver-dashboard check was requested; no result has been received yet. Day 3's full manual UI flow also remains unverified.
+- Known scope: demo matching permits clearly labeled unverified drivers; geographic matching distance is not a road ETA; location presence is explicit rather than tied to browser login; active ride progression/completion and realtime remain later work.
+- Beginner setup and two-account steps are in `docs/RIDE_MATCHING.md`.
+- Source review: actual local database passwords and JWT secret are absent from all 23 changed/new files. `.env` remains ignored and owner-only; dependencies, virtual environment, and generated build output remain ignored. `git diff --check` passed.
+- Day 4 commit/push checkpoint pending. Day 5 remains optional and has not started.
 
 ## Daily completion record
 

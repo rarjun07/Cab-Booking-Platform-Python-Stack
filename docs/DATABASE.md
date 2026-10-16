@@ -1,6 +1,6 @@
 # Day 2: PostgreSQL, PostGIS, and migrations
 
-Day 1 introduced accounts and sessions for the user's choice of custom authentication. Day 2 extends that database with the mentor guide's booking models. It does not implement booking, payment, matching, or review APIs ahead of their scheduled days.
+Day 1 introduced accounts and sessions for the user's choice of custom authentication. Day 2 extended that database with the mentor guide's booking models. This page also tracks later schema revisions; the feature walkthroughs explain the Day 3 booking and Day 4 matching APIs.
 
 ## Understand the tables
 
@@ -12,6 +12,7 @@ Day 1 introduced accounts and sessions for the user's choice of custom authentic
 | `rides` | Rider, optional assigned driver, pickup/drop points, status, fares, distance, duration, and creation time. | Rider references `users`; assigned driver references `drivers`. |
 | `payments` | Ride, optional Stripe PaymentIntent ID, amount, and payment status. | One payment record per ride; Stripe IDs are unique when present. |
 | `reviews` | Ride, reviewer, reviewed user, rating, and optional comment. | One review per reviewer per ride. |
+| `ride_declines` (Day 4) | Driver decisions to decline specific requests. | Composite ride/driver primary key; both reference their existing records. |
 
 The database protects basic integrity: referenced records must exist, fares/distances/durations cannot be negative, ratings must be 1-5, reviewers cannot rate themselves, and pickup/drop/driver coordinates must be in range.
 
@@ -30,17 +31,18 @@ POINT(77.2090 28.6139)
       longitude latitude
 ```
 
-GiST spatial indexes exist on the driver's current location and both ride points. The tests verify the indexes and a real `ST_DistanceSphere` calculation in meters. Nearby-driver matching itself remains Day 4 work.
+GiST spatial indexes exist on the driver's current location and both ride points. The tests verify the indexes and a real `ST_DistanceSphere` calculation in meters. Day 4 adds nearby matching and expression indexes on location/pickup cast to geography, so its radius uses meters. See [the matching walkthrough](RIDE_MATCHING.md).
 
 ## Understand migrations
 
 A model describes the desired table structure in Python. An Alembic migration records a versioned change to the actual database. Changing a model alone does not update an existing database.
 
-We now have three revisions:
+We now have four revisions:
 
 1. `0001_auth_baseline`: on a fresh database, creates the frozen Day 1 user/session schema. On an existing Day 1 database, checks its columns, indexes, foreign keys, primary keys, and role constraint before adopting it. It refuses unexpected unversioned tables or schema drift rather than silently stamping them as correct.
 2. `0002_booking_models`: requires an administrator-enabled PostGIS extension, adds user profile fields/defaults, and creates the driver, ride, payment, and review tables and indexes.
 3. `0003_ride_quote` (Day 3): adds nullable, unique `rides.quote_id` to prevent duplicate ride creation when a signed estimate is retried. Existing rides can retain a null quote ID.
+4. `0004_driver_matching` (Day 4): adds nullable driver location timestamps, geography expression indexes, a partial unique active-driver assignment index, and the `ride_declines` table. Legacy locations are ineligible for matching until refreshed. Existing duplicate active assignments must be reconciled before this migration can create its unique index.
 
 Existing account fields, password hashes, IDs, and session records are retained. Added non-null user fields receive database defaults. Migrations import frozen schema definitions rather than future ORM models, so the historical steps remain stable.
 
@@ -58,7 +60,7 @@ python -m alembic check
 python -m scripts.db_status
 ```
 
-Expected current revision: `0003_ride_quote (head)`.
+Expected current revision: `0004_driver_matching (head)`.
 
 `alembic check` should report **No new upgrade operations detected**. `db_status` prints the installed PostGIS version and table/column names, without showing credentials or account data.
 

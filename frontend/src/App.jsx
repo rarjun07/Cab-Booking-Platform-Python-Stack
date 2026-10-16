@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import AuthPanel from './AuthPanel.jsx'
 import RideBooking from './RideBooking.jsx'
+import DriverDashboard from './DriverDashboard.jsx'
 
 const connectionMessages = {
   idle: 'Ready when you are. Start FastAPI, then check the connection.',
@@ -44,7 +45,7 @@ export default function App() {
           <span className="brand-mark" aria-hidden="true">C</span>
           Cab Booking Platform
         </a>
-        <span className="day-label">Day 03 <span aria-hidden="true">/</span> Your first ride</span>
+        <span className="day-label">Day 04 <span aria-hidden="true">/</span> Meet your driver</span>
       </header>
 
       <main id="main">
@@ -58,7 +59,9 @@ export default function App() {
         </section>
 
         <AuthPanel user={user} onUserChange={setUser} />
-        <RideBooking key={user?.id ?? 'signed-out'} user={user} onSessionExpired={setUser} />
+        {user?.role === 'driver'
+          ? <DriverDashboard key={user.id} onSessionExpired={setUser} />
+          : <RideBooking key={user?.id ?? 'signed-out'} user={user} onSessionExpired={setUser} />}
 
         <section className="connection-card" aria-labelledby="connection-title">
           <div>
@@ -84,7 +87,7 @@ export default function App() {
           <ol>
             <li><span className="step-number">01</span><div><h3>Your account</h3><p>Sign in as a rider.</p></div></li>
             <li><span className="step-number">02</span><div><h3>Your estimate</h3><p>Road distance, travel time, and fare.</p></div></li>
-            <li><span className="step-number">03</span><div><h3>Your request</h3><p>Confirm and save your ride request.</p></div></li>
+            <li><span className="step-number">03</span><div><h3>Your driver</h3><p>A nearby driver accepts your saved request.</p></div></li>
           </ol>
         </section>
       </main>

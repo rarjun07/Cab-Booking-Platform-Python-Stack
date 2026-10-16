@@ -4,10 +4,10 @@ from datetime import datetime
 from decimal import Decimal
 from uuid import UUID, uuid4
 
-from geoalchemy2 import Geometry, WKBElement
+from geoalchemy2 import Geography, Geometry, WKBElement
 from sqlalchemy import (
     Boolean, CheckConstraint, DateTime, ForeignKey, Index, Integer, Numeric,
-    SmallInteger, String, Text, UniqueConstraint, Uuid, func, text,
+    SmallInteger, String, Text, UniqueConstraint, Uuid, cast, func, text,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
@@ -53,6 +53,7 @@ class Driver(Base):
     vehicle_info: Mapped[dict] = mapped_column(JSONB, default=dict, server_default=text("'{}'::jsonb"))
     verified: Mapped[bool] = mapped_column(Boolean, server_default=text("false"))
     current_location: Mapped[WKBElement | None] = mapped_column(Geometry("POINT", srid=4326, spatial_index=True))
+    location_updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     status: Mapped[str] = mapped_column(String(20), server_default="offline")
 
 
@@ -66,6 +67,8 @@ class Ride(Base):
         CheckConstraint("driver_id IS NULL OR rider_id <> driver_id", name="ck_rides_distinct_participants"),
         CheckConstraint("ST_X(pickup_point) BETWEEN -180 AND 180 AND ST_Y(pickup_point) BETWEEN -90 AND 90 AND ST_X(drop_point) BETWEEN -180 AND 180 AND ST_Y(drop_point) BETWEEN -90 AND 90", name="ck_rides_coordinates"),
         Index("ix_rides_rider_created", "rider_id", "created_at"),
+        Index("uq_rides_active_driver", "driver_id", unique=True,
+              postgresql_where=text("driver_id IS NOT NULL AND status IN ('accepted', 'arriving', 'in_progress')")),
     )
 
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
@@ -79,6 +82,19 @@ class Ride(Base):
     fare_actual: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))
     distance_meters: Mapped[int | None] = mapped_column(Integer)
     duration_secs: Mapped[int | None] = mapped_column(Integer)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+# Meter-based radius queries cast WGS84 points to geography; index the same expression.
+Index("ix_drivers_location_geography", cast(Driver.current_location, Geography(geometry_type=None)), postgresql_using="gist")
+Index("ix_rides_pickup_geography", cast(Ride.pickup_point, Geography(geometry_type=None)), postgresql_using="gist")
+
+
+class RideDecline(Base):
+    __tablename__ = "ride_declines"
+
+    ride_id: Mapped[UUID] = mapped_column(ForeignKey("rides.id", ondelete="CASCADE"), primary_key=True)
+    driver_id: Mapped[UUID] = mapped_column(ForeignKey("drivers.user_id", ondelete="CASCADE"), primary_key=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 

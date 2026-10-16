@@ -78,6 +78,24 @@ h1 { margin: 0; font-size: clamp(34px, 5.5vw, 56px); font-weight: 650; line-heig
 .fare-breakdown dd { margin: 0; }
 .fare-note { color: #596660; }
 .ride-reference { overflow-wrap: anywhere; font-family: ui-monospace, monospace; }
+.driver-card { margin-bottom: 24px; }
+.driver-toolbar, .matching-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.driver-toolbar { margin-block: 24px; }
+.availability-badge { display: inline-flex; border-radius: 20px; padding: 6px 12px; background: #edf0e8; font-size: 12px; font-weight: 700; }
+.availability-online { background: #d7e7b5; color: #29451d; }
+.driver-section-title { margin-bottom: 16px; font-size: 16px; font-weight: 700; }
+.vehicle-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+.driver-location-form, .driver-requests { margin-top: 28px; padding-top: 24px; border-top: 1px solid #dcded4; }
+.driver-requests > h3 { margin: 0 0 16px; font-size: 18px; }
+.driver-demo-note { font-size: 12px; line-height: 1.7; }
+.matching-list { list-style: none; padding: 0; margin: 16px 0 0; }
+.matching-list > li { padding: 20px; margin-top: 12px; border: 1px solid #cdd3c7; border-radius: 12px; background: #fffef9; overflow-wrap: anywhere; }
+.matching-list p { margin: 8px 0; font-size: 13px; }
+.matching-list .auth-actions { margin-top: 16px; }
+.matching-title h4 { margin: 0; font-size: 22px; }
+.matching-title span { font-size: 12px; color: #596660; }
+.rider-matching { margin-top: 24px; border-top: 1px solid #cdd3c7; padding-top: 16px; }
+.rider-matching h4 { margin: 0 0 12px; }
 footer { display: flex; justify-content: space-between; gap: 16px; padding: 24px 0; border-top: 1px solid #dcded4; font-size: 11px; color: #596660; }
 :focus-visible { outline: 3px solid #557a21; outline-offset: 5px; }
 .connection-card :focus-visible { outline-color: #e5ee9d; }
@@ -95,6 +113,7 @@ footer { display: flex; justify-content: space-between; gap: 16px; padding: 24px
   .connection-card { padding: 24px 20px; }
   .auth-card { padding: 24px 20px; }
   .route-grid { grid-template-columns: 1fr; }
+  .vehicle-grid { grid-template-columns: 1fr; gap: 0; }
   .connection-card button { width: 100%; }
   .journey li { gap: 12px; }
   footer { flex-direction: column; gap: 4px; }

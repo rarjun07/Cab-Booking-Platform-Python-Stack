@@ -126,3 +126,11 @@ def ride_status(ride_id: UUID, user: RiderUser, db: DB):
     if ride is None:
         raise HTTPException(404, "Ride not found.")
     return ride_response(ride, db)
+
+
+@router.get("/current", response_model=RidePublic | None)
+def current_ride(user: RiderUser, db: DB):
+    ride = db.scalar(select(Ride).where(Ride.rider_id == user.id,
+                                       Ride.status.in_(("requested", "accepted", "arriving", "in_progress")))
+                     .order_by(Ride.created_at.desc(), Ride.id.desc()).limit(1))
+    return ride_response(ride, db) if ride else None

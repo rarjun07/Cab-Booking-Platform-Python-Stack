@@ -27,6 +27,8 @@ The user subsequently chose custom FastAPI + PostgreSQL authentication instead o
 
 Days 4 and 5 are explicitly optional in the guide. The guide also labels geospatial queries optional in its notes, while its Day 2 schedule includes PostGIS setup. Keep PostGIS in the planned database setup; decide the optional matching features when reaching Day 4.
 
+The user chose to include Day 4. Day 5 realtime remains undecided.
+
 ## Day 1 checklist
 
 - [x] Confirm the project repository URL and local GitHub access.
@@ -72,12 +74,27 @@ Do not begin the remaining Day 2 database models or migrations until every requi
 - [x] Commit, push, and verify the Day 3 implementation (`ef48c41`).
 - [ ] Manual/visual UI follow-up: browser policy blocked automated preview; user has not tried the form yet. Track this separately from the verified API flow.
 
+## Day 4 checklist
+
+- [x] Verify the Day 3 completion-record commit on GitHub (`8d59f1c`).
+- [x] Resolve optional scope: user chose to include Day 4.
+- [x] Add driver-owned vehicle setup and online/offline location updates.
+- [x] Add location freshness, indexed meter-based radius queries, and sorted nearby offers/candidates.
+- [x] Add accept/decline matching with authorization and eligibility rechecks.
+- [x] Prevent competing assignments with row locks and a unique active-driver index.
+- [x] Add the React driver dashboard, rider candidate list, and current-ride recovery.
+- [x] Apply the migration and verify preservation, backend tests, frontend build, and the live API demo.
+- [x] Document the two-account walkthrough and demo/verification limits.
+- [ ] Commit, push, and verify the Day 4 implementation.
+- [ ] Manual/visual UI follow-up: preview automation remains blocked by the earlier URL-policy rejection. User feedback is recorded separately in `PROGRESS.md`.
+
 ## Choices to resolve at the relevant milestone
 
 - Day 1 choices resolved: step-by-step teaching, confirmed GitHub repository, custom FastAPI/PostgreSQL authentication, and SQLAlchemy with local PostgreSQL.
 - Day 2: extend the schema with PostGIS and Alembic migrations.
 - Day 3 routing choice resolved: OSRM public demo for learning, with no API key. See `RIDE_BOOKING.md` for service limits and the production hosting decision still needed before deployment.
-- Days 4-5: whether to include the optional driver dashboard and realtime features.
+- Day 4 choice resolved: include the driver dashboard, availability, and nearby matching.
+- Day 5: whether to include optional realtime features.
 - Day 6 onward: required service configuration for test payments, email, and deployment.
 
 The PDF supplies project requirements and suggestions. The user's chosen stack and daily commit/push workflow govern our implementation. External credentials, accounts, and deployments are not assumed to exist merely because the PDF mentions them.

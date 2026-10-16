@@ -4,13 +4,13 @@ const emptyRoute = { pickupLat: '', pickupLng: '', destinationLat: '', destinati
 const sampleRoute = { pickupLat: '28.6139', pickupLng: '77.2090', destinationLat: '28.6129', destinationLng: '77.2295' }
 const formatMoney = (value) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(Number(value))
 
-async function rideRequest(path, body) {
+async function rideRequest(path, body, signal) {
   const response = await fetch(`/api/rides/${path}`, {
     method: body === undefined ? 'GET' : 'POST',
     credentials: 'same-origin',
     headers: body === undefined ? {} : { 'Content-Type': 'application/json' },
     body: body === undefined ? undefined : JSON.stringify(body),
-    signal: AbortSignal.timeout(15000),
+    signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(15000)]) : AbortSignal.timeout(15000),
   })
   const data = await response.json()
   if (!response.ok) {
@@ -26,9 +26,26 @@ export default function RideBooking({ user, onSessionExpired }) {
   const [route, setRoute] = useState(emptyRoute)
   const [quote, setQuote] = useState(null)
   const [ride, setRide] = useState(null)
+  const [nearbyDrivers, setNearbyDrivers] = useState([])
+  const [matchingChecked, setMatchingChecked] = useState(false)
+  const [restoring, setRestoring] = useState(user?.role === 'rider')
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
   const [isError, setIsError] = useState(false)
+
+  useEffect(() => {
+    if (user?.role !== 'rider') return
+    const controller = new AbortController()
+    rideRequest('current', undefined, controller.signal).then((saved) => {
+      if (!controller.signal.aborted) setRide(saved)
+    }).catch((error) => {
+      if (controller.signal.aborted) return
+      if (error.status === 401) onSessionExpired(null)
+      setIsError(true)
+      setMessage(error.status ? error.message : 'Could not restore your latest open ride. Refresh the page to retry.')
+    }).finally(() => { if (!controller.signal.aborted) setRestoring(false) })
+    return () => controller.abort()
+  }, [user?.id, user?.role, onSessionExpired])
 
   useEffect(() => {
     if (!quote) return
@@ -43,6 +60,8 @@ export default function RideBooking({ user, onSessionExpired }) {
     setRoute(next)
     setQuote(null)
     setRide(null)
+    setNearbyDrivers([])
+    setMatchingChecked(false)
     setMessage('')
   }
 
@@ -59,6 +78,8 @@ export default function RideBooking({ user, onSessionExpired }) {
     setIsError(false)
     setQuote(null)
     setRide(null)
+    setNearbyDrivers([])
+    setMatchingChecked(false)
     const parameters = new URLSearchParams({ origin: `${route.pickupLat},${route.pickupLng}`, dest: `${route.destinationLat},${route.destinationLng}` })
     try {
       setQuote(await rideRequest(`estimate?${parameters}`))
@@ -94,7 +115,23 @@ export default function RideBooking({ user, onSessionExpired }) {
     setIsError(false)
     try {
       setRide(await rideRequest(`${ride.id}/status`))
+      setNearbyDrivers([])
+      setMatchingChecked(false)
       setMessage('Ride status refreshed.')
+    } catch (error) {
+      showError(error)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function findDrivers() {
+    setBusy(true)
+    setIsError(false)
+    setMessage('')
+    try {
+      setNearbyDrivers(await rideRequest(`${ride.id}/drivers`))
+      setMatchingChecked(true)
     } catch (error) {
       showError(error)
     } finally {
@@ -110,7 +147,7 @@ export default function RideBooking({ user, onSessionExpired }) {
         <>
           <p className="auth-description">Enter coordinates, or try our public Delhi sample route.</p>
           <form onSubmit={estimate} aria-busy={busy}>
-            <fieldset disabled={busy}>
+            <fieldset disabled={busy || restoring}>
               <div className="route-grid">
                 {[
                   ['pickupLat', 'Pickup latitude', -90, 90],
@@ -133,7 +170,18 @@ export default function RideBooking({ user, onSessionExpired }) {
             <p className="fare-note">Sample project pricing. Expires at {new Date(quote.expires_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}. Travel time excludes live traffic.</p>
             <button type="button" disabled={busy} onClick={book}>{busy ? 'Saving…' : 'Request this ride'}</button>
           </div>}
-          {ride && <div className="fare-summary" role="status"><p className="eyebrow">RIDE REQUEST SAVED</p><h3>Status: {ride.status.replaceAll('_', ' ')}</h3><p>Estimated fare: {formatMoney(ride.fare_estimate)}</p><p className="ride-reference">Reference: {ride.id}</p><button type="button" disabled={busy} onClick={refreshStatus}>Refresh ride status</button></div>}
+          {restoring && <p role="status">Checking your latest open ride…</p>}
+          {ride && <div className="fare-summary"><p className="eyebrow">RIDE REQUEST SAVED</p><h3>Status: {ride.status.replaceAll('_', ' ')}</h3><p>Estimated fare: {formatMoney(ride.fare_estimate)}</p><p className="ride-reference">Reference: {ride.id}</p>
+            {ride.driver_id && <p className="ride-reference">Assigned driver: {ride.driver_id}</p>}
+            <div className="auth-actions"><button type="button" disabled={busy} onClick={refreshStatus}>Refresh ride status</button>{ride.status === 'requested' && <button className="secondary-button" type="button" disabled={busy} onClick={findDrivers}>Find nearby drivers</button>}</div>
+            {ride.status === 'requested' && matchingChecked && <div className="rider-matching">
+              <h4>Nearby available drivers</h4>
+              <p className="fare-note">Drivers must accept your request. These are geographic pickup distances, not driving ETAs. Refresh ride status to check for acceptance.</p>
+              {nearbyDrivers.length === 0 ? <p>No nearby available drivers right now. Try again after a driver goes online.</p> : <ul className="matching-list">
+                {nearbyDrivers.map((driver) => <li key={driver.driver_id}><div className="matching-title"><strong>{driver.name}</strong><span>{(driver.distance_meters / 1000).toFixed(2)} km away</span></div><p>{driver.vehicle_info.make} {driver.vehicle_info.model} · {driver.vehicle_info.plate}</p><p className="fare-note">{driver.verified ? 'Vehicle marked verified' : 'Unverified learning-demo vehicle'}</p></li>)}
+              </ul>}
+            </div>}
+          </div>}
         </>
       )}
       <p className={`auth-message${isError ? ' auth-error' : ''}`} role="status" aria-live="polite" aria-atomic="true">{message}</p>

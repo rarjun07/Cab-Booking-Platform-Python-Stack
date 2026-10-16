@@ -88,4 +88,4 @@ References: [OSRM HTTP API](https://github.com/Project-OSRM/osrm-backend/blob/ma
 - Live API check against the running development server: registered a synthetic rider, fetched a real OSRM route, saved a ride with 201, retried with 200 and the same ride ID, read owned status with 200, logged out, and received 401 on a subsequent status request. Synthetic user/ride records remain local development test data.
 - Browser visual check: **unverified**. The browser URL policy rejected the automated preview reload. The user reported that they have not yet tried the manual form flow above. A successful build and API check do not establish visual behavior; carry this follow-up into the manual flow/UI testing milestones.
 
-Day 4 has not started. The daily Git checkpoint is recorded in `PROGRESS.md`.
+The evidence above records Day 3. Day 4 now extends this flow with [nearby matching and open-ride recovery](RIDE_MATCHING.md). Current verification and daily Git checkpoints are recorded in `PROGRESS.md`.

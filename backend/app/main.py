@@ -6,10 +6,12 @@ from fastapi.responses import JSONResponse
 
 from app.auth import router as auth_router
 from app.rides import router as rides_router
+from app.drivers import router as drivers_router
 
 app = FastAPI(title="Cab Booking Platform API", version="0.1.0")
 app.include_router(auth_router)
 app.include_router(rides_router)
+app.include_router(drivers_router)
 
 
 @app.exception_handler(RequestValidationError)

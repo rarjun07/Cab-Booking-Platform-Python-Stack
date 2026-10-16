@@ -1,4 +1,5 @@
 from pathlib import Path
+from decimal import Decimal
 from uuid import uuid4
 import io
 
@@ -24,7 +25,7 @@ def test_fresh_database_upgrade_and_downgrade_are_transactional(test_engine):
             assert "users" not in inspect(connection).get_table_names()
             command.upgrade(config, "head")
             assert {"users", "auth_sessions", "drivers", "rides", "payments", "reviews"} <= set(inspect(connection).get_table_names())
-            assert connection.scalar(text("SELECT version_num FROM alembic_version")) == "0003_ride_quote"
+            assert connection.scalar(text("SELECT version_num FROM alembic_version")) == "0004_driver_matching"
             command.check(config)
         finally:
             transaction.rollback()
@@ -46,6 +47,26 @@ def test_day1_account_survives_booking_schema_upgrade(test_engine):
             assert row.password_hash == "preserve-this-hash"
             assert row.rating_avg == 0 and row.created_at is not None
             assert connection.scalar(text("SELECT user_id FROM auth_sessions WHERE id=:id"), {"id": session_id}) == user_id
+        finally:
+            transaction.rollback()
+
+
+def test_day3_driver_and_ride_survive_matching_migration(test_engine):
+    with test_engine.connect() as connection:
+        transaction = connection.begin()
+        try:
+            config = config_for(connection)
+            command.downgrade(config, "0003_ride_quote")
+            rider_id, driver_id, ride_id, quote_id = uuid4(), uuid4(), uuid4(), uuid4()
+            for user_id, role in [(rider_id, "rider"), (driver_id, "driver")]:
+                connection.execute(text("INSERT INTO users (id,name,email,password_hash,role) VALUES (:id,'Legacy',:email,'keep-hash',:role)"), {"id": user_id, "email": f"{user_id}@example.com", "role": role})
+            connection.execute(text("INSERT INTO drivers (user_id, current_location, status) VALUES (:id, ST_SetSRID(ST_MakePoint(77.209,28.614),4326), 'active')"), {"id": driver_id})
+            connection.execute(text("INSERT INTO rides (id,rider_id,quote_id,pickup_point,drop_point,fare_estimate) VALUES (:id,:rider,:quote,ST_SetSRID(ST_MakePoint(77.209,28.6139),4326),ST_SetSRID(ST_MakePoint(77.2295,28.6129),4326),104.38)"), {"id": ride_id, "rider": rider_id, "quote": quote_id})
+            command.upgrade(config, "head")
+            assert connection.scalar(text("SELECT quote_id FROM rides WHERE id=:id"), {"id": ride_id}) == quote_id
+            assert connection.scalar(text("SELECT fare_estimate FROM rides WHERE id=:id"), {"id": ride_id}) == Decimal("104.38")
+            assert connection.scalar(text("SELECT location_updated_at FROM drivers WHERE user_id=:id"), {"id": driver_id}) is None
+            assert connection.scalar(text("SELECT ST_X(current_location) FROM drivers WHERE user_id=:id"), {"id": driver_id}) == 77.209
         finally:
             transaction.rollback()
 

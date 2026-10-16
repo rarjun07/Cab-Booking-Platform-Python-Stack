@@ -25,6 +25,8 @@ class Settings(BaseSettings):
     fare_per_km: Decimal = Field(default=Decimal("12.00"), ge=0, le=1000, decimal_places=2)
     fare_per_minute: Decimal = Field(default=Decimal("1.00"), ge=0, le=100, decimal_places=2)
     fare_minimum: Decimal = Field(default=Decimal("80.00"), ge=0, le=10000, decimal_places=2)
+    matching_radius_meters: int = Field(default=5000, ge=100, le=50000)
+    driver_location_max_age_seconds: int = Field(default=300, ge=60, le=3600)
     allowed_origins: list[str] = [
         "http://127.0.0.1:5173",
         "http://localhost:5173",
