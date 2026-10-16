@@ -12,7 +12,7 @@ The user subsequently chose custom FastAPI + PostgreSQL authentication instead o
 | --- | --- | --- |
 | 1 | Initialize `backend/` and `frontend/`; FastAPI scaffold; custom PostgreSQL-backed authentication and signed session verification (user's adaptation). | Both apps run; real registration/login/logout work; FastAPI rejects invalid, missing, expired, and revoked sessions. |
 | 2 | Extend the PostgreSQL setup with PostGIS, remaining SQLAlchemy models, and Alembic migrations. | Migrations include the existing auth schema and add driver, ride, payment, and review models; the geospatial setup is verified. |
-| 3 | Fare estimation with Google Maps and ride request creation. | An estimate can be requested and a ride request persists in PostgreSQL. |
+| 3 | Fare estimation and ride request creation; OSRM replaces Google Maps at the user's request for a free alternative. | A real road-route estimate can be requested and a ride request persists in PostgreSQL. |
 | 4 | Optional driver dashboard, nearby-driver queries, matching, and availability. | If included, availability and nearby-driver matching work with sample data. If deferred, record the decision before proceeding. |
 | 5 | Optional realtime rider/driver connections and location updates with WebSockets or Socket.IO plus Redis. | If included, an authenticated rider receives the relevant driver's updates. If deferred, record the decision before proceeding. |
 | 6 | Stripe PaymentIntents and signed payment webhooks. | Stripe test-mode payment flow works and verified webhook events update payment state. |
@@ -59,11 +59,24 @@ Do not begin the remaining Day 2 database models or migrations until every requi
 - [x] Commit Day 2 and push it to GitHub (`4ae8200`).
 - [x] Verify the remote implementation commit before Day 3.
 
+## Day 3 checklist
+
+- [x] Verify the Day 2 Git checkpoint before starting (`af94813`).
+- [x] Resolve the routing provider: the user chose a free alternative; use OSRM/OpenStreetMap.
+- [x] Add authenticated road-route estimates with validation, timeouts, caching, and throttling.
+- [x] Calculate illustrative INR fares on the server and issue expiring, rider-bound signed quotes.
+- [x] Persist ride requests with PostGIS points and duplicate protection through Alembic migration `0003_ride_quote`.
+- [x] Add owned ride status access and a React booking form.
+- [x] Pass backend tests and the frontend build; verify the real OSRM and ride API flow.
+- [x] Document setup, limitations, and verification evidence.
+- [ ] Commit, push, and verify the Day 3 implementation.
+- [ ] Manual/visual UI follow-up: browser policy blocked automated preview; user has not tried the form yet. Track this separately from the verified API flow.
+
 ## Choices to resolve at the relevant milestone
 
 - Day 1 choices resolved: step-by-step teaching, confirmed GitHub repository, custom FastAPI/PostgreSQL authentication, and SQLAlchemy with local PostgreSQL.
 - Day 2: extend the schema with PostGIS and Alembic migrations.
-- Day 3: maps API configuration. The guide mentions Leaflet for an MVP; a map display alone does not replace a routing/distance service for fare estimates.
+- Day 3 routing choice resolved: OSRM public demo for learning, with no API key. See `RIDE_BOOKING.md` for service limits and the production hosting decision still needed before deployment.
 - Days 4-5: whether to include the optional driver dashboard and realtime features.
 - Day 6 onward: required service configuration for test payments, email, and deployment.
 

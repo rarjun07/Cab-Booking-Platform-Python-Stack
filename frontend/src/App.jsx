@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import AuthPanel from './AuthPanel.jsx'
+import RideBooking from './RideBooking.jsx'
 
 const connectionMessages = {
   idle: 'Ready when you are. Start FastAPI, then check the connection.',
@@ -10,6 +11,7 @@ const connectionMessages = {
 
 export default function App() {
   const [connection, setConnection] = useState('idle')
+  const [user, setUser] = useState(null)
 
   async function checkConnection() {
     setConnection('checking')
@@ -42,18 +44,21 @@ export default function App() {
           <span className="brand-mark" aria-hidden="true">C</span>
           Cab Booking Platform
         </a>
-        <span className="day-label">Day 01 <span aria-hidden="true">/</span> Getting started</span>
+        <span className="day-label">Day 03 <span aria-hidden="true">/</span> Your first ride</span>
       </header>
 
       <main id="main">
         <section className="intro" aria-labelledby="page-title">
-          <p className="eyebrow">ONE CONNECTION AT A TIME</p>
-          <h1 id="page-title">Every journey starts<br />with a first step.</h1>
+          <p className="eyebrow">YOUR NEXT JOURNEY</p>
+          <h1 id="page-title">Where would you<br />like to go?</h1>
           <p className="intro-copy">
-            Welcome to our cab booking project. Our first stop: connecting
-            this React app to the FastAPI backend.
+            Sign in, choose your pickup and destination, and get an estimate
+            before you request your ride.
           </p>
         </section>
+
+        <AuthPanel user={user} onUserChange={setUser} />
+        <RideBooking key={user?.id ?? 'signed-out'} user={user} onSessionExpired={setUser} />
 
         <section className="connection-card" aria-labelledby="connection-title">
           <div>
@@ -74,14 +79,12 @@ export default function App() {
           <p className="endpoint-note">GET /api/health</p>
         </section>
 
-        <AuthPanel />
-
         <section className="journey" aria-labelledby="journey-title">
-          <h2 id="journey-title">Our Day 1 route</h2>
+          <h2 id="journey-title">Your booking route</h2>
           <ol>
-            <li><span className="step-number">01</span><div><h3>Project setup</h3><p>Local Git and app foundations.</p></div><span className="step-tag">Ready</span></li>
-            <li><span className="step-number">02</span><div><h3>Connect the apps</h3><p>React meets our FastAPI endpoint.</p></div><span className="step-tag">Try it above</span></li>
-            <li><span className="step-number">03</span><div><h3>Your account</h3><p>Sign in and verify your session above.</p></div><span className="step-tag">Try it above</span></li>
+            <li><span className="step-number">01</span><div><h3>Your account</h3><p>Sign in as a rider.</p></div></li>
+            <li><span className="step-number">02</span><div><h3>Your estimate</h3><p>Road distance, travel time, and fare.</p></div></li>
+            <li><span className="step-number">03</span><div><h3>Your request</h3><p>Confirm and save your ride request.</p></div></li>
           </ol>
         </section>
       </main>

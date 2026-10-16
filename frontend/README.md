@@ -2,6 +2,8 @@
 
 The page now includes PostgreSQL-backed sign-up, sign-in, session restoration, verification, and sign-out. See [the authentication walkthrough](../docs/AUTHENTICATION.md).
 
+Day 3 adds a coordinate form, public Delhi sample, fare breakdown, ride request, and status refresh for signed-in riders. See [the ride-booking walkthrough](../docs/RIDE_BOOKING.md) for a step-by-step demo. The production build passes; the new form's visual/manual browser check remains pending.
+
 ## What each tool does
 
 - React builds the interactive page from components.
@@ -73,6 +75,7 @@ This proxy exists only in the development server. A deployed build will need an 
 | `src/main.jsx` | Loads styles and renders our `App` component. |
 | `src/App.jsx` | Defines the page, connection state, and health request. |
 | `src/AuthPanel.jsx` | Handles account forms and restores/verifies the HTTP-only cookie session through FastAPI. |
+| `src/RideBooking.jsx` | Requests estimates, displays their expiry and price, saves a ride, and refreshes its status. |
 | `src/styles.css` | Styles the desktop and mobile layouts. |
 | `vite.config.js` | Configures the React plugin, fixed frontend port, and API proxy. |
 | `package.json` | Lists dependencies and development/build commands. |
@@ -92,6 +95,6 @@ Vite writes generated output into `dist/`, which is ignored by Git. A successful
 
 ## Authentication and the Day 1 checkpoint
 
-The user chose custom FastAPI + PostgreSQL authentication instead of an external provider. The account panel is connected to the real backend and uses an HTTP-only cookie. Database models for rides, payments, and reviews remain Day 2 work. See the progress log for verification and the Day 1 commit/push checkpoint.
+The user chose custom FastAPI + PostgreSQL authentication instead of an external provider. The account panel is connected to the real backend and uses an HTTP-only cookie. `App` shares the signed-in user with `RideBooking`; changing accounts resets the booking state. Database models arrived on Day 2 and the ride request flow on Day 3. See the progress log for verification and daily commit/push checkpoints.
 
 References: [Vite guide](https://vite.dev/guide/) and [React's guide to starting an app](https://react.dev/learn/build-a-react-app-from-scratch).

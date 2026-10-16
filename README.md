@@ -8,7 +8,8 @@ An internship project based on the mentor's **Cab Booking Platform - Python Stac
 - Database: PostgreSQL; add PostGIS for the guide's location queries.
 - Frontend: React. The guide lists Next.js as optional, so Next.js is not required for this project.
 - Authentication: custom FastAPI + PostgreSQL, with Argon2 password hashes and signed HTTP-only session cookies, as chosen by the user instead of Clerk/Supabase Auth.
-- Additional services will be introduced on their scheduled days: maps, Redis, Stripe, Celery, and Docker.
+- Routing: OSRM with OpenStreetMap data, the user's free alternative to Google Maps.
+- Additional services will be introduced on their scheduled days: Redis, Stripe, Celery, and Docker.
 
 ## How we will work
 
@@ -33,7 +34,8 @@ Learning preference: step-by-step guidance with explanations.
 - [Frontend setup and code explanation](frontend/README.md)
 - [Authentication setup and walkthrough](docs/AUTHENTICATION.md)
 - [Database models, PostGIS, and migrations](docs/DATABASE.md)
+- [Fare estimates and ride requests](docs/RIDE_BOOKING.md)
 
 ## Current state
 
-Days 1 and 2 are complete and pushed. Day 2 adds PostgreSQL/PostGIS models for drivers, rides, payments, and reviews, plus versioned Alembic migrations that preserve existing auth data. The backend suite passes 43 tests, including authentication, spatial operations, database constraints, and migration checks. The Day 2 implementation commit `4ae8200` is verified on GitHub; see the progress log for its following documentation checkpoint. Ride request and fare-estimate APIs remain Day 3 work.
+Days 1 and 2 are complete and pushed. Day 3 implements authenticated OSRM fare estimates, signed quotes, PostgreSQL ride requests, and a React booking form. All 71 backend tests and the frontend build pass. A live API check verified a real route, ride persistence, duplicate-request protection, and owned status access. Browser visual verification is pending because the browser URL policy blocked the preview reload; the user has not yet tried the form manually. See the progress log for the Day 3 Git checkpoint. Day 4 has not started.

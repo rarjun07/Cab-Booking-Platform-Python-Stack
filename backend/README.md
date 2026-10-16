@@ -4,6 +4,8 @@ The original health endpoint below is now joined by PostgreSQL-backed registrati
 
 Day 2 adds the booking models, PostGIS, and Alembic migrations. Follow [the database walkthrough](../docs/DATABASE.md) to enable PostGIS, apply migrations, and inspect the schema. Database initialization is now handled by `python -m alembic upgrade head`.
 
+Day 3 adds authenticated fare estimates and ride requests with OSRM road routing. Follow [the ride-booking walkthrough](../docs/RIDE_BOOKING.md) for the pricing formula, signed quotes, API endpoints, and sample route. Apply migration `0003_ride_quote` before using these endpoints.
+
 ## What we added
 
 - `.venv/`: this project's isolated Python environment. It holds installed libraries locally and is ignored by Git.
@@ -57,10 +59,10 @@ Press `Ctrl+C` to stop the server. Run `deactivate` to leave the virtual environ
 
 In the startup command, `app.main:app` means "import the `app` object from `app/main.py`." `--reload` restarts the development server when you change Python code.
 
-The root URL `/` currently returns 404 because we only defined `/api/health`.
+The root URL `/` returns 404; use `/docs` to explore the API or open the React app for the user interface.
 
 ## Scope of this checkpoint
 
-The health endpoint checks API availability only. Custom authentication uses PostgreSQL user/session tables. Day 2 adds PostGIS and the driver, ride, payment, and review models through Alembic; their feature APIs remain on their scheduled days. See the progress log for the current Git checkpoint.
+The health endpoint checks API availability only. Custom authentication uses PostgreSQL user/session tables. Day 2 adds PostGIS and the driver, ride, payment, and review models through Alembic. Day 3 implements estimates, ride creation, and owned ride status. Matching, payments, and reviews remain on their scheduled days. See the progress log for verification and Git checkpoints.
 
 Reference: [FastAPI's official first-steps tutorial](https://fastapi.tiangolo.com/tutorial/first-steps/).

@@ -1,9 +1,10 @@
 """Local configuration, loaded from backend/.env or environment variables."""
 
 from functools import lru_cache
+from decimal import Decimal
 from pathlib import Path
 
-from pydantic import Field, SecretStr, field_validator
+from pydantic import Field, HttpUrl, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -18,6 +19,12 @@ class Settings(BaseSettings):
     jwt_secret: SecretStr = Field(min_length=48)
     cookie_secure: bool = True
     access_token_minutes: int = Field(default=30, ge=1, le=120)
+    osrm_base_url: HttpUrl = "https://router.project-osrm.org"
+    quote_lifetime_seconds: int = Field(default=300, ge=60, le=900)
+    fare_base: Decimal = Field(default=Decimal("50.00"), ge=0, le=10000, decimal_places=2)
+    fare_per_km: Decimal = Field(default=Decimal("12.00"), ge=0, le=1000, decimal_places=2)
+    fare_per_minute: Decimal = Field(default=Decimal("1.00"), ge=0, le=100, decimal_places=2)
+    fare_minimum: Decimal = Field(default=Decimal("80.00"), ge=0, le=10000, decimal_places=2)
     allowed_origins: list[str] = [
         "http://127.0.0.1:5173",
         "http://localhost:5173",

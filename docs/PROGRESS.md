@@ -2,7 +2,7 @@
 
 ## Current checkpoint
 
-- Active milestone: Day 2 complete; Day 3 has not started.
+- Active milestone: Day 3 implementation verified through automated and live API checks; commit/push checkpoint pending. Visual/manual UI follow-up remains unverified.
 - Completed: read all nine PDF pages, checked the daily schedule, confirmed stack compatibility, and prepared the roadmap.
 - Learning preference: guide the user step by step with explanations.
 - Day 1 implementation: complete; custom FastAPI + PostgreSQL authentication is verified with real database tests and browser flows.
@@ -17,7 +17,8 @@
 - This completion record is saved in a following documentation commit. For the latest checkpoint commit, compare `git rev-parse HEAD` with `git ls-remote origin refs/heads/main`.
 - Day 2 implementation commit: `4ae8200b1345a202c18a4ab4ea2296f3e9a82030` (`feat: complete day 2 PostGIS models and Alembic migrations`).
 - Verified Day 2 push: GitHub `refs/heads/main` matched that exact SHA. This completion record follows in a documentation commit; compare current HEAD and the remote for the latest checkpoint.
-- Next action: Day 3 when the user requests it: configure the routing/maps provider, implement fare estimates, and persist ride requests. Day 3 work has not started.
+- Day 2 documentation checkpoint: `af94813132f8a08456d8ed90062d29cd730fe701`, verified against GitHub before Day 3 started.
+- Next action: complete and verify the Day 3 Git checkpoint. Day 4 has not started; its optional scope will be resolved when the user requests the next milestone.
 
 ## Day 1, step 1: local Git setup
 
@@ -87,6 +88,22 @@
 - Tests now initialize schema with Alembic. Migration downgrade checks are confined to the dedicated test database and rolled back; the development database was not downgraded.
 - Replaced the old auth `create_all` initializer with an Alembic compatibility command. Added a safe database status command and beginner walkthrough; frontend code and Day 3 APIs were not changed.
 - Day 2 implementation commit `4ae8200b1345a202c18a4ab4ea2296f3e9a82030` was pushed; `git ls-remote` returned the same SHA.
+
+## Day 3: routing, fare estimates, and ride requests
+
+- User requested the next milestone and chose a free alternative to Google Maps. Implemented OSRM/OpenStreetMap routing without an API key; no paid account or Google service was configured.
+- Confirmed the previous Day 2 documentation commit `af94813132f8a08456d8ed90062d29cd730fe701` matched the remote before implementing Day 3.
+- Added authenticated rider-only fare estimates using real driving distance/duration, validated coordinates, bounded upstream requests, short caching, and one new request per second per process. Visible attribution and coordinate-transmission disclosure accompany the form.
+- Added configurable illustrative INR pricing with Decimal rounding, five-minute signed quotes bound to the rider, and audience separation from session tokens. Requests accept the signed quote rather than trusting a submitted fare or rider ID.
+- Added Alembic revision `0003_ride_quote` and unique quote IDs for duplicate-request protection. Existing rides may retain null quote IDs. Applied the development migration; Alembic check reports no drift.
+- Added ride request creation and owned status endpoints; other riders cannot inspect a ride and driver accounts cannot book. No driver matching or trip dispatch is implemented in this milestone.
+- React now shares authenticated user state, accepts coordinates or an explicit Delhi sample, shows fare breakdown/expiry, submits the quote, displays the saved ride, and refreshes status.
+- Automated verification: all **71 backend tests passed**, frontend production build passed, and pip dependency consistency check passed. One existing TestClient/HTTPX compatibility deprecation warning remains.
+- Live API verification: real OSRM Delhi route returned 3,982 meters, 396 seconds, and sample fare ₹104.38. Ride creation returned 201; repeating the quote returned 200 with the same UUID; owned status returned 200; after logout it returned 401. A synthetic local demo rider and requested ride remain as development test data.
+- UI verification limitation: browser URL policy rejected automated preview reload. The user answered “I haven’t tried it yet” to the manual flow check. The new form is build-verified but visual/manual behavior is unverified; keep this follow-up visible for later manual/UI testing.
+- Setup, code explanation, service limitations, and the manual walkthrough are in `docs/RIDE_BOOKING.md`.
+- Source review: actual local database passwords and JWT secret are absent from all 24 changed/new files. `.env` remains owner-only and ignored; virtual environment, dependencies, and frontend build output are ignored. `git diff --check` passed.
+- Day 3 commit/push is pending. Day 4 has not started.
 
 ## Daily completion record
 

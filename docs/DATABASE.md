@@ -36,10 +36,11 @@ GiST spatial indexes exist on the driver's current location and both ride points
 
 A model describes the desired table structure in Python. An Alembic migration records a versioned change to the actual database. Changing a model alone does not update an existing database.
 
-We now have two revisions:
+We now have three revisions:
 
 1. `0001_auth_baseline`: on a fresh database, creates the frozen Day 1 user/session schema. On an existing Day 1 database, checks its columns, indexes, foreign keys, primary keys, and role constraint before adopting it. It refuses unexpected unversioned tables or schema drift rather than silently stamping them as correct.
 2. `0002_booking_models`: requires an administrator-enabled PostGIS extension, adds user profile fields/defaults, and creates the driver, ride, payment, and review tables and indexes.
+3. `0003_ride_quote` (Day 3): adds nullable, unique `rides.quote_id` to prevent duplicate ride creation when a signed estimate is retried. Existing rides can retain a null quote ID.
 
 Existing account fields, password hashes, IDs, and session records are retained. Added non-null user fields receive database defaults. Migrations import frozen schema definitions rather than future ORM models, so the historical steps remain stable.
 
@@ -57,7 +58,7 @@ python -m alembic check
 python -m scripts.db_status
 ```
 
-Expected current revision: `0002_booking_models (head)`.
+Expected current revision: `0003_ride_quote (head)`.
 
 `alembic check` should report **No new upgrade operations detected**. `db_status` prints the installed PostGIS version and table/column names, without showing credentials or account data.
 

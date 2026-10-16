@@ -24,7 +24,7 @@ def test_fresh_database_upgrade_and_downgrade_are_transactional(test_engine):
             assert "users" not in inspect(connection).get_table_names()
             command.upgrade(config, "head")
             assert {"users", "auth_sessions", "drivers", "rides", "payments", "reviews"} <= set(inspect(connection).get_table_names())
-            assert connection.scalar(text("SELECT version_num FROM alembic_version")) == "0002_booking_models"
+            assert connection.scalar(text("SELECT version_num FROM alembic_version")) == "0003_ride_quote"
             command.check(config)
         finally:
             transaction.rollback()

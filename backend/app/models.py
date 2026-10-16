@@ -70,6 +70,7 @@ class Ride(Base):
 
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
     rider_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"))
+    quote_id: Mapped[UUID | None] = mapped_column(Uuid, unique=True)
     driver_id: Mapped[UUID | None] = mapped_column(ForeignKey("drivers.user_id", ondelete="SET NULL"), index=True)
     pickup_point: Mapped[WKBElement] = mapped_column(Geometry("POINT", srid=4326, spatial_index=True))
     drop_point: Mapped[WKBElement] = mapped_column(Geometry("POINT", srid=4326, spatial_index=True))

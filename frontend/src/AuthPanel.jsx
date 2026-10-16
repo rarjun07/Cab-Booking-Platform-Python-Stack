@@ -18,10 +18,10 @@ async function authRequest(path, body, signal) {
   return data
 }
 
-export default function AuthPanel() {
+export default function AuthPanel({ user, onUserChange }) {
   const formId = useId()
   const [mode, setMode] = useState('register')
-  const [user, setUser] = useState(null)
+  const setUser = onUserChange
   const [restoring, setRestoring] = useState(true)
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
@@ -41,7 +41,7 @@ export default function AuthPanel() {
       })
       .finally(() => { clearTimeout(timer); if (active) setRestoring(false) })
     return () => { active = false; clearTimeout(timer); controller.abort() }
-  }, [])
+  }, [onUserChange])
 
   async function submit(event) {
     event.preventDefault()
