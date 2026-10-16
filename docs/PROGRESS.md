@@ -2,7 +2,7 @@
 
 ## Current checkpoint
 
-- Active milestone: Day 5 in progress; the user chose to include optional realtime updates. Day 3 and Day 4 visual/manual UI follow-ups remain unverified.
+- Active milestone: Day 5 implemented and pushed; automated, protocol, and cross-process checks passed. Day 3-5 visual/manual UI follow-ups remain unverified.
 - Completed: read all nine PDF pages, checked the daily schedule, confirmed stack compatibility, and prepared the roadmap.
 - Learning preference: guide the user step by step with explanations.
 - Day 1 implementation: complete; custom FastAPI + PostgreSQL authentication is verified with real database tests and browser flows.
@@ -22,7 +22,8 @@
 - Day 3 documentation checkpoint: `8d59f1c5b04fcf3687beba196e58d2b6c57f29aa`, confirmed equal to GitHub before Day 4 started; working tree was clean.
 - Day 4 implementation commit: `834ae6e413fadb6a5e1c61a2c66d0d19191fe5b9`, pushed and verified against GitHub `refs/heads/main`.
 - Day 4 documentation checkpoint: `1af381c19bcabe7bc2c46e5d93803022e5dbd3e1`, verified against GitHub before starting Day 5; working tree was clean.
-- Next action: implement and verify Day 5 only. Day 6 payments have not started.
+- Day 5 implementation commit: `4a99f39759ec485565597b570a02b6866006530d`, pushed and verified against GitHub `refs/heads/main`.
+- Next action: push and verify this completion record, then let the user try the documented two-window demo. Day 6 payments have not started; await the user's next instruction.
 
 ## Day 1, step 1: local Git setup
 
@@ -140,9 +141,22 @@
 - Preview HTTP response: 200. Automated visual interaction remains unverified after the earlier browser URL-policy rejection. User answered “I haven’t tried it yet” to the manual live-connection-badge check. Prior full rider/driver UI checks remain unverified too.
 - Setup, code/protocol explanations, security boundaries, and the two-window walkthrough are in `docs/LIVE_UPDATES.md`.
 - Source review: actual local database passwords and JWT secret are absent from all 28 changed/new files. `.env` remains ignored and owner-only; dependencies, virtual environment, and build output remain ignored. `git diff --check` passed.
-- Day 5 Git checkpoint pending; Day 6 payments have not started.
+- Day 5 implementation commit `4a99f39759ec485565597b570a02b6866006530d` was pushed; `git ls-remote origin refs/heads/main` returned that exact SHA. Day 6 payments have not started.
 
 ## Daily completion record
+
+Day 5:
+
+- Scope delivered: authenticated FastAPI WebSockets, Redis Pub/Sub invalidations, automatic React updates/reconnects, assigned-rider location access, driver location acknowledgements/HTTP fallback, and guarded trip progression.
+- Verification: 113 backend tests passed; React build and pip check passed; no schema drift; real TCP WebSocket/Redis integration tests passed; Vite upgrade forwarding and cross-process live delivery passed.
+- Security checks: strict Origin/account/role/session boundaries, private channel isolation, location ownership/freshness, validation and update spacing, and logout/JWT-expiry closure on existing sockets passed.
+- Failure checks: Redis outage preserves committed HTTP writes, reconnect rereads durable state, and old sockets/tasks/subscriptions are cleaned up. Pending visual/manual UI checks are explicitly unverified; the user has not tried the live badge yet.
+- Source review: actual local credentials absent from all 28 changed/new files; ignored configuration/dependencies/build output remain untracked; whitespace check passed.
+- Implementation commit: `4a99f39759ec485565597b570a02b6866006530d`.
+- Remote: `https://github.com/rarjun07/Cab-Booking-Platform-Python-Stack.git`, branch `main`.
+- Push result: succeeded; exact remote implementation SHA verified. This completion record follows in a documentation commit; compare current HEAD with the remote for the latest checkpoint.
+- Known limits: manual coordinate sharing rather than device GPS, ephemeral Pub/Sub with snapshot recovery, demo driver verification policy, general rate/connection limits scheduled for Day 12, existing TestClient deprecation warning, no payments/final billing yet.
+- Ready for next milestone: after this documentation checkpoint is pushed and verified, await the user's next instruction. Carry manual UI follow-ups forward explicitly.
 
 Day 4:
 

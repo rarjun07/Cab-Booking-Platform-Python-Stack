@@ -100,7 +100,7 @@ Do not begin the remaining Day 2 database models or migrations until every requi
 - [x] Add React connection status, coalesced refreshes, reconnect recovery, and manual fallbacks.
 - [x] Verify real WebSocket/Redis tests, backend regressions, schema/dependencies, frontend build, Vite upgrades, and cross-process delivery.
 - [x] Document setup, two-window demo, security, and limitations.
-- [ ] Commit, push, and verify the Day 5 implementation.
+- [x] Commit, push, and verify the Day 5 implementation (`4a99f39`).
 - [ ] Manual/visual UI follow-up: earlier browser policy blocks automated preview; user has not tried the connection-badge check yet.
 
 ## Choices to resolve at the relevant milestone
