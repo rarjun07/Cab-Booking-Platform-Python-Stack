@@ -96,6 +96,10 @@ h1 { margin: 0; font-size: clamp(34px, 5.5vw, 56px); font-weight: 650; line-heig
 .matching-title span { font-size: 12px; color: #596660; }
 .rider-matching { margin-top: 24px; border-top: 1px solid #cdd3c7; padding-top: 16px; }
 .rider-matching h4 { margin: 0 0 12px; }
+.live-connection { display: flex; align-items: center; gap: 8px; margin: 18px 4px 0; font-size: 12px; color: #596660; }
+.live-connection::before { content: ''; width: 7px; height: 7px; flex-shrink: 0; border-radius: 50%; background: #af8a32; }
+.live-connected::before { background: #557a21; }
+.driver-location-card { margin-block: 16px; padding: 14px; background: #fffef9; border-radius: 8px; }
 footer { display: flex; justify-content: space-between; gap: 16px; padding: 24px 0; border-top: 1px solid #dcded4; font-size: 11px; color: #596660; }
 :focus-visible { outline: 3px solid #557a21; outline-offset: 5px; }
 .connection-card :focus-visible { outline-color: #e5ee9d; }

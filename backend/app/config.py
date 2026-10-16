@@ -27,6 +27,10 @@ class Settings(BaseSettings):
     fare_minimum: Decimal = Field(default=Decimal("80.00"), ge=0, le=10000, decimal_places=2)
     matching_radius_meters: int = Field(default=5000, ge=100, le=50000)
     driver_location_max_age_seconds: int = Field(default=300, ge=60, le=3600)
+    redis_url: SecretStr = SecretStr("redis://127.0.0.1:6379/0")
+    realtime_channel_prefix: str = Field(default="cab_booking:realtime:v1", pattern=r"^[a-zA-Z0-9:_-]{1,80}$")
+    websocket_session_check_seconds: float = Field(default=2.0, ge=0.1, le=10)
+    websocket_sync_seconds: float = Field(default=15.0, ge=1, le=60)
     allowed_origins: list[str] = [
         "http://127.0.0.1:5173",
         "http://localhost:5173",

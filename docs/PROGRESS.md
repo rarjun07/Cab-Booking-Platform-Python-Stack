@@ -2,7 +2,7 @@
 
 ## Current checkpoint
 
-- Active milestone: Day 4 implemented and pushed; automated/live API checks passed. Day 3 and Day 4 visual/manual UI follow-ups remain unverified.
+- Active milestone: Day 5 in progress; the user chose to include optional realtime updates. Day 3 and Day 4 visual/manual UI follow-ups remain unverified.
 - Completed: read all nine PDF pages, checked the daily schedule, confirmed stack compatibility, and prepared the roadmap.
 - Learning preference: guide the user step by step with explanations.
 - Day 1 implementation: complete; custom FastAPI + PostgreSQL authentication is verified with real database tests and browser flows.
@@ -21,7 +21,8 @@
 - Day 3 implementation commit: `ef48c41770db6eedb4392f350176f9fb379049ec`, pushed and verified against GitHub `refs/heads/main`.
 - Day 3 documentation checkpoint: `8d59f1c5b04fcf3687beba196e58d2b6c57f29aa`, confirmed equal to GitHub before Day 4 started; working tree was clean.
 - Day 4 implementation commit: `834ae6e413fadb6a5e1c61a2c66d0d19191fe5b9`, pushed and verified against GitHub `refs/heads/main`.
-- Next action: push and verify this completion record, then let the user try the documented rider/driver walkthrough. Day 5 has not started and remains optional; resolve its inclusion when the user requests the next milestone.
+- Day 4 documentation checkpoint: `1af381c19bcabe7bc2c46e5d93803022e5dbd3e1`, verified against GitHub before starting Day 5; working tree was clean.
+- Next action: implement and verify Day 5 only. Day 6 payments have not started.
 
 ## Day 1, step 1: local Git setup
 
@@ -123,6 +124,23 @@
 - Beginner setup and two-account steps are in `docs/RIDE_MATCHING.md`.
 - Source review: actual local database passwords and JWT secret are absent from all 23 changed/new files. `.env` remains ignored and owner-only; dependencies, virtual environment, and generated build output remain ignored. `git diff --check` passed.
 - Day 4 implementation commit `834ae6e413fadb6a5e1c61a2c66d0d19191fe5b9` was pushed; `git ls-remote origin refs/heads/main` returned that exact SHA. Day 5 remains optional and has not started.
+
+## Day 5: realtime notifications, locations, and trip status
+
+- The user selected “Include Day 5 (recommended).” Verified Day 4 documentation checkpoint `1af381c19bcabe7bc2c46e5d93803022e5dbd3e1` against GitHub and confirmed a clean working tree before starting.
+- Reused the existing local Redis 8.6.0 service on 6379 without restarting/reconfiguring it or modifying unrelated keys. Added pinned Python `redis==8.1.0` and `websockets==17.2` dependencies.
+- Added `/api/ws/rider/{user_id}` and `/api/ws/driver/{user_id}` via a role-validated route. The `/api` path preserves the HTTP-only cookie scope. Origin, token, stored session, account ID, and role are checked; connected sessions are rechecked before events/messages and every two seconds while idle.
+- Redis carries account-scoped ride/driver invalidations plus a generic matching signal containing no IDs/coordinates. Publishing follows committed PostgreSQL writes and catches broker failures without reporting a saved write as failed. Short database sessions, bounded sends, task/subscription cleanup, and namespaced channels support multiple workers.
+- Added location messages with acknowledgements, HTTP fallback, online requirement, validation, and one-second update spacing on the dedicated location paths. Only the assigned rider can read a fresh point; offline/stale/finished rides expose none.
+- Added guarded assigned-driver progression `accepted → arriving → in_progress → completed` with same-step retries and no skipping/regression. Completion releases the active assignment and does not charge a payment or set `fare_actual`; Day 6 remains untouched.
+- React shows connection state, reconnects with capped backoff, coalesces notifications, and rereads protected API snapshots. Ready/reconnect and periodic 15-second sync recover missed Pub/Sub events. Refresh controls remain, unsaved form inputs are preserved, and stale responses/old sockets are guarded during account changes.
+- Final verification: **113 backend tests passed**, React production build passed, Alembic check reported no drift, and pip check passed. Schema remains `0004_driver_matching`. One existing TestClient/HTTPX deprecation warning remains.
+- Integration tests use real temporary TCP WebSocket servers, Redis with unique test prefixes, and the guarded PostgreSQL test database. They cover Origin/account/role/token rejection, private-channel isolation, location/status delivery, validation/freshness/throttling, logout/JWT expiry on open sockets, oversized messages, broker outage, reconnect recovery, and coherent concurrent location reads. Synthetic committed fixtures are removed; Redis is not flushed.
+- Live development demo passed: Vite WebSocket forwarding, REST writes on 8000 delivered through Redis to a rider socket on independent backend 8002, location sharing, all trip steps, hidden completed-ride location, and logout closure. Synthetic ride `77e46024-c667-4715-8090-10bc73ada350` is completed; its driver was left offline. Local demo records remain development test data.
+- Preview HTTP response: 200. Automated visual interaction remains unverified after the earlier browser URL-policy rejection. User answered “I haven’t tried it yet” to the manual live-connection-badge check. Prior full rider/driver UI checks remain unverified too.
+- Setup, code/protocol explanations, security boundaries, and the two-window walkthrough are in `docs/LIVE_UPDATES.md`.
+- Source review: actual local database passwords and JWT secret are absent from all 28 changed/new files. `.env` remains ignored and owner-only; dependencies, virtual environment, and build output remain ignored. `git diff --check` passed.
+- Day 5 Git checkpoint pending; Day 6 payments have not started.
 
 ## Daily completion record
 

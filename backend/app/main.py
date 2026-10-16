@@ -1,5 +1,6 @@
 """Application entry point for the Cab Booking Platform API."""
 
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -7,11 +8,20 @@ from fastapi.responses import JSONResponse
 from app.auth import router as auth_router
 from app.rides import router as rides_router
 from app.drivers import router as drivers_router
+from app.events import get_event_publisher
+from app.realtime import router as realtime_router
 
-app = FastAPI(title="Cab Booking Platform API", version="0.1.0")
+
+@asynccontextmanager
+async def lifespan(app):
+    yield
+    get_event_publisher().close()
+
+app = FastAPI(title="Cab Booking Platform API", version="0.1.0", lifespan=lifespan)
 app.include_router(auth_router)
 app.include_router(rides_router)
 app.include_router(drivers_router)
+app.include_router(realtime_router)
 
 
 @app.exception_handler(RequestValidationError)

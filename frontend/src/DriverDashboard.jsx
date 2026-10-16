@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 
 const formatMoney = (value) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(Number(value))
+const tripSteps = { accepted: ['arriving', 'Head to pickup'], arriving: ['in_progress', 'Start trip'], in_progress: ['completed', 'Complete trip'] }
 
 async function driverRequest(path, { method = 'GET', body, signal } = {}) {
   const response = await fetch(`/api/drivers/me${path}`, {
@@ -20,9 +21,10 @@ async function driverRequest(path, { method = 'GET', body, signal } = {}) {
   return data
 }
 
-export default function DriverDashboard({ onSessionExpired }) {
+export default function DriverDashboard({ onSessionExpired, live }) {
   const formId = useId()
   const mounted = useRef(true)
+  const formsInitialized = useRef(false)
   const [profile, setProfile] = useState(null)
   const [vehicle, setVehicle] = useState({ make: '', model: '', plate: '' })
   const [location, setLocation] = useState({ latitude: '', longitude: '' })
@@ -34,6 +36,7 @@ export default function DriverDashboard({ onSessionExpired }) {
   const [isError, setIsError] = useState(false)
   const [now, setNow] = useState(Date.now())
   const fresh = profile?.status === 'active' && new Date(profile.location_expires_at).getTime() > now
+  const nextStep = tripSteps[ride?.status]
 
   useEffect(() => {
     mounted.current = true
@@ -48,6 +51,7 @@ export default function DriverDashboard({ onSessionExpired }) {
         if (controller.signal.aborted) return
         setProfile(saved)
         if (saved) {
+          formsInitialized.current = true
           setVehicle({ make: saved.vehicle_info.make ?? '', model: saved.vehicle_info.model ?? '', plate: saved.vehicle_info.plate ?? '' })
           if (saved.current_location) setLocation(saved.current_location)
         }
@@ -75,15 +79,31 @@ export default function DriverDashboard({ onSessionExpired }) {
     return () => clearTimeout(timer)
   }, [profile])
 
-  async function reloadDashboard() {
-    const [saved, current] = await Promise.all([driverRequest(''), driverRequest('/ride')])
-    const nearby = saved ? await driverRequest('/offers') : []
-    if (!mounted.current) return
+  async function reloadDashboard(signal) {
+    const [saved, current] = await Promise.all([driverRequest('', { signal }), driverRequest('/ride', { signal })])
+    const nearby = saved ? await driverRequest('/offers', { signal }) : []
+    if (!mounted.current || signal?.aborted) return
     setProfile(saved)
-    if (saved) setVehicle({ make: saved.vehicle_info.make ?? '', model: saved.vehicle_info.model ?? '', plate: saved.vehicle_info.plate ?? '' })
+    if (saved && !formsInitialized.current) {
+      setVehicle({ make: saved.vehicle_info.make ?? '', model: saved.vehicle_info.model ?? '', plate: saved.vehicle_info.plate ?? '' })
+      if (saved.current_location) setLocation(saved.current_location)
+      formsInitialized.current = true
+    }
     setRide(current)
     setOffers(nearby)
   }
+
+  useEffect(() => {
+    if (!live.revision || busy || loading) return
+    const controller = new AbortController()
+    reloadDashboard(controller.signal).catch((error) => {
+      if (controller.signal.aborted) return
+      if (error.status === 401) onSessionExpired(null)
+      setIsError(true)
+      setMessage('Could not refresh live ride data. Try Refresh dashboard.')
+    })
+    return () => controller.abort()
+  }, [live.revision, busy, loading, onSessionExpired])
 
   async function perform(action, successMessage) {
     setBusy(true)
@@ -117,11 +137,21 @@ export default function DriverDashboard({ onSessionExpired }) {
     } }), 'Location updated. You are online for nearby requests.')
   }
 
+  function shareLocation() {
+    if (location.latitude === '' || location.longitude === '' || !Number.isFinite(Number(location.latitude)) || !Number.isFinite(Number(location.longitude))) {
+      setIsError(true)
+      setMessage('Enter valid latitude and longitude before sharing.')
+      return
+    }
+    const point = { latitude: Number(location.latitude), longitude: Number(location.longitude) }
+    perform(() => live.status === 'connected' ? live.sendLocation(point) : driverRequest('/location', { method: 'POST', body: { location: point } }), 'Location updated.')
+  }
+
   return (
     <section className="auth-card driver-card" aria-labelledby="driver-title" aria-busy={loading || busy}>
       <p className="eyebrow">DRIVER DASHBOARD</p>
       <h2 id="driver-title">Your next pickup starts here.</h2>
-      <p className="auth-description">Save your vehicle, go online, and choose a nearby request. Refresh to check for new requests.</p>
+      <p className="auth-description">Save your vehicle, go online, and choose a nearby request. Connected dashboards update automatically.</p>
       {loading ? <p role="status">Loading your driver dashboard…</p> : <>
         <div className="driver-toolbar">
           <span className={`availability-badge${fresh && !ride ? ' availability-online' : ''}`}>
@@ -153,11 +183,13 @@ export default function DriverDashboard({ onSessionExpired }) {
               <div className="auth-actions">
                 <button className="secondary-button" type="button" onClick={() => setLocation({ latitude: '28.6140', longitude: '77.2090' })}>Use Delhi sample location</button>
                 <button type="submit">{profile.status === 'active' ? 'Refresh location / go online' : 'Go online'}</button>
+                {profile.status === 'active' && <button type="button" onClick={shareLocation}>Share updated location</button>}
                 <button className="secondary-button" type="button" onClick={() => perform(() => driverRequest('/availability', { method: 'POST', body: { status: 'offline' } }), 'You are offline. Any accepted ride stays assigned.')}>Go offline</button>
               </div>
             </fieldset>
           </form>
           <p className="fare-note driver-demo-note">Your location is shared with our backend for nearby matching. Refresh it before it expires{profile.location_expires_at ? ` at ${new Date(profile.location_expires_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : ''}. Going offline stops new offers and clears this location.</p>
+          {profile.current_location && <p className="fare-note driver-demo-note">Last shared: {profile.current_location.latitude}, {profile.current_location.longitude}. Edit the coordinates above and choose Share updated location to send a new point.</p>}
           <div className="driver-requests">
             <h3>3. {ride ? 'Your accepted ride' : 'Nearby ride requests'}</h3>
             {ride ? <div className="fare-summary" role="status">
@@ -166,7 +198,8 @@ export default function DriverDashboard({ onSessionExpired }) {
               <p>Pickup: {ride.pickup.latitude}, {ride.pickup.longitude}</p>
               <p>Destination: {ride.destination.latitude}, {ride.destination.longitude}</p>
               <p>Estimated fare: {formatMoney(ride.fare_estimate)}</p>
-              <p className="fare-note">This ride is assigned to you. Trip progression is coming in a later step.</p>
+              <p className="fare-note">This ride is assigned to you. Update its progress when you reach each step; completing it does not charge a payment.</p>
+              {nextStep && <button type="button" disabled={busy} onClick={() => perform(() => driverRequest(`/rides/${ride.id}/status`, { method: 'POST', body: { status: nextStep[0] } }), 'Trip status updated.')}>{nextStep[1]}</button>}
             </div> : !fresh ? <p className="auth-description">Go online with a fresh location to see nearby requests.</p> : offers.length === 0 ? <p className="auth-description">No nearby requests right now. Refresh the dashboard to check again.</p> : <ul className="matching-list">
               {offers.map(({ ride: offer, pickup_distance_meters: distance }) => <li key={offer.id}>
                 <div className="matching-title"><h4>{formatMoney(offer.fare_estimate)}</h4><span>{(distance / 1000).toFixed(2)} km to pickup</span></div>

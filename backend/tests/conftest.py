@@ -15,6 +15,23 @@ from sqlalchemy.orm import Session
 from app.config import get_settings
 from app.database import get_db
 from app.main import app
+from app.events import get_event_publisher
+
+
+class SilentEvents:
+    def ride_changed(self, ride):
+        pass
+
+    def driver_changed(self, driver_id, ride=None):
+        pass
+
+
+@pytest.fixture(autouse=True)
+def notifications():
+    publisher = SilentEvents()
+    app.dependency_overrides[get_event_publisher] = lambda: publisher
+    yield publisher
+    app.dependency_overrides.pop(get_event_publisher, None)
 
 
 @pytest.fixture(scope="session")

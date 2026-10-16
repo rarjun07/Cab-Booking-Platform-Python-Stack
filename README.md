@@ -9,7 +9,8 @@ An internship project based on the mentor's **Cab Booking Platform - Python Stac
 - Frontend: React. The guide lists Next.js as optional, so Next.js is not required for this project.
 - Authentication: custom FastAPI + PostgreSQL, with Argon2 password hashes and signed HTTP-only session cookies, as chosen by the user instead of Clerk/Supabase Auth.
 - Routing: OSRM with OpenStreetMap data, the user's free alternative to Google Maps.
-- Additional services will be introduced on their scheduled days: Redis, Stripe, Celery, and Docker.
+- Realtime: FastAPI WebSockets backed by Redis Pub/Sub.
+- Additional services will be introduced on their scheduled days: Stripe, Celery, and Docker.
 
 ## How we will work
 
@@ -36,7 +37,8 @@ Learning preference: step-by-step guidance with explanations.
 - [Database models, PostGIS, and migrations](docs/DATABASE.md)
 - [Fare estimates and ride requests](docs/RIDE_BOOKING.md)
 - [Driver dashboard and nearby matching](docs/RIDE_MATCHING.md)
+- [Live ride and location updates](docs/LIVE_UPDATES.md)
 
 ## Current state
 
-Days 1-4 are implemented and pushed. The user chose to include Day 4, which adds the driver dashboard, fresh online availability, nearby PostGIS queries, accept/decline matching, and recovery of the latest open ride. All 91 backend tests and the React build pass. Live API checks verified setup, a real route, matching, safe acceptance retries, assignment recovery, offline behavior, and logout. Automated visual verification remains unavailable after a browser URL-policy rejection; the user has not tried the manual dashboard check yet. Day 4 implementation commit `834ae6e` is verified on GitHub; see the progress log for its following documentation checkpoint. Day 5 has not started and remains optional.
+Days 1-4 are implemented and pushed. The user also chose to include Day 5: authenticated FastAPI WebSockets, Redis notifications, live location/status updates, reconnect recovery, and guarded trip progression. All 113 backend tests and the React build pass. A live demo verified Vite WebSocket forwarding and Redis delivery between two independent backend processes. Manual UI checks remain pending after the earlier browser URL-policy rejection; the user has not tried the live connection badge yet. The Day 5 Git checkpoint is pending. Day 6 payments have not started.

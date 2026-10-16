@@ -12,7 +12,8 @@ from sqlalchemy.exc import IntegrityError
 
 from app.auth import DB, check_origin, get_current_user
 from app.config import get_settings
-from app.driver_schemas import AvailabilityInput, DriverProfileInput, DriverPublic, NearbyDriver, RideOffer, VehicleInfo
+from app.driver_schemas import AvailabilityInput, DriverProfileInput, DriverPublic, NearbyDriver, RideOffer, VehicleInfo, DriverLocationInput, DriverLocationPublic, TripStatusInput
+from app.events import Events
 from app.models import Driver, Ride, RideDecline, User
 from app.ride_schemas import Coordinate, RidePublic
 from app.rides import RiderUser, ride_response
@@ -55,17 +56,17 @@ def driver_profile(driver_id: UUID, db, *, lock=False) -> Driver:
 
 
 def profile_response(driver: Driver, db) -> DriverPublic:
-    location = None
-    if driver.current_location is not None:
-        x, y = db.execute(select(func.ST_X(Driver.current_location), func.ST_Y(Driver.current_location))
-                          .where(Driver.user_id == driver.user_id)).one()
-        location = Coordinate(latitude=y, longitude=x)
-    expires = (driver.location_updated_at + timedelta(seconds=get_settings().driver_location_max_age_seconds)
-               if driver.location_updated_at else None)
+    # Read the related location fields together: another request may just have gone offline.
+    x, y, updated, status = db.execute(select(func.ST_X(Driver.current_location), func.ST_Y(Driver.current_location),
+                                             Driver.location_updated_at, Driver.status)
+                                      .where(Driver.user_id == driver.user_id)).one()
+    location = Coordinate(latitude=y, longitude=x) if x is not None and y is not None else None
+    expires = updated + timedelta(seconds=get_settings().driver_location_max_age_seconds) if updated else None
+    fresh = status == "active" and location is not None and expires is not None and expires > datetime.now(timezone.utc)
     return DriverPublic(user_id=driver.user_id, vehicle_info=driver.vehicle_info, verified=driver.verified,
-                        status=driver.status, current_location=location, location_updated_at=driver.location_updated_at,
+                        status=status, current_location=location, location_updated_at=updated,
                         location_expires_at=expires,
-                        available_for_matching=location_is_fresh(driver) and db.scalar(active_ride_query(driver.user_id)) is None)
+                        available_for_matching=fresh and db.scalar(active_ride_query(driver.user_id)) is None)
 
 
 @router.get("/drivers/me", response_model=DriverPublic | None)
@@ -75,7 +76,7 @@ def get_profile(user: DriverUser, db: DB):
 
 
 @router.put("/drivers/me", response_model=DriverPublic, dependencies=[Depends(check_origin)])
-def save_profile(data: DriverProfileInput, user: DriverUser, db: DB):
+def save_profile(data: DriverProfileInput, user: DriverUser, db: DB, events: Events):
     # Lock the parent even before the profile exists, serializing concurrent first saves.
     db.scalar(select(User).where(User.id == user.id).with_for_update())
     driver = db.scalar(select(Driver).where(Driver.user_id == user.id).with_for_update())
@@ -88,11 +89,12 @@ def save_profile(data: DriverProfileInput, user: DriverUser, db: DB):
         driver.verified = False
     db.commit()
     db.refresh(driver)
+    events.driver_changed(user.id)
     return profile_response(driver, db)
 
 
 @router.post("/drivers/me/availability", response_model=DriverPublic, dependencies=[Depends(check_origin)])
-def set_availability(data: AvailabilityInput, user: DriverUser, db: DB):
+def set_availability(data: AvailabilityInput, user: DriverUser, db: DB, events: Events):
     driver = driver_profile(user.id, db, lock=True)
     if data.status == "active":
         try:
@@ -107,6 +109,7 @@ def set_availability(data: AvailabilityInput, user: DriverUser, db: DB):
     driver.status = data.status
     db.commit()
     db.refresh(driver)
+    events.driver_changed(user.id, db.scalar(active_ride_query(user.id)))
     return profile_response(driver, db)
 
 
@@ -174,7 +177,7 @@ def ensure_eligible(driver: Driver, ride: Ride, db):
 
 
 @router.post("/drivers/me/rides/{ride_id}/accept", response_model=RidePublic, dependencies=[Depends(check_origin)])
-def accept_ride(ride_id: UUID, user: DriverUser, db: DB):
+def accept_ride(ride_id: UUID, user: DriverUser, db: DB, events: Events):
     # All availability/accept/decline writes lock driver first, then ride.
     driver = driver_profile(user.id, db, lock=True)
     ride = lock_requested_ride(ride_id, db)
@@ -190,14 +193,70 @@ def accept_ride(ride_id: UUID, user: DriverUser, db: DB):
         db.rollback()
         raise HTTPException(409, "The ride could not be assigned. Refresh your requests.") from None
     db.refresh(ride)
+    events.ride_changed(ride)
     return ride_response(ride, db)
 
 
 @router.post("/drivers/me/rides/{ride_id}/decline", status_code=204, dependencies=[Depends(check_origin)])
-def decline_ride(ride_id: UUID, user: DriverUser, db: DB):
+def decline_ride(ride_id: UUID, user: DriverUser, db: DB, events: Events):
     driver = driver_profile(user.id, db, lock=True)
     ride = lock_requested_ride(ride_id, db)
     ensure_eligible(driver, ride, db)
     if db.get(RideDecline, (ride.id, user.id)) is None:
         db.add(RideDecline(ride_id=ride.id, driver_id=user.id))
         db.commit()
+        events.ride_changed(ride)
+
+
+def update_location(data: DriverLocationInput, user: User, db, events):
+    driver = driver_profile(user.id, db, lock=True)
+    if driver.status != "active":
+        raise HTTPException(409, "Go online before sharing location updates.")
+    now = datetime.now(timezone.utc)
+    if driver.location_updated_at and (now - driver.location_updated_at).total_seconds() < 1:
+        raise HTTPException(429, "Wait one second between location updates.", headers={"Retry-After": "1"})
+    driver.current_location = WKTElement(f"POINT({data.location.longitude} {data.location.latitude})", srid=4326)
+    driver.location_updated_at = now
+    db.commit()
+    db.refresh(driver)
+    events.driver_changed(user.id, db.scalar(active_ride_query(user.id)))
+    return profile_response(driver, db)
+
+
+@router.post("/drivers/me/location", response_model=DriverPublic, dependencies=[Depends(check_origin)])
+def driver_location(data: DriverLocationInput, user: DriverUser, db: DB, events: Events):
+    return update_location(data, user, db, events)
+
+
+@router.get("/rides/{ride_id}/driver-location", response_model=DriverLocationPublic | None)
+def assigned_driver_location(ride_id: UUID, user: RiderUser, db: DB):
+    ride = db.scalar(select(Ride).where(Ride.id == ride_id, Ride.rider_id == user.id))
+    if ride is None:
+        raise HTTPException(404, "Ride not found.")
+    if ride.driver_id is None or ride.status not in ACTIVE_RIDE_STATUSES:
+        return None
+    driver = db.get(Driver, ride.driver_id)
+    public = profile_response(driver, db)
+    fresh = (public.status == "active" and public.location_expires_at is not None
+             and public.location_expires_at > datetime.now(timezone.utc))
+    return DriverLocationPublic(driver_id=driver.user_id, ride_id=ride.id,
+                                location=public.current_location if fresh else None,
+                                updated_at=public.location_updated_at, expires_at=public.location_expires_at)
+
+
+@router.post("/drivers/me/rides/{ride_id}/status", response_model=RidePublic, dependencies=[Depends(check_origin)])
+def advance_trip(ride_id: UUID, data: TripStatusInput, user: DriverUser, db: DB, events: Events):
+    driver_profile(user.id, db, lock=True)
+    ride = lock_requested_ride(ride_id, db)
+    if ride.driver_id != user.id:
+        raise HTTPException(404, "Ride not found.")
+    if ride.status == data.status:
+        return ride_response(ride, db)
+    transitions = {"accepted": "arriving", "arriving": "in_progress", "in_progress": "completed"}
+    if transitions.get(ride.status) != data.status:
+        raise HTTPException(409, "Use the next trip step; this transition is not allowed.")
+    ride.status = data.status
+    db.commit()
+    db.refresh(ride)
+    events.ride_changed(ride)
+    return ride_response(ride, db)

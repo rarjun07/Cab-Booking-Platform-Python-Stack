@@ -54,3 +54,21 @@ class NearbyDriver(BaseModel):
 class RideOffer(BaseModel):
     ride: RidePublic
     pickup_distance_meters: int
+
+
+class DriverLocationInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    location: Coordinate
+
+
+class TripStatusInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    status: Literal["arriving", "in_progress", "completed"]
+
+
+class DriverLocationPublic(BaseModel):
+    driver_id: UUID
+    ride_id: UUID
+    location: Coordinate | None
+    updated_at: datetime | None
+    expires_at: datetime | None

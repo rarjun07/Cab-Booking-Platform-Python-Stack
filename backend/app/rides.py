@@ -15,6 +15,7 @@ from sqlalchemy.exc import IntegrityError
 from app.auth import DB, ISSUER, check_origin, get_current_user
 from app.config import get_settings
 from app.models import Ride, User
+from app.events import Events
 from app.ride_schemas import Coordinate, FareBreakdown, FareEstimate, QuoteContents, RidePublic, RideRequest, RouteMetrics
 from app.routing import OSRMProvider, get_route_provider
 
@@ -96,7 +97,7 @@ def ride_response(ride: Ride, db) -> RidePublic:
 
 
 @router.post("/request", response_model=RidePublic, status_code=201, dependencies=[Depends(check_origin)])
-def request_ride(data: RideRequest, response: Response, user: RiderUser, db: DB):
+def request_ride(data: RideRequest, response: Response, user: RiderUser, db: DB, events: Events):
     quote_id, contents = validate_quote(data.quote_token, user)
     existing = db.scalar(select(Ride).where(Ride.quote_id == quote_id, Ride.rider_id == user.id))
     if existing:
@@ -117,6 +118,7 @@ def request_ride(data: RideRequest, response: Response, user: RiderUser, db: DB)
             raise HTTPException(409, "The ride could not be saved. Please try again.") from None
         response.status_code = 200
     db.refresh(ride)
+    events.ride_changed(ride)
     return ride_response(ride, db)
 
 

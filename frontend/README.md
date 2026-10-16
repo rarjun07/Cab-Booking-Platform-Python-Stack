@@ -4,7 +4,9 @@ The page now includes PostgreSQL-backed sign-up, sign-in, session restoration, v
 
 Day 3 adds a coordinate form, public Delhi sample, fare breakdown, ride request, and status refresh for signed-in riders. See [the ride-booking walkthrough](../docs/RIDE_BOOKING.md) for a step-by-step demo. The production build passes; the new form's visual/manual browser check remains pending.
 
-Day 4 adds the driver dashboard, vehicle setup, online/offline controls, location freshness, nearby offers, and accept/decline actions. Riders can find nearby drivers and recover their latest open ride after signing in. See [the matching walkthrough](../docs/RIDE_MATCHING.md) for the two-account demo and verification limits. Updates use explicit refresh buttons; realtime is not enabled yet.
+Day 4 adds the driver dashboard, vehicle setup, online/offline controls, location freshness, nearby offers, and accept/decline actions. Riders can find nearby drivers and recover their latest open ride after signing in. See [the matching walkthrough](../docs/RIDE_MATCHING.md) for the two-account demo and verification limits. Day 4 originally used explicit refresh buttons; Day 5 now adds realtime.
+
+Day 5 adds live updates through `useRealtime`, an announced connection status, automatic reads of protected ride data after notifications, connection retries, location sharing, and trip-step buttons. Refresh controls remain as a fallback. See [the realtime walkthrough](../docs/LIVE_UPDATES.md); the new UI manual/visual check remains pending.
 
 ## What each tool does
 
@@ -24,7 +26,7 @@ Keep two terminals open. Each server stays running in its own terminal.
 ```bash
 cd "/Users/arjunsair/Desktop/Python_Developer/Cab Booking Platform/backend"
 source .venv/bin/activate
-python -m uvicorn app.main:app --reload
+python -m uvicorn app.main:app --reload --ws-max-size 2048
 ```
 
 If FastAPI is already running on port 8000, reuse it rather than starting another copy.
@@ -67,6 +69,8 @@ Browser -> React button -> fetch('/api/health')
 
 The browser sends the request to Vite on port 5173. Vite's `/api` proxy forwards it to `http://127.0.0.1:8000`. Keeping the browser request on the frontend's own origin avoids needing cross-origin configuration for this local step.
 
+Since Day 5, Vite also forwards `/api` WebSocket upgrades with `ws: true` while preserving the browser Origin. The backend checks Origin on state-changing and WebSocket requests.
+
 This proxy exists only in the development server. A deployed build will need an API routing arrangement or a configured API URL with appropriate CORS; that is part of the deployment milestone.
 
 ## Understand the files
@@ -79,6 +83,7 @@ This proxy exists only in the development server. A deployed build will need an 
 | `src/AuthPanel.jsx` | Handles account forms and restores/verifies the HTTP-only cookie session through FastAPI. |
 | `src/RideBooking.jsx` | Requests estimates, displays their expiry and price, saves a ride, and refreshes its status. |
 | `src/DriverDashboard.jsx` | Restores the driver profile/assignment, saves vehicle details, updates availability/location, and accepts or declines nearby requests. |
+| `src/useRealtime.js` | Opens the account socket, coalesces events, retries connections, and confirms location messages. |
 | `src/styles.css` | Styles the desktop and mobile layouts. |
 | `vite.config.js` | Configures the React plugin, fixed frontend port, and API proxy. |
 | `package.json` | Lists dependencies and development/build commands. |

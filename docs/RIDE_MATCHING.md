@@ -48,7 +48,7 @@ You can use one browser and switch accounts. For simultaneous views, use separat
 5. Click **Accept ride** on the rider's request. The dashboard should display the accepted ride reference, pickup/destination, and estimated fare.
 6. Sign back in as the rider. The latest open ride is restored automatically; **Refresh ride status** should show `accepted` and the assigned driver reference.
 
-To try declining, create a separate request while an eligible driver has no active ride, then choose **Decline ride**. That request disappears for that driver and remains available to other eligible drivers. There is no undo-decline control in this milestone. Accepted drivers stay busy; trip progression/completion is a later step, so use a separate demo driver when testing another acceptance.
+To try declining, create a separate request while an eligible driver has no active ride, then choose **Decline ride**. That request disappears for that driver and remains available to other eligible drivers. There is no undo-decline control in this milestone. Accepted drivers stay busy until completion; use the trip-step controls added on Day 5 or a separate demo driver when testing another acceptance.
 
 The rider restoration endpoint returns only the latest open request/ride, not a history list. Existing multiple open requests are retained in PostgreSQL and can still be accessed by their owner using their saved references. Ride history remains Day 8 work.
 
@@ -62,7 +62,7 @@ The rider restoration endpoint returns only the latest open request/ride, not a 
 - The first successful transaction assigns the driver and changes the ride to `accepted`. Competing acceptance attempts return 409. Retrying an acceptance already owned by that driver returns the same ride.
 - A partial unique index prevents one driver from holding more than one `accepted`, `arriving`, or `in_progress` ride, even if another database writer bypasses the endpoint.
 
-There is no automatic polling, WebSocket, Redis presence, device GPS tracking, or OSRM request for nearby matching. Users refresh explicitly; Day 5 realtime remains optional and undecided.
+Day 4 used explicit refresh and no realtime connections. The user subsequently chose Day 5, which now adds [WebSocket/Redis updates and trip progression](LIVE_UPDATES.md). Device GPS tracking is still absent, and nearby matching does not call OSRM.
 
 ## API endpoints
 

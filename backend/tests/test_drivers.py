@@ -235,7 +235,7 @@ def test_matching_indexes_exist(db):
 
 
 @pytest.mark.parametrize("scenario", ["two_drivers_one_ride", "one_driver_two_rides"])
-def test_concurrent_accepts_have_one_winner(test_engine, scenario):
+def test_concurrent_accepts_have_one_winner(test_engine, scenario, notifications):
     # Separate committed fixtures/connections exercise real row-lock behavior.
     # test_engine is guarded by conftest to require the dedicated _test database.
     users, ride_ids = [], []
@@ -260,7 +260,7 @@ def test_concurrent_accepts_have_one_winner(test_engine, scenario):
                 user = session.get(User, task[0])
                 barrier.wait(timeout=5)
                 try:
-                    accept_ride(task[1], user, session)
+                    accept_ride(task[1], user, session, notifications)
                     return 200
                 except HTTPException as error:
                     return error.status_code

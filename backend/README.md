@@ -8,6 +8,8 @@ Day 3 adds authenticated fare estimates and ride requests with OSRM road routing
 
 Day 4 adds driver profiles, availability, nearby requests, accept/decline matching, and open-ride recovery. Follow [the matching walkthrough](../docs/RIDE_MATCHING.md). Run `python -m alembic upgrade head` to apply `0004_driver_matching` before using the new endpoints.
 
+Day 5 adds cookie-authenticated FastAPI WebSockets and Redis notifications, manual driver location sharing, and authorized trip progression. Follow [the realtime walkthrough](../docs/LIVE_UPDATES.md) for Redis startup, protocol/security details, and the two-window demo. No additional schema migration is needed. The complete test suite now also requires a running local Redis service.
+
 ## What we added
 
 - `.venv/`: this project's isolated Python environment. It holds installed libraries locally and is ignored by Git.
@@ -35,7 +37,7 @@ From the project root:
 ```bash
 cd backend
 source .venv/bin/activate
-python -m uvicorn app.main:app --reload
+python -m uvicorn app.main:app --reload --ws-max-size 2048
 ```
 
 If your terminal is already inside `backend/`, skip `cd backend`.
@@ -65,6 +67,6 @@ The root URL `/` returns 404; use `/docs` to explore the API or open the React a
 
 ## Scope of this checkpoint
 
-The health endpoint checks API availability only. Custom authentication uses PostgreSQL user/session tables. Day 2 adds PostGIS and the driver, ride, payment, and review models through Alembic. Day 3 implements estimates, ride creation, and owned ride status; Day 4 adds driver availability and matching. Realtime, trip progression, payments, and reviews remain later work. See the progress log for verification and Git checkpoints.
+The health endpoint checks API availability only. Custom authentication uses PostgreSQL user/session tables. Day 2 adds PostGIS and the driver, ride, payment, and review models through Alembic. Day 3 implements estimates, ride creation, and owned ride status; Day 4 adds driver availability and matching. Day 5 adds realtime delivery and guarded trip progression. Payments and reviews remain later work. See the progress log for verification and Git checkpoints.
 
 Reference: [FastAPI's official first-steps tutorial](https://fastapi.tiangolo.com/tutorial/first-steps/).

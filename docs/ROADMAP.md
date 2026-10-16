@@ -27,7 +27,7 @@ The user subsequently chose custom FastAPI + PostgreSQL authentication instead o
 
 Days 4 and 5 are explicitly optional in the guide. The guide also labels geospatial queries optional in its notes, while its Day 2 schedule includes PostGIS setup. Keep PostGIS in the planned database setup; decide the optional matching features when reaching Day 4.
 
-The user chose to include Day 4. Day 5 realtime remains undecided.
+The user chose to include both Day 4 and Day 5.
 
 ## Day 1 checklist
 
@@ -88,13 +88,28 @@ Do not begin the remaining Day 2 database models or migrations until every requi
 - [x] Commit, push, and verify the Day 4 implementation (`834ae6e`).
 - [ ] Manual/visual UI follow-up: preview automation remains blocked by the earlier URL-policy rejection. User feedback is recorded separately in `PROGRESS.md`.
 
+## Day 5 checklist
+
+- [x] Verify the Day 4 completion-record commit on GitHub (`1af381c`).
+- [x] Resolve optional scope: user chose to include Day 5.
+- [x] Add WebSockets using the existing cookie and strict Origin/role/account checks.
+- [x] Recheck session expiry/revocation on connected sockets and clean up subscriptions/tasks.
+- [x] Use namespaced Redis Pub/Sub to bridge backend processes with no private fields on shared channels.
+- [x] Publish after database commits and preserve HTTP success if notifications fail.
+- [x] Add assigned-rider location access, validated driver sharing, and authorized trip progression.
+- [x] Add React connection status, coalesced refreshes, reconnect recovery, and manual fallbacks.
+- [x] Verify real WebSocket/Redis tests, backend regressions, schema/dependencies, frontend build, Vite upgrades, and cross-process delivery.
+- [x] Document setup, two-window demo, security, and limitations.
+- [ ] Commit, push, and verify the Day 5 implementation.
+- [ ] Manual/visual UI follow-up: earlier browser policy blocks automated preview; user has not tried the connection-badge check yet.
+
 ## Choices to resolve at the relevant milestone
 
 - Day 1 choices resolved: step-by-step teaching, confirmed GitHub repository, custom FastAPI/PostgreSQL authentication, and SQLAlchemy with local PostgreSQL.
 - Day 2: extend the schema with PostGIS and Alembic migrations.
 - Day 3 routing choice resolved: OSRM public demo for learning, with no API key. See `RIDE_BOOKING.md` for service limits and the production hosting decision still needed before deployment.
 - Day 4 choice resolved: include the driver dashboard, availability, and nearby matching.
-- Day 5: whether to include optional realtime features.
+- Day 5 choice resolved: include realtime with FastAPI WebSockets and Redis.
 - Day 6 onward: required service configuration for test payments, email, and deployment.
 
 The PDF supplies project requirements and suggestions. The user's chosen stack and daily commit/push workflow govern our implementation. External credentials, accounts, and deployments are not assumed to exist merely because the PDF mentions them.

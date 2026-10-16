@@ -2,6 +2,7 @@ import { useState } from 'react'
 import AuthPanel from './AuthPanel.jsx'
 import RideBooking from './RideBooking.jsx'
 import DriverDashboard from './DriverDashboard.jsx'
+import useRealtime from './useRealtime.js'
 
 const connectionMessages = {
   idle: 'Ready when you are. Start FastAPI, then check the connection.',
@@ -13,6 +14,7 @@ const connectionMessages = {
 export default function App() {
   const [connection, setConnection] = useState('idle')
   const [user, setUser] = useState(null)
+  const live = useRealtime(user, setUser)
 
   async function checkConnection() {
     setConnection('checking')
@@ -45,7 +47,7 @@ export default function App() {
           <span className="brand-mark" aria-hidden="true">C</span>
           Cab Booking Platform
         </a>
-        <span className="day-label">Day 04 <span aria-hidden="true">/</span> Meet your driver</span>
+        <span className="day-label">Day 05 <span aria-hidden="true">/</span> Your ride, live</span>
       </header>
 
       <main id="main">
@@ -59,9 +61,10 @@ export default function App() {
         </section>
 
         <AuthPanel user={user} onUserChange={setUser} />
+        {user && <p className={`live-connection${live.status === 'connected' ? ' live-connected' : ''}`} role="status" aria-live="polite">{live.status === 'connected' ? 'Live updates connected' : live.status === 'connecting' ? 'Connecting live updates…' : 'Live updates reconnecting. Refresh is still available.'}</p>}
         {user?.role === 'driver'
-          ? <DriverDashboard key={user.id} onSessionExpired={setUser} />
-          : <RideBooking key={user?.id ?? 'signed-out'} user={user} onSessionExpired={setUser} />}
+          ? <DriverDashboard key={user.id} onSessionExpired={setUser} live={live} />
+          : <RideBooking key={user?.id ?? 'signed-out'} user={user} onSessionExpired={setUser} liveRevision={live.revision} />}
 
         <section className="connection-card" aria-labelledby="connection-title">
           <div>

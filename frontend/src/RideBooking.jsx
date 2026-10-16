@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 
 const emptyRoute = { pickupLat: '', pickupLng: '', destinationLat: '', destinationLng: '' }
 const sampleRoute = { pickupLat: '28.6139', pickupLng: '77.2090', destinationLat: '28.6129', destinationLng: '77.2295' }
@@ -21,11 +21,19 @@ async function rideRequest(path, body, signal) {
   return data
 }
 
-export default function RideBooking({ user, onSessionExpired }) {
+async function readDriverLocation(ride, signal) {
+  return ride?.driver_id && ['accepted', 'arriving', 'in_progress'].includes(ride.status)
+    ? rideRequest(`${ride.id}/driver-location`, undefined, signal) : null
+}
+
+export default function RideBooking({ user, onSessionExpired, liveRevision = 0 }) {
   const formId = useId()
   const [route, setRoute] = useState(emptyRoute)
   const [quote, setQuote] = useState(null)
   const [ride, setRide] = useState(null)
+  const rideRef = useRef(null)
+  rideRef.current = ride
+  const [driverLocation, setDriverLocation] = useState(null)
   const [nearbyDrivers, setNearbyDrivers] = useState([])
   const [matchingChecked, setMatchingChecked] = useState(false)
   const [restoring, setRestoring] = useState(user?.role === 'rider')
@@ -36,8 +44,11 @@ export default function RideBooking({ user, onSessionExpired }) {
   useEffect(() => {
     if (user?.role !== 'rider') return
     const controller = new AbortController()
-    rideRequest('current', undefined, controller.signal).then((saved) => {
-      if (!controller.signal.aborted) setRide(saved)
+    rideRequest('current', undefined, controller.signal).then(async (saved) => {
+      if (controller.signal.aborted) return
+      setRide(saved)
+      const location = await readDriverLocation(saved, controller.signal)
+      if (!controller.signal.aborted) setDriverLocation(location)
     }).catch((error) => {
       if (controller.signal.aborted) return
       if (error.status === 401) onSessionExpired(null)
@@ -46,6 +57,31 @@ export default function RideBooking({ user, onSessionExpired }) {
     }).finally(() => { if (!controller.signal.aborted) setRestoring(false) })
     return () => controller.abort()
   }, [user?.id, user?.role, onSessionExpired])
+
+  useEffect(() => {
+    if (user?.role !== 'rider' || !liveRevision || restoring || busy) return
+    const controller = new AbortController()
+    const previousId = rideRef.current?.id
+    async function sync() {
+      const latest = await rideRequest('current', undefined, controller.signal)
+      const saved = latest ?? (previousId ? await rideRequest(`${previousId}/status`, undefined, controller.signal) : null)
+      const location = await readDriverLocation(saved, controller.signal)
+      const candidates = matchingChecked && saved?.status === 'requested'
+        ? await rideRequest(`${saved.id}/drivers`, undefined, controller.signal) : []
+      if (controller.signal.aborted || rideRef.current?.id !== previousId) return
+      setRide(saved)
+      setDriverLocation(location)
+      setNearbyDrivers(candidates)
+      if (saved?.status !== 'requested') setMatchingChecked(false)
+    }
+    sync().catch((error) => {
+      if (controller.signal.aborted) return
+      if (error.status === 401) onSessionExpired(null)
+      setIsError(true)
+      setMessage('Could not refresh live ride data. Try Refresh ride status.')
+    })
+    return () => controller.abort()
+  }, [liveRevision, user?.id, user?.role, restoring, busy, matchingChecked, onSessionExpired])
 
   useEffect(() => {
     if (!quote) return
@@ -59,7 +95,6 @@ export default function RideBooking({ user, onSessionExpired }) {
   function changeRoute(next) {
     setRoute(next)
     setQuote(null)
-    setRide(null)
     setNearbyDrivers([])
     setMatchingChecked(false)
     setMessage('')
@@ -77,7 +112,6 @@ export default function RideBooking({ user, onSessionExpired }) {
     setMessage('')
     setIsError(false)
     setQuote(null)
-    setRide(null)
     setNearbyDrivers([])
     setMatchingChecked(false)
     const parameters = new URLSearchParams({ origin: `${route.pickupLat},${route.pickupLng}`, dest: `${route.destinationLat},${route.destinationLng}` })
@@ -114,7 +148,9 @@ export default function RideBooking({ user, onSessionExpired }) {
     setBusy(true)
     setIsError(false)
     try {
-      setRide(await rideRequest(`${ride.id}/status`))
+      const saved = await rideRequest(`${ride.id}/status`)
+      setRide(saved)
+      setDriverLocation(await readDriverLocation(saved))
       setNearbyDrivers([])
       setMatchingChecked(false)
       setMessage('Ride status refreshed.')
@@ -173,6 +209,13 @@ export default function RideBooking({ user, onSessionExpired }) {
           {restoring && <p role="status">Checking your latest open ride…</p>}
           {ride && <div className="fare-summary"><p className="eyebrow">RIDE REQUEST SAVED</p><h3>Status: {ride.status.replaceAll('_', ' ')}</h3><p>Estimated fare: {formatMoney(ride.fare_estimate)}</p><p className="ride-reference">Reference: {ride.id}</p>
             {ride.driver_id && <p className="ride-reference">Assigned driver: {ride.driver_id}</p>}
+            {ride.driver_id && ['accepted', 'arriving', 'in_progress'].includes(ride.status) && <div className="driver-location-card">
+              <strong>Driver’s last shared location</strong>
+              {driverLocation?.ride_id === ride.id && driverLocation.location && new Date(driverLocation.expires_at).getTime() > Date.now()
+                ? <p>{driverLocation.location.latitude}, {driverLocation.location.longitude} · Updated {new Date(driverLocation.updated_at).toLocaleTimeString()}</p>
+                : <p>Waiting for a fresh location. The driver may be offline.</p>}
+            </div>}
+            {ride.status === 'completed' && <p>Your trip is complete. Payments are not enabled in this demo yet.</p>}
             <div className="auth-actions"><button type="button" disabled={busy} onClick={refreshStatus}>Refresh ride status</button>{ride.status === 'requested' && <button className="secondary-button" type="button" disabled={busy} onClick={findDrivers}>Find nearby drivers</button>}</div>
             {ride.status === 'requested' && matchingChecked && <div className="rider-matching">
               <h4>Nearby available drivers</h4>

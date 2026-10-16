@@ -114,3 +114,7 @@ Checks cover password hashes, cookie attributes, duplicate/case-insensitive emai
 The current Starlette version emits a deprecation warning about its HTTPX TestClient compatibility path. The tests pass using the installed HTTPX version; this is a test dependency warning, not an authentication failure.
 
 References: [FastAPI password hashing and JWT tutorial](https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/) and [SQLAlchemy PostgreSQL driver documentation](https://docs.sqlalchemy.org/en/20/dialects/postgresql.html#module-sqlalchemy.dialects.postgresql.psycopg).
+
+## Day 5 WebSocket authentication
+
+Live endpoints are under `/api/ws/`, so the browser sends the existing HTTP-only cookie scoped to `/api`. The server checks the exact Origin, JWT, database session, account ID, and role before accepting. Each broker event and incoming message triggers another session check; idle connections are rechecked every two seconds by default. Expired or revoked accepted connections close with code `4401`. Credentials are never placed in the socket URL or browser storage. See [the realtime walkthrough](LIVE_UPDATES.md) for the tested protocol and privacy boundaries.

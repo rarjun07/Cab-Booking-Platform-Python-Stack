@@ -68,7 +68,13 @@ def start_session(user: User, response: Response, db: Session) -> None:
 
 
 def get_current_user(request: Request, response: Response, db: DB) -> User:
-    token = request.cookies.get(COOKIE_NAME)
+    user = user_from_token(request.cookies.get(COOKIE_NAME), db)
+    response.headers["Cache-Control"] = "no-store"
+    return user
+
+
+def user_from_token(token: str | None, db: Session) -> User:
+    """Shared HTTP/WebSocket validation; callers own a short database session."""
     if not token:
         raise HTTPException(401, "Please sign in to continue.")
     claims = decode_token(token)
@@ -84,7 +90,6 @@ def get_current_user(request: Request, response: Response, db: DB) -> User:
     user = db.get(User, user_id)
     if user is None:
         raise HTTPException(401, "Please sign in again.")
-    response.headers["Cache-Control"] = "no-store"
     return user
 
 
