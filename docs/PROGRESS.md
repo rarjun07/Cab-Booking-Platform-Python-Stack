@@ -2,7 +2,7 @@
 
 ## Current checkpoint
 
-- Active milestone: Day 4 in progress; the user chose to include the optional driver dashboard, availability, and matching. Day 3 visual/manual UI follow-up remains unverified.
+- Active milestone: Day 4 implemented and pushed; automated/live API checks passed. Day 3 and Day 4 visual/manual UI follow-ups remain unverified.
 - Completed: read all nine PDF pages, checked the daily schedule, confirmed stack compatibility, and prepared the roadmap.
 - Learning preference: guide the user step by step with explanations.
 - Day 1 implementation: complete; custom FastAPI + PostgreSQL authentication is verified with real database tests and browser flows.
@@ -20,7 +20,8 @@
 - Day 2 documentation checkpoint: `af94813132f8a08456d8ed90062d29cd730fe701`, verified against GitHub before Day 3 started.
 - Day 3 implementation commit: `ef48c41770db6eedb4392f350176f9fb379049ec`, pushed and verified against GitHub `refs/heads/main`.
 - Day 3 documentation checkpoint: `8d59f1c5b04fcf3687beba196e58d2b6c57f29aa`, confirmed equal to GitHub before Day 4 started; working tree was clean.
-- Next action: implement and verify Day 4 only. Day 5 has not started and remains optional.
+- Day 4 implementation commit: `834ae6e413fadb6a5e1c61a2c66d0d19191fe5b9`, pushed and verified against GitHub `refs/heads/main`.
+- Next action: push and verify this completion record, then let the user try the documented rider/driver walkthrough. Day 5 has not started and remains optional; resolve its inclusion when the user requests the next milestone.
 
 ## Day 1, step 1: local Git setup
 
@@ -117,13 +118,25 @@
 - Added the React driver dashboard and rider nearby list. Rider sign-in restores the latest open ride; driver sign-in restores the profile and active assignment. Updates use explicit refresh controls; Day 5 realtime has not started.
 - Verification: **91 backend tests passed**, React production build passed, and pip check passed. Separate-connection concurrency tests verify exactly one winner for two drivers/one ride and one driver/two rides; committed synthetic test fixtures are cleaned up. One existing TestClient/HTTPX deprecation warning remains.
 - Live local API demo passed: synthetic rider/driver registration, vehicle setup, online location, real OSRM estimate, persisted ride, nearby candidate at 12 meters, offer/acceptance, same-ride repeat acceptance, rider/driver restoration, offline location clearing while retaining assignment, and logout revocation. Demo ride `cde03821-ad85-4f26-8958-7cb2141e615e` is accepted; its synthetic driver was left offline. These records are local development test data.
-- Preview HTTP response: 200. Automated visual interaction remains unverified because of the earlier browser URL-policy rejection. A manual driver-dashboard check was requested; no result has been received yet. Day 3's full manual UI flow also remains unverified.
+- Preview HTTP response: 200. Automated visual interaction remains unverified because of the earlier browser URL-policy rejection. The user answered “I haven’t tried it yet” to the manual driver-dashboard check. Day 3's full manual UI flow also remains unverified.
 - Known scope: demo matching permits clearly labeled unverified drivers; geographic matching distance is not a road ETA; location presence is explicit rather than tied to browser login; active ride progression/completion and realtime remain later work.
 - Beginner setup and two-account steps are in `docs/RIDE_MATCHING.md`.
 - Source review: actual local database passwords and JWT secret are absent from all 23 changed/new files. `.env` remains ignored and owner-only; dependencies, virtual environment, and generated build output remain ignored. `git diff --check` passed.
-- Day 4 commit/push checkpoint pending. Day 5 remains optional and has not started.
+- Day 4 implementation commit `834ae6e413fadb6a5e1c61a2c66d0d19191fe5b9` was pushed; `git ls-remote origin refs/heads/main` returned that exact SHA. Day 5 remains optional and has not started.
 
 ## Daily completion record
+
+Day 4:
+
+- Scope delivered: driver-owned vehicle profiles, fresh online/offline location, indexed nearby queries, driver accept/decline dashboard, transactional assignment, and rider/driver open-ride recovery.
+- Verification: 91 backend tests passed; React build and pip check passed; migration applied with no drift; legacy-data preservation and real concurrent acceptance tests passed; live local two-account API demo passed.
+- UI follow-up: automated visual verification remains blocked by the earlier browser URL policy; user has not yet tried the manual driver-dashboard check. No browser pass is claimed.
+- Source review: actual local credentials absent from all 23 changed/new files; ignored configuration/dependencies/build output remain untracked; whitespace check passed.
+- Implementation commit: `834ae6e413fadb6a5e1c61a2c66d0d19191fe5b9`.
+- Remote: `https://github.com/rarjun07/Cab-Booking-Platform-Python-Stack.git`, branch `main`.
+- Push result: succeeded; exact remote implementation SHA verified. This completion record follows in a documentation commit; compare current HEAD with the remote for the latest checkpoint.
+- Known limits: unverified demo profiles permitted and labeled; manual refresh/location renewal; geographic proximity rather than road ETA; accepted rides remain active until later trip-progression work; existing TestClient deprecation warning.
+- Ready for next milestone: after this documentation checkpoint is pushed and verified, await the user's next instruction and resolve optional Day 5. Carry manual UI follow-ups forward explicitly.
 
 Day 3:
 

@@ -85,7 +85,7 @@ Do not begin the remaining Day 2 database models or migrations until every requi
 - [x] Add the React driver dashboard, rider candidate list, and current-ride recovery.
 - [x] Apply the migration and verify preservation, backend tests, frontend build, and the live API demo.
 - [x] Document the two-account walkthrough and demo/verification limits.
-- [ ] Commit, push, and verify the Day 4 implementation.
+- [x] Commit, push, and verify the Day 4 implementation (`834ae6e`).
 - [ ] Manual/visual UI follow-up: preview automation remains blocked by the earlier URL-policy rejection. User feedback is recorded separately in `PROGRESS.md`.
 
 ## Choices to resolve at the relevant milestone
