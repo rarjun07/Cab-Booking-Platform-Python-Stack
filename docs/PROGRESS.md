@@ -2,7 +2,7 @@
 
 ## Current checkpoint
 
-- Active milestone: Day 3 implementation verified through automated and live API checks; commit/push checkpoint pending. Visual/manual UI follow-up remains unverified.
+- Active milestone: Day 3 implemented and pushed; automated and live API checks passed. Visual/manual UI follow-up remains unverified.
 - Completed: read all nine PDF pages, checked the daily schedule, confirmed stack compatibility, and prepared the roadmap.
 - Learning preference: guide the user step by step with explanations.
 - Day 1 implementation: complete; custom FastAPI + PostgreSQL authentication is verified with real database tests and browser flows.
@@ -18,7 +18,8 @@
 - Day 2 implementation commit: `4ae8200b1345a202c18a4ab4ea2296f3e9a82030` (`feat: complete day 2 PostGIS models and Alembic migrations`).
 - Verified Day 2 push: GitHub `refs/heads/main` matched that exact SHA. This completion record follows in a documentation commit; compare current HEAD and the remote for the latest checkpoint.
 - Day 2 documentation checkpoint: `af94813132f8a08456d8ed90062d29cd730fe701`, verified against GitHub before Day 3 started.
-- Next action: complete and verify the Day 3 Git checkpoint. Day 4 has not started; its optional scope will be resolved when the user requests the next milestone.
+- Day 3 implementation commit: `ef48c41770db6eedb4392f350176f9fb379049ec`, pushed and verified against GitHub `refs/heads/main`.
+- Next action: push and verify this completion-record commit, then let the user try the manual ride form. Day 4 has not started; its optional scope will be resolved when the user requests the next milestone.
 
 ## Day 1, step 1: local Git setup
 
@@ -103,9 +104,21 @@
 - UI verification limitation: browser URL policy rejected automated preview reload. The user answered “I haven’t tried it yet” to the manual flow check. The new form is build-verified but visual/manual behavior is unverified; keep this follow-up visible for later manual/UI testing.
 - Setup, code explanation, service limitations, and the manual walkthrough are in `docs/RIDE_BOOKING.md`.
 - Source review: actual local database passwords and JWT secret are absent from all 24 changed/new files. `.env` remains owner-only and ignored; virtual environment, dependencies, and frontend build output are ignored. `git diff --check` passed.
-- Day 3 commit/push is pending. Day 4 has not started.
+- Day 3 implementation commit `ef48c41770db6eedb4392f350176f9fb379049ec` was pushed; `git ls-remote origin refs/heads/main` returned that exact SHA. Day 4 has not started.
 
 ## Daily completion record
+
+Day 3:
+
+- Scope delivered: OSRM road routing, configurable sample INR fares, signed rider-bound quotes, persistent ride requests, duplicate protection, owned status access, and the React booking form.
+- Verification: 71 backend tests passed; frontend build and dependency check passed; migration applied with no schema drift; real OSRM/API estimate-create-retry-status-logout flow passed.
+- UI follow-up: visual/manual verification remains pending because browser URL policy blocked the automated preview reload and the user has not yet tried the form. This is not a claimed browser pass.
+- Source review: local credentials absent from all 24 changed/new files; local configuration and generated files remain ignored; whitespace check passed.
+- Implementation commit: `ef48c41770db6eedb4392f350176f9fb379049ec`.
+- Remote: `https://github.com/rarjun07/Cab-Booking-Platform-Python-Stack.git`, branch `main`.
+- Push result: succeeded; exact remote implementation SHA verified. This completion record follows in a documentation commit; compare current HEAD with the remote for the latest checkpoint.
+- Known limits: public OSRM service is best-effort; no live traffic; process-local throttling only; sample pricing; driver matching is not implemented. Existing TestClient deprecation warning remains.
+- Ready for next milestone: after this documentation checkpoint is pushed and verified, await the user's next instruction and resolve optional Day 4 scope. Carry the manual UI check forward explicitly.
 
 Day 2:
 

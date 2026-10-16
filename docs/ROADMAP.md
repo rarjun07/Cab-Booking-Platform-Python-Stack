@@ -69,7 +69,7 @@ Do not begin the remaining Day 2 database models or migrations until every requi
 - [x] Add owned ride status access and a React booking form.
 - [x] Pass backend tests and the frontend build; verify the real OSRM and ride API flow.
 - [x] Document setup, limitations, and verification evidence.
-- [ ] Commit, push, and verify the Day 3 implementation.
+- [x] Commit, push, and verify the Day 3 implementation (`ef48c41`).
 - [ ] Manual/visual UI follow-up: browser policy blocked automated preview; user has not tried the form yet. Track this separately from the verified API flow.
 
 ## Choices to resolve at the relevant milestone
