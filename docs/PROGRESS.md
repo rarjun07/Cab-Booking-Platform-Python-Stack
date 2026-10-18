@@ -2,7 +2,7 @@
 
 ## Current checkpoint
 
-- Active milestone: Day 8 history, PDF receipts and background receipt email; final review/Git checkpoint pending. The user explicitly deferred Stripe setup and real-provider/rendered-checkout verification on 2026-10-18. Earlier visual/manual React follow-ups remain unverified.
+- Active milestone: Day 8 history, PDF receipts and background receipt email implemented, locally verified, committed, pushed and verified against GitHub; awaiting the user's next instruction. The user explicitly deferred Stripe setup and real-provider/rendered-checkout verification on 2026-10-18. Earlier visual/manual React follow-ups remain unverified.
 - Completed: read all nine PDF pages, checked the daily schedule, confirmed stack compatibility, and prepared the roadmap.
 - Learning preference: guide the user step by step with explanations.
 - Day 1 implementation: complete; custom FastAPI + PostgreSQL authentication is verified with real database tests and browser flows.
@@ -27,7 +27,8 @@
 - Day 6 code checkpoint: `d2e9e778969be525ee5ff1a7983b1e185ffbf63d`, pushed to `origin/main`; `git ls-remote` returned that exact SHA. Working tree was clean before Day 7 began.
 - Day 7 implementation checkpoint: `4746d1750d948db614feca1619a552a3e22a41fc`, pushed to `origin/main`; `git ls-remote` returned that exact SHA. This completion record follows in a documentation commit; compare current HEAD with GitHub for the latest checkpoint.
 - Day 7 documentation checkpoint: `f415d80e2dbeacfcd8c4666818a5e818e3276ea9`, verified equal to GitHub before Day 8; the working tree was clean.
-- Next action: finish Day 8 source review, commit/push and remote verification. Stripe setup, a real test transaction, signed Stripe delivery, and rendered checkout remain explicitly deferred. Day 9 has not started.
+- Day 8 implementation checkpoint: `f70387c95fbf4e69736a3a7ee6b41f6c875da426`, pushed to `origin/main`; `git ls-remote` returned that exact SHA. This completion record follows in a documentation commit; compare current HEAD with GitHub for the latest checkpoint.
+- Next action: await the user's next instruction; Day 9 will add ratings/reviews and aggregation. Stripe setup, a real test transaction, signed Stripe delivery, and rendered checkout remain explicitly deferred. Day 9 has not started.
 
 ## Day 1, step 1: local Git setup
 
@@ -177,7 +178,7 @@
 - Source review: Python syntax, local documentation links, absence of actual local credentials in all five changed/new files, and whitespace checks passed. Day 7 changes contain tests and documentation only.
 - Day 7 implementation commit: `4746d1750d948db614feca1619a552a3e22a41fc`; push succeeded and GitHub `refs/heads/main` matched exactly. Day 8 has not started.
 
-## Day 8: history and receipts (in progress)
+## Day 8: history and receipts (implementation checkpoint verified)
 
 - User requested the next milestone. Verified local HEAD and GitHub `refs/heads/main` both equal Day 7's final documentation checkpoint `f415d80e2dbeacfcd8c4666818a5e818e3276ea9` before starting; working tree was clean.
 - Rechecked the mentor's Day 8 requirements: history endpoints, WeasyPrint PDF receipts and Celery email tasks. Added pinned Celery 5.6.3, WeasyPrint 70.0 and runtime dependencies; pinned PDF-extraction/loopback-catcher dependencies are development-only. Existing package versions remain unchanged.
@@ -192,9 +193,20 @@
 - Generated an ignored synthetic unpaid PDF, rendered it to PNG using Poppler and visually inspected the one-page layout: readable text, correct amount/status, and no clipping/overlap. New PDF content tests cover paid amount selection, escaping, completion/ownership guards and private response headers.
 - Browser interaction remains unverified after the earlier URL-policy rejection; no workaround or visual React pass is claimed. Manual history/download/email follow-up is recorded in `docs/HISTORY_RECEIPTS.md`. Earlier Day 3-5 manual checks and the user-deferred real Stripe checks remain pending.
 - Source review: Python syntax, local documentation links, whitespace and absence of actual local credentials passed for all 26 changed/new files. Existing runtime version pins are retained; private `.env` remains ignored with mode 0600, and generated samples/dependencies/build output remain ignored. All test-owned worker/SMTP/socket processes were cleaned up; no development preview server was started in this milestone.
-- No Day 8 commit or push yet; Day 9 has not started.
+- Day 8 implementation commit: `f70387c95fbf4e69736a3a7ee6b41f6c875da426`; push succeeded and GitHub `refs/heads/main` matched exactly. Day 9 has not started.
 
 ## Daily completion record
+
+Day 8:
+
+- Scope delivered: participant-owned completed/cancelled history, private WeasyPrint PDFs, React history/download/email controls, and durable versioned Celery receipt-email jobs with status/retries.
+- Verification: 157 backend tests passed, React build passed, schema upgrade/preservation/downgrade and no-drift checks passed, pip check passed, and rendered PDF sample visually inspected. Real Celery/Redis/loopback SMTP test captured one readable PDF email from duplicate queued copies and recorded one sent attempt.
+- Source review: actual local credentials absent from all 26 changed/new candidates; private configuration/generated output remain ignored; syntax, document links and whitespace passed. Existing runtime version pins are retained.
+- Known limits: default email remains disabled until configured; only local SMTP acceptance was verified, not an external inbox. SMTP submission/database commit cannot guarantee exactly-once delivery across a crash; lost queue publication requires explicitly requesting the saved receipt again. Browser interaction/manual UI and user-deferred Stripe verification remain unverified. One existing TestClient warning remains.
+- Implementation commit: `f70387c95fbf4e69736a3a7ee6b41f6c875da426`.
+- Remote: `https://github.com/rarjun07/Cab-Booking-Platform-Python-Stack.git`, branch `main`.
+- Push result: succeeded; exact remote implementation SHA verified. This completion record follows in a documentation commit; compare current HEAD with GitHub for the latest checkpoint.
+- Ready for next milestone: after this record is pushed and verified, await the user's next instruction. Day 9 has not started.
 
 Day 7:
 

@@ -129,7 +129,7 @@ On 2026-10-18, the user explicitly chose to defer Stripe setup and real-provider
 - [x] Explicitly track pending browser checks, user-deferred Stripe verification, and the existing TestClient warning.
 - [x] Review, commit, push, and verify the Day 7 implementation checkpoint (`4746d17`); final documentation checkpoint `f415d80` was verified before Day 8.
 
-## Day 8 checklist (in progress)
+## Day 8 checklist (implementation pushed; manual follow-up tracked)
 
 - [x] Verify Day 7's final documentation checkpoint on GitHub (`f415d80`) with a clean working tree.
 - [x] Add participant-owned completed/cancelled history with stable bounded cursor pagination.
@@ -139,7 +139,7 @@ On 2026-10-18, the user explicitly chose to defer Stripe setup and real-provider
 - [x] Verify real Celery/Redis/local SMTP delivery with a PDF attachment and duplicate-task handling; no external email sent.
 - [x] Pass 157 backend tests, React build, pip consistency and schema checks; render/visually inspect the PDF sample.
 - [x] Document native PDF dependencies, four-terminal local setup, retry/delivery limits and manual UI follow-ups.
-- [ ] Review, commit, push, and verify the Day 8 checkpoint before Day 9.
+- [x] Review, commit, push, and verify the Day 8 implementation checkpoint (`f70387c`) before Day 9.
 - [ ] Manual/visual React follow-up: page history, download/open a PDF, use the local catcher and check account separation; prior browser automation rejection remains unresolved.
 
 ## Choices to resolve at the relevant milestone
