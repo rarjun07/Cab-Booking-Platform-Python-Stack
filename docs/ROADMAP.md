@@ -142,7 +142,7 @@ On 2026-10-18, the user explicitly chose to defer Stripe setup and real-provider
 - [x] Review, commit, push, and verify the Day 8 implementation checkpoint (`f70387c`) before Day 9.
 - [ ] Manual/visual React follow-up: page history, download/open a PDF, use the local catcher and check account separation; prior browser automation rejection remains unresolved.
 
-## Day 9 checklist (in progress)
+## Day 9 checklist (implementation pushed; manual follow-up tracked)
 
 - [x] Verify Day 8's final documentation checkpoint on GitHub (`9f59017`) with a clean working tree.
 - [x] Add completed-trip participant review reads/writes with server-selected recipients, strict 1-5 ratings and bounded plain-text comments.
@@ -153,7 +153,7 @@ On 2026-10-18, the user explicitly chose to defer Stripe setup and real-provider
 - [x] Verify participant-only Redis/WebSocket notifications with no private comment payload or matching broadcast.
 - [x] Finish final backend regressions/source review: 184 tests, React build, schema/dependency checks and source checks passed.
 - [x] Document the two-account walkthrough, eligibility, aggregation and known manual follow-ups in `REVIEWS.md`.
-- [ ] Commit, push and verify the Day 9 checkpoint before Day 10.
+- [x] Commit, push and verify the Day 9 implementation checkpoint (`90bc586`) before Day 10.
 - [ ] Manual browser follow-up: submit/read both participants' feedback, check averages/reload, and confirm drafts survive live sync. Earlier browser automation remains blocked.
 
 ## Choices to resolve at the relevant milestone
