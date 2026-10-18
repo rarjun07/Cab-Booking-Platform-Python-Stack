@@ -110,3 +110,5 @@ Optional settings are documented in `backend/.env.example`: `REDIS_URL`, `REALTI
 - Frontend HTTP availability passed. Automated visual interaction remains unverified after the earlier browser URL-policy rejection. The user reported that they have not tried the manual **Live updates connected** check yet. API/protocol checks and a build are not claimed as browser UI verification.
 
 References: [FastAPI WebSockets](https://fastapi.tiangolo.com/advanced/websockets/), [redis-py async cleanup and subscriptions](https://redis.io/docs/latest/develop/clients/redis-py/async/), and [Redis Pub/Sub delivery behavior](https://redis.io/docs/latest/develop/pubsub/).
+
+Day 6 follow-up: [test checkout](PAYMENTS.md) now uses `payment.changed` notifications for the owning rider and restores the latest completed ride when no open ride exists. The Day 5 evidence above remains historical; real payment-provider verification is still pending.

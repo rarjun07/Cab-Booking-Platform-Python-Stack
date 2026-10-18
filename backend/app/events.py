@@ -61,6 +61,9 @@ class EventPublisher:
     def close(self):
         self.client.close()
 
+    def payment_changed(self, payment, ride):
+        return self.publish([("rider", ride.rider_id)], "payment.changed", ride.id, matching=False)
+
 
 @lru_cache
 def get_event_publisher():

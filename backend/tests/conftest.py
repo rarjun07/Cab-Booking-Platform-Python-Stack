@@ -19,6 +19,9 @@ from app.events import get_event_publisher
 
 
 class SilentEvents:
+    def payment_changed(self, payment, ride):
+        pass
+
     def ride_changed(self, ride):
         pass
 

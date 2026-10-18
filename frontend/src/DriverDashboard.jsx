@@ -198,7 +198,7 @@ export default function DriverDashboard({ onSessionExpired, live }) {
               <p>Pickup: {ride.pickup.latitude}, {ride.pickup.longitude}</p>
               <p>Destination: {ride.destination.latitude}, {ride.destination.longitude}</p>
               <p>Estimated fare: {formatMoney(ride.fare_estimate)}</p>
-              <p className="fare-note">This ride is assigned to you. Update its progress when you reach each step; completing it does not charge a payment.</p>
+              <p className="fare-note">This ride is assigned to you. Update its progress when you reach each step. After completion, the rider can open test checkout.</p>
               {nextStep && <button type="button" disabled={busy} onClick={() => perform(() => driverRequest(`/rides/${ride.id}/status`, { method: 'POST', body: { status: nextStep[0] } }), 'Trip status updated.')}>{nextStep[1]}</button>}
             </div> : !fresh ? <p className="auth-description">Go online with a fresh location to see nearby requests.</p> : offers.length === 0 ? <p className="auth-description">No nearby requests right now. Refresh the dashboard to check again.</p> : <ul className="matching-list">
               {offers.map(({ ride: offer, pickup_distance_meters: distance }) => <li key={offer.id}>

@@ -25,7 +25,7 @@ def test_fresh_database_upgrade_and_downgrade_are_transactional(test_engine):
             assert "users" not in inspect(connection).get_table_names()
             command.upgrade(config, "head")
             assert {"users", "auth_sessions", "drivers", "rides", "payments", "reviews"} <= set(inspect(connection).get_table_names())
-            assert connection.scalar(text("SELECT version_num FROM alembic_version")) == "0004_driver_matching"
+            assert connection.scalar(text("SELECT version_num FROM alembic_version")) == "0005_test_payments"
             command.check(config)
         finally:
             transaction.rollback()
@@ -67,6 +67,24 @@ def test_day3_driver_and_ride_survive_matching_migration(test_engine):
             assert connection.scalar(text("SELECT fare_estimate FROM rides WHERE id=:id"), {"id": ride_id}) == Decimal("104.38")
             assert connection.scalar(text("SELECT location_updated_at FROM drivers WHERE user_id=:id"), {"id": driver_id}) is None
             assert connection.scalar(text("SELECT ST_X(current_location) FROM drivers WHERE user_id=:id"), {"id": driver_id}) == 77.209
+        finally:
+            transaction.rollback()
+
+
+def test_existing_payment_is_preserved_when_payment_audit_fields_are_added(test_engine):
+    with test_engine.connect() as connection:
+        transaction = connection.begin()
+        try:
+            config = config_for(connection)
+            command.downgrade(config, "0004_driver_matching")
+            user_id, ride_id, payment_id = uuid4(), uuid4(), uuid4()
+            connection.execute(text("INSERT INTO users (id,name,email,password_hash,role) VALUES (:id,'Legacy payment rider',:email,'keep-hash','rider')"), {"id": user_id, "email": f"{user_id}@example.com"})
+            connection.execute(text("INSERT INTO rides (id,rider_id,status,pickup_point,drop_point,fare_estimate) VALUES (:id,:rider,'completed',ST_SetSRID(ST_MakePoint(77.209,28.6139),4326),ST_SetSRID(ST_MakePoint(77.2295,28.6129),4326),104.38)"), {"id": ride_id, "rider": user_id})
+            connection.execute(text("INSERT INTO payments (id,ride_id,stripe_payment_intent_id,amount,status) VALUES (:id,:ride,'pi_preservedfixture',104.38,'succeeded')"), {"id": payment_id, "ride": ride_id})
+            command.upgrade(config, "head")
+            row = connection.execute(text("SELECT stripe_payment_intent_id,amount,status,currency,created_at,paid_at FROM payments WHERE id=:id"), {"id": payment_id}).one()
+            assert (row.stripe_payment_intent_id, row.amount, row.status, row.currency) == ("pi_preservedfixture", Decimal("104.38"), "succeeded", "inr")
+            assert row.created_at is not None and row.paid_at is None
         finally:
             transaction.rollback()
 

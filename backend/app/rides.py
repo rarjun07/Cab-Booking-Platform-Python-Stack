@@ -135,4 +135,7 @@ def current_ride(user: RiderUser, db: DB):
     ride = db.scalar(select(Ride).where(Ride.rider_id == user.id,
                                        Ride.status.in_(("requested", "accepted", "arriving", "in_progress")))
                      .order_by(Ride.created_at.desc(), Ride.id.desc()).limit(1))
+    if ride is None:
+        ride = db.scalar(select(Ride).where(Ride.rider_id == user.id, Ride.status == "completed")
+                         .order_by(Ride.created_at.desc(), Ride.id.desc()).limit(1))
     return ride_response(ride, db) if ride else None

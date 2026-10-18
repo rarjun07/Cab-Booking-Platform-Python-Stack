@@ -13,6 +13,7 @@ Day 1 introduced accounts and sessions for the user's choice of custom authentic
 | `payments` | Ride, optional Stripe PaymentIntent ID, amount, and payment status. | One payment record per ride; Stripe IDs are unique when present. |
 | `reviews` | Ride, reviewer, reviewed user, rating, and optional comment. | One review per reviewer per ride. |
 | `ride_declines` (Day 4) | Driver decisions to decline specific requests. | Composite ride/driver primary key; both reference their existing records. |
+| `payment_events` (Day 6) | Processed signed Stripe event IDs, types, and timestamps. | References one local payment; primary key prevents replaying an event. |
 
 The database protects basic integrity: referenced records must exist, fares/distances/durations cannot be negative, ratings must be 1-5, reviewers cannot rate themselves, and pickup/drop/driver coordinates must be in range.
 
@@ -37,12 +38,13 @@ GiST spatial indexes exist on the driver's current location and both ride points
 
 A model describes the desired table structure in Python. An Alembic migration records a versioned change to the actual database. Changing a model alone does not update an existing database.
 
-We now have four revisions:
+We now have five revisions:
 
 1. `0001_auth_baseline`: on a fresh database, creates the frozen Day 1 user/session schema. On an existing Day 1 database, checks its columns, indexes, foreign keys, primary keys, and role constraint before adopting it. It refuses unexpected unversioned tables or schema drift rather than silently stamping them as correct.
 2. `0002_booking_models`: requires an administrator-enabled PostGIS extension, adds user profile fields/defaults, and creates the driver, ride, payment, and review tables and indexes.
 3. `0003_ride_quote` (Day 3): adds nullable, unique `rides.quote_id` to prevent duplicate ride creation when a signed estimate is retried. Existing rides can retain a null quote ID.
 4. `0004_driver_matching` (Day 4): adds nullable driver location timestamps, geography expression indexes, a partial unique active-driver assignment index, and the `ride_declines` table. Legacy locations are ineligible for matching until refreshed. Existing duplicate active assignments must be reconciled before this migration can create its unique index.
+5. `0005_test_payments` (Day 6): adds payment INR currency, creation/paid timestamps, and a payment-event audit table. Existing payment amounts, status, and provider references are preserved; old `paid_at` values remain null rather than inventing payment times.
 
 Existing account fields, password hashes, IDs, and session records are retained. Added non-null user fields receive database defaults. Migrations import frozen schema definitions rather than future ORM models, so the historical steps remain stable.
 
@@ -60,7 +62,7 @@ python -m alembic check
 python -m scripts.db_status
 ```
 
-Expected current revision: `0004_driver_matching (head)`.
+Expected current revision: `0005_test_payments (head)`.
 
 `alembic check` should report **No new upgrade operations detected**. `db_status` prints the installed PostGIS version and table/column names, without showing credentials or account data.
 

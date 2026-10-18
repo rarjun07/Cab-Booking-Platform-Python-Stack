@@ -10,7 +10,8 @@ An internship project based on the mentor's **Cab Booking Platform - Python Stac
 - Authentication: custom FastAPI + PostgreSQL, with Argon2 password hashes and signed HTTP-only session cookies, as chosen by the user instead of Clerk/Supabase Auth.
 - Routing: OSRM with OpenStreetMap data, the user's free alternative to Google Maps.
 - Realtime: FastAPI WebSockets backed by Redis Pub/Sub.
-- Additional services will be introduced on their scheduled days: Stripe, Celery, and Docker.
+- Payments: Stripe sandbox integration is in progress; real provider verification remains pending.
+- Additional services will be introduced on their scheduled days: Celery and Docker.
 
 ## How we will work
 
@@ -38,7 +39,8 @@ Learning preference: step-by-step guidance with explanations.
 - [Fare estimates and ride requests](docs/RIDE_BOOKING.md)
 - [Driver dashboard and nearby matching](docs/RIDE_MATCHING.md)
 - [Live ride and location updates](docs/LIVE_UPDATES.md)
+- [Stripe test-payment setup and verification](docs/PAYMENTS.md)
 
 ## Current state
 
-Days 1-5 are implemented and pushed. The user chose to include Day 5: authenticated FastAPI WebSockets, Redis notifications, live location/status updates, reconnect recovery, and guarded trip progression. All 113 backend tests and the React build pass. A live demo verified Vite WebSocket forwarding and Redis delivery between two independent backend processes. Manual UI checks remain pending after the earlier browser URL-policy rejection; the user has not tried the live connection badge yet. Day 5 implementation commit `4a99f39` is verified on GitHub; see the progress log for its following documentation checkpoint. Day 6 payments have not started.
+Days 1-5 are implemented and pushed. Day 6 adds stored-fare test invoices, Stripe PaymentIntents, signed/deduplicated webhooks, and a React Payment Element. All 144 backend tests and the React build pass; payment API calls in the tests use a controlled provider double. The development schema is at `0005_test_payments`. On 2026-10-18, the user chose to defer Stripe setup, a real test transaction, Stripe-delivered webhooks, and rendered checkout verification and continue to Day 7 after the Day 6 code Git checkpoint. These checks remain unverified; Day 6 code is not committed/pushed yet and Day 7 has not started. Earlier manual UI follow-ups remain unverified after a browser URL-policy rejection.

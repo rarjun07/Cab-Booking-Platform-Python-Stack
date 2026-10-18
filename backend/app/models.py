@@ -103,13 +103,26 @@ class Payment(Base):
     __table_args__ = (
         CheckConstraint("amount >= 0", name="ck_payments_amount"),
         CheckConstraint("status IN ('pending', 'processing', 'succeeded', 'failed', 'cancelled', 'refunded')", name="ck_payments_status"),
+        CheckConstraint("currency = 'inr'", name="ck_payments_currency"),
     )
 
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
     ride_id: Mapped[UUID] = mapped_column(ForeignKey("rides.id", ondelete="RESTRICT"), unique=True)
     stripe_payment_intent_id: Mapped[str | None] = mapped_column(String(255), unique=True)
     amount: Mapped[Decimal] = mapped_column(Numeric(10, 2))
+    currency: Mapped[str] = mapped_column(String(3), server_default="inr")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    paid_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     status: Mapped[str] = mapped_column(String(20), server_default="pending")
+
+
+class PaymentEvent(Base):
+    __tablename__ = "payment_events"
+
+    stripe_event_id: Mapped[str] = mapped_column(String(255), primary_key=True)
+    payment_id: Mapped[UUID] = mapped_column(ForeignKey("payments.id", ondelete="RESTRICT"), index=True)
+    event_type: Mapped[str] = mapped_column(String(80))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
 class Review(Base):

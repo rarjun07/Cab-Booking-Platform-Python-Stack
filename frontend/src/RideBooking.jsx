@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react'
+import RidePayment from './RidePayment.jsx'
 
 const emptyRoute = { pickupLat: '', pickupLng: '', destinationLat: '', destinationLng: '' }
 const sampleRoute = { pickupLat: '28.6139', pickupLng: '77.2090', destinationLat: '28.6129', destinationLng: '77.2295' }
@@ -215,7 +216,7 @@ export default function RideBooking({ user, onSessionExpired, liveRevision = 0 }
                 ? <p>{driverLocation.location.latitude}, {driverLocation.location.longitude} · Updated {new Date(driverLocation.updated_at).toLocaleTimeString()}</p>
                 : <p>Waiting for a fresh location. The driver may be offline.</p>}
             </div>}
-            {ride.status === 'completed' && <p>Your trip is complete. Payments are not enabled in this demo yet.</p>}
+            {ride.status === 'completed' && <RidePayment key={ride.id} rideId={ride.id} liveRevision={liveRevision} onSessionExpired={onSessionExpired} />}
             <div className="auth-actions"><button type="button" disabled={busy} onClick={refreshStatus}>Refresh ride status</button>{ride.status === 'requested' && <button className="secondary-button" type="button" disabled={busy} onClick={findDrivers}>Find nearby drivers</button>}</div>
             {ride.status === 'requested' && matchingChecked && <div className="rider-matching">
               <h4>Nearby available drivers</h4>

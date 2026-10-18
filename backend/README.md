@@ -10,6 +10,8 @@ Day 4 adds driver profiles, availability, nearby requests, accept/decline matchi
 
 Day 5 adds cookie-authenticated FastAPI WebSockets and Redis notifications, manual driver location sharing, and authorized trip progression. Follow [the realtime walkthrough](../docs/LIVE_UPDATES.md) for Redis startup, protocol/security details, and the two-window demo. No additional schema migration is needed. The complete test suite now also requires a running local Redis service.
 
+Day 6 adds Stripe test PaymentIntents and verified payment webhooks. Apply migration `0005_test_payments` and follow [the payment setup walkthrough](../docs/PAYMENTS.md) to configure private test keys and the listener. `python -m scripts.configure_test_payments` saves entered test keys without echoing them. Without configuration, checkout stays disabled; real Stripe provider verification is pending.
+
 ## What we added
 
 - `.venv/`: this project's isolated Python environment. It holds installed libraries locally and is ignored by Git.
@@ -67,6 +69,6 @@ The root URL `/` returns 404; use `/docs` to explore the API or open the React a
 
 ## Scope of this checkpoint
 
-The health endpoint checks API availability only. Custom authentication uses PostgreSQL user/session tables. Day 2 adds PostGIS and the driver, ride, payment, and review models through Alembic. Day 3 implements estimates, ride creation, and owned ride status; Day 4 adds driver availability and matching. Day 5 adds realtime delivery and guarded trip progression. Payments and reviews remain later work. See the progress log for verification and Git checkpoints.
+The health endpoint checks API availability only. Custom authentication uses PostgreSQL user/session tables. Day 2 adds PostGIS and the driver, ride, payment, and review models through Alembic. Day 3 implements estimates, ride creation, and owned ride status; Day 4 adds driver availability and matching; Day 5 adds realtime and trip progression. Day 6 payment code is tested locally but awaits real Stripe sandbox verification. Reviews remain later work. See the progress log for verification and Git checkpoints.
 
 Reference: [FastAPI's official first-steps tutorial](https://fastapi.tiangolo.com/tutorial/first-steps/).

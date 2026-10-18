@@ -31,6 +31,9 @@ class Settings(BaseSettings):
     realtime_channel_prefix: str = Field(default="cab_booking:realtime:v1", pattern=r"^[a-zA-Z0-9:_-]{1,80}$")
     websocket_session_check_seconds: float = Field(default=2.0, ge=0.1, le=10)
     websocket_sync_seconds: float = Field(default=15.0, ge=1, le=60)
+    stripe_secret_key: SecretStr | None = None
+    stripe_publishable_key: str | None = None
+    stripe_webhook_secret: SecretStr | None = None
     allowed_origins: list[str] = [
         "http://127.0.0.1:5173",
         "http://localhost:5173",
@@ -43,6 +46,27 @@ class Settings(BaseSettings):
     def reject_example_secret(cls, value: SecretStr) -> SecretStr:
         if value.get_secret_value().startswith("REPLACE_"):
             raise ValueError("Generate a random JWT_SECRET; do not use the example value.")
+        return value
+
+    @field_validator("stripe_secret_key")
+    @classmethod
+    def test_secret_only(cls, value):
+        if value is not None and not value.get_secret_value().startswith("sk_test_"):
+            raise ValueError("Day 6 accepts only Stripe test secret keys.")
+        return value
+
+    @field_validator("stripe_publishable_key")
+    @classmethod
+    def test_publishable_only(cls, value):
+        if value is not None and not value.startswith("pk_test_"):
+            raise ValueError("Day 6 accepts only Stripe test publishable keys.")
+        return value
+
+    @field_validator("stripe_webhook_secret")
+    @classmethod
+    def webhook_secret_prefix(cls, value):
+        if value is not None and not value.get_secret_value().startswith("whsec_"):
+            raise ValueError("Use the signing secret for the test webhook listener.")
         return value
 
 

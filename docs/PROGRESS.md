@@ -2,7 +2,7 @@
 
 ## Current checkpoint
 
-- Active milestone: Day 5 implemented and pushed; automated, protocol, and cross-process checks passed. Day 3-5 visual/manual UI follow-ups remain unverified.
+- Active milestone: Day 6 code checkpoint; user explicitly deferred Stripe setup and real-provider/rendered-checkout verification on 2026-10-18 to continue to Day 7 after commit/push verification. Day 3-5 visual/manual UI follow-ups remain unverified.
 - Completed: read all nine PDF pages, checked the daily schedule, confirmed stack compatibility, and prepared the roadmap.
 - Learning preference: guide the user step by step with explanations.
 - Day 1 implementation: complete; custom FastAPI + PostgreSQL authentication is verified with real database tests and browser flows.
@@ -23,7 +23,8 @@
 - Day 4 implementation commit: `834ae6e413fadb6a5e1c61a2c66d0d19191fe5b9`, pushed and verified against GitHub `refs/heads/main`.
 - Day 4 documentation checkpoint: `1af381c19bcabe7bc2c46e5d93803022e5dbd3e1`, verified against GitHub before starting Day 5; working tree was clean.
 - Day 5 implementation commit: `4a99f39759ec485565597b570a02b6866006530d`, pushed and verified against GitHub `refs/heads/main`.
-- Next action: push and verify this completion record, then let the user try the documented two-window demo. Day 6 payments have not started; await the user's next instruction.
+- Day 5 documentation checkpoint: `0d465f99e1c8585741f9d610add7dd63f3258422`, verified against GitHub before Day 6; working tree was clean.
+- Next action: review and locally verify the Day 6 code, commit/push it, verify GitHub, then begin Day 7 testing. Stripe setup, a real test transaction, signed Stripe delivery, and rendered checkout are explicitly deferred by the user, not verified. Day 7 has not started.
 
 ## Day 1, step 1: local Git setup
 
@@ -142,6 +143,25 @@
 - Setup, code/protocol explanations, security boundaries, and the two-window walkthrough are in `docs/LIVE_UPDATES.md`.
 - Source review: actual local database passwords and JWT secret are absent from all 28 changed/new files. `.env` remains ignored and owner-only; dependencies, virtual environment, and build output remain ignored. `git diff --check` passed.
 - Day 5 implementation commit `4a99f39759ec485565597b570a02b6866006530d` was pushed; `git ls-remote origin refs/heads/main` returned that exact SHA. Day 6 payments have not started.
+
+## Day 6: test payments (code checkpoint; provider checks deferred)
+
+- User requested the next milestone and then asked to continue. Verified Day 5 documentation checkpoint `0d465f99e1c8585741f9d610add7dd63f3258422` against GitHub and confirmed a clean working tree before starting.
+- Added pinned Stripe Python SDK 16.0.0 and its dependencies, plus official React Stripe.js 7.0.0/Stripe.js 10.1.0 packages. No account or sandbox has been created; no Git identity has been sent to Stripe.
+- Added completed-ride owner-only invoices, final-fare freezing from stored data, stable PaymentIntent idempotency, canonical provider checks, and locked concurrent retries. Unlinked invoices older than 23 hours require reconciliation before recreation beyond Stripe's idempotency window.
+- Added raw-body webhook signature verification, test-only mode checks, bounded bodies, canonical intent retrieval, amount/currency/metadata validation, atomic event-ID deduplication, and terminal-state protection. Browser confirmation alone cannot mark an invoice paid.
+- Migration `0005_test_payments` adds currency/timestamps and `payment_events`. Applied to development; Alembic check reports no drift. Existing payment preservation, fresh upgrades, and rollback migrations are tested in the separate test database.
+- Added React Payment Element for completed rides, lazy Stripe.js loading, safe client-secret handling in component state, provider-error/status display, and realtime/manual invoice refresh. Latest completed ride is recoverable after reload when no open ride exists.
+- Added optional test-key settings with live-key rejection and `scripts.configure_test_payments` for hidden local entry into ignored `.env`. The helper has not been run with actual credentials.
+- Verification: **144 backend tests passed**; pip consistency and React production build passed. Payment API calls use a controlled provider double; official Stripe objects/signature verification and real PostgreSQL concurrency are tested. One existing TestClient/HTTPX warning remains.
+- Local HTTP smoke check passed with a synthetic rider: frontend/health 200, config reports `configured=false`, checkout 503 without keys, unsigned webhook 400, logout followed by config 401. No Stripe transaction was attempted; a synthetic local configuration-demo account remains development test data.
+- Real-provider/rendered-checkout verification remains pending. Stripe secret/publishable/webhook keys were absent at the start; setup choices have been requested. Creating a temporary sandbox using the user's Git identity requires that user's explicit selection. No approval has been inferred from elapsed time.
+- Earlier browser URL-policy rejection still prevents automated visual checking; no new browser pass is claimed. Follow the setup and success/decline/retry walkthrough in `docs/PAYMENTS.md`.
+- Final source review repeated for the deferral checkpoint: local database passwords and signing secret absent from all 33 changed/new files; Python syntax and whitespace checks passed. `.env` remains ignored with mode 0600; helper temporary configuration names and generated/dependency folders are ignored.
+- Stopped the temporary backend and React preview after HTTP checks; existing PostgreSQL and Redis services were not stopped. Restart commands are in the payment walkthrough.
+- On 2026-10-18 the user asked to do Stripe setup later and continue to the next day. Recorded this explicit exception in `AGENTS.md`, the roadmap, and payment walkthrough. No account, sandbox, or credentials are needed for Day 7's local checks; real-provider and rendered-checkout checks remain deferred.
+- Repeated checkpoint verification: 144 backend tests passed in 13.38 seconds, React production build passed, pip check passed, and Alembic reported no new upgrade operations. The existing TestClient warning remains; these checks do not verify Stripe delivery or rendered checkout.
+- No Day 6 commit or push yet. Finish local review/checks and the daily Git checkpoint before Day 7; Day 7 has not started.
 
 ## Daily completion record
 

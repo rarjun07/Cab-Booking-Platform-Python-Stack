@@ -103,6 +103,23 @@ Do not begin the remaining Day 2 database models or migrations until every requi
 - [x] Commit, push, and verify the Day 5 implementation (`4a99f39`).
 - [ ] Manual/visual UI follow-up: earlier browser policy blocks automated preview; user has not tried the connection-badge check yet.
 
+## Day 6 checklist (in progress)
+
+- [x] Verify Day 5's final documentation commit on GitHub (`0d465f9`).
+- [x] Add a versioned payment currency/timestamp and webhook audit schema while preserving existing rows.
+- [x] Create owner-only checkout for completed rides using a frozen stored fare and stable idempotency key.
+- [x] Verify raw-body signatures, canonical Stripe state/amount/metadata, duplicate events, and out-of-order events.
+- [x] Add test-only key validation, disabled checkout without configuration, and a hidden-prompt local setup helper.
+- [x] Add React Payment Element checkout, payment status refresh, and completed-ride restoration.
+- [x] Pass backend tests, schema/dependency checks, and the React production build.
+- [x] Verify local HTTP behavior with keys absent; unsigned webhooks are rejected and checkout is disabled.
+- [ ] Configure the user's Stripe sandbox/test keys and local webhook listener.
+- [ ] Complete a real Stripe test transaction and verify a Stripe-delivered signed webhook updates the matching invoice.
+- [ ] Verify rendered checkout success/failure/retry behavior; prior browser automation remains unavailable.
+- [ ] Finish the Day 6 review, commit, push, and verify its Git checkpoint.
+
+On 2026-10-18, the user explicitly chose to defer Stripe setup and real-provider/rendered-checkout verification and continue to Day 7. Those items remain unchecked; provider test doubles and locally signed fixture events do not substitute for real sandbox verification. Commit, push, and verify the Day 6 code checkpoint before Day 7. This is an exception for the deferred checks, not a claim that the payment integration is fully verified.
+
 ## Choices to resolve at the relevant milestone
 
 - Day 1 choices resolved: step-by-step teaching, confirmed GitHub repository, custom FastAPI/PostgreSQL authentication, and SQLAlchemy with local PostgreSQL.

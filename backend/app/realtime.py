@@ -61,7 +61,7 @@ def public_event(raw):
         data = json.loads(raw)
         if data["type"] in ("matching.changed", "driver.changed"):
             return {"type": data["type"]}
-        if data["type"] in ("ride.changed", "ride.location"):
+        if data["type"] in ("ride.changed", "ride.location", "payment.changed"):
             return {"type": data["type"], "ride_id": str(UUID(data["ride_id"]))}
     except (ValueError, TypeError, KeyError):
         pass

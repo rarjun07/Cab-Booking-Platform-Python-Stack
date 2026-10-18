@@ -8,6 +8,8 @@ Day 4 adds the driver dashboard, vehicle setup, online/offline controls, locatio
 
 Day 5 adds live updates through `useRealtime`, an announced connection status, automatic reads of protected ride data after notifications, connection retries, location sharing, and trip-step buttons. Refresh controls remain as a fallback. See [the realtime walkthrough](../docs/LIVE_UPDATES.md); the new UI manual/visual check remains pending.
 
+Day 6 adds `RidePayment` to completed rides. It lazy-loads Stripe.js, renders Stripe's Payment Element, confirms test payments, and displays only backend-verified payment success. Test keys belong in the backend's ignored `.env`; no frontend secret variables are required. Follow [the payment walkthrough](../docs/PAYMENTS.md). The build passes; rendered Stripe checkout and a real provider transaction remain unverified until setup is complete.
+
 ## What each tool does
 
 - React builds the interactive page from components.
@@ -84,6 +86,7 @@ This proxy exists only in the development server. A deployed build will need an 
 | `src/RideBooking.jsx` | Requests estimates, displays their expiry and price, saves a ride, and refreshes its status. |
 | `src/DriverDashboard.jsx` | Restores the driver profile/assignment, saves vehicle details, updates availability/location, and accepts or declines nearby requests. |
 | `src/useRealtime.js` | Opens the account socket, coalesces events, retries connections, and confirms location messages. |
+| `src/RidePayment.jsx` | Prepares owner-only test checkout, hosts Stripe Elements, and reads signed-webhook payment state. |
 | `src/styles.css` | Styles the desktop and mobile layouts. |
 | `vite.config.js` | Configures the React plugin, fixed frontend port, and API proxy. |
 | `package.json` | Lists dependencies and development/build commands. |
@@ -103,6 +106,6 @@ Vite writes generated output into `dist/`, which is ignored by Git. A successful
 
 ## Authentication and the Day 1 checkpoint
 
-The user chose custom FastAPI + PostgreSQL authentication instead of an external provider. The account panel is connected to the real backend and uses an HTTP-only cookie. `App` shares the signed-in user with `RideBooking` or shows `DriverDashboard` for a driver. Changing accounts resets component state; the API restores the rider's latest open ride or driver's active assignment. Database models arrived on Day 2, the ride request flow on Day 3, and matching on Day 4. See the progress log for verification and daily commit/push checkpoints.
+The user chose custom FastAPI + PostgreSQL authentication instead of an external provider. The account panel is connected to the real backend and uses an HTTP-only cookie. `App` shares the signed-in user with `RideBooking` or shows `DriverDashboard` for a driver. Changing accounts resets component state. The API restores the rider's latest open ride, falling back to their latest completed ride for checkout, or the driver's active assignment. See the progress log for verification and daily commit/push checkpoints.
 
 References: [Vite guide](https://vite.dev/guide/) and [React's guide to starting an app](https://react.dev/learn/build-a-react-app-from-scratch).
