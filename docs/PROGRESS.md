@@ -2,7 +2,7 @@
 
 ## Current checkpoint
 
-- Active milestone: Day 8 history, PDF receipts and background receipt email implemented, locally verified, committed, pushed and verified against GitHub; awaiting the user's next instruction. The user explicitly deferred Stripe setup and real-provider/rendered-checkout verification on 2026-10-18. Earlier visual/manual React follow-ups remain unverified.
+- Active milestone: Day 9 ratings/reviews and aggregation; final backend checks and Git checkpoint in progress. The user explicitly deferred Stripe setup and real-provider/rendered-checkout verification on 2026-10-18. Earlier visual/manual React follow-ups remain unverified.
 - Completed: read all nine PDF pages, checked the daily schedule, confirmed stack compatibility, and prepared the roadmap.
 - Learning preference: guide the user step by step with explanations.
 - Day 1 implementation: complete; custom FastAPI + PostgreSQL authentication is verified with real database tests and browser flows.
@@ -28,7 +28,8 @@
 - Day 7 implementation checkpoint: `4746d1750d948db614feca1619a552a3e22a41fc`, pushed to `origin/main`; `git ls-remote` returned that exact SHA. This completion record follows in a documentation commit; compare current HEAD with GitHub for the latest checkpoint.
 - Day 7 documentation checkpoint: `f415d80e2dbeacfcd8c4666818a5e818e3276ea9`, verified equal to GitHub before Day 8; the working tree was clean.
 - Day 8 implementation checkpoint: `f70387c95fbf4e69736a3a7ee6b41f6c875da426`, pushed to `origin/main`; `git ls-remote` returned that exact SHA. This completion record follows in a documentation commit; compare current HEAD with GitHub for the latest checkpoint.
-- Next action: await the user's next instruction; Day 9 will add ratings/reviews and aggregation. Stripe setup, a real test transaction, signed Stripe delivery, and rendered checkout remain explicitly deferred. Day 9 has not started.
+- Day 8 documentation checkpoint: `9f59017d2d4d39453aefb2a1fcd6f0c0e3a61e2f`, verified equal to GitHub before Day 9; working tree was clean.
+- Next action: finish Day 9's verification, review and commit/push checkpoint. Stripe setup, a real test transaction, signed Stripe delivery, and rendered checkout remain explicitly deferred. Day 10 has not started.
 
 ## Day 1, step 1: local Git setup
 
@@ -194,6 +195,21 @@
 - Browser interaction remains unverified after the earlier URL-policy rejection; no workaround or visual React pass is claimed. Manual history/download/email follow-up is recorded in `docs/HISTORY_RECEIPTS.md`. Earlier Day 3-5 manual checks and the user-deferred real Stripe checks remain pending.
 - Source review: Python syntax, local documentation links, whitespace and absence of actual local credentials passed for all 26 changed/new files. Existing runtime version pins are retained; private `.env` remains ignored with mode 0600, and generated samples/dependencies/build output remain ignored. All test-owned worker/SMTP/socket processes were cleaned up; no development preview server was started in this milestone.
 - Day 8 implementation commit: `f70387c95fbf4e69736a3a7ee6b41f6c875da426`; push succeeded and GitHub `refs/heads/main` matched exactly. Day 9 has not started.
+
+## Day 9: ratings and reviews (in progress)
+
+- User requested the next milestone. Verified local HEAD and GitHub `refs/heads/main` both equal Day 8's final documentation checkpoint `9f59017d2d4d39453aefb2a1fcd6f0c0e3a61e2f`, with a clean working tree before starting. No Day 10 work is included.
+- Added participant-only review reads/writes for completed rides and own rating summaries. Recipient and author come from the stored ride/session; client-supplied identity fields are rejected. Completed trips do not require payment to be reviewed, so the user's Stripe deferral does not block this feature.
+- Ratings require strict integers 1-5; comments are trimmed, blank-to-null, at most 2,000 characters, valid Unicode without NUL, and returned/displayed as plain text. Errors omit submitted comment text. Unrelated accounts get 404; anonymous/revoked sessions and forbidden Origins are rejected by existing protections.
+- Existing `(ride_id, rater_id)` uniqueness is retained. First submissions return 201; identical normalized retries return the original review with 200; conflicting changes return 409. No review editing/deletion is introduced.
+- Review insert and recipient `users.rating_avg` update commit together. Trip row locks serialize duplicate submissions; recipient `FOR NO KEY UPDATE` locks serialize averages across trips while permitting foreign-key key-share checks for opposite-direction reviews. Summary average/count are read in one SQL aggregate statement and rounded half-up to two decimals; no reviews returns null/zero rather than a zero-star score.
+- Applied migration `0007_review_timestamps`: old review text/IDs/ratings remain, unknown old dates stay null, new inserts default to server time, and derived user averages are reconciled. Identity/password/session/ride/invoice data are preserved. New legacy-preservation and existing migration tests passed; Alembic reports no drift. No package or configuration secret was added.
+- Added `RideReviews` controls and own rating summary in history. Live/manual reads show saved and received reviews; comments render as React text. Background history refresh no longer unmounts open review/payment forms, avoiding draft reset on periodic live sync. Browser interaction is not claimed verified.
+- Added private `review.changed` notifications for the two trip participants after commit, containing only type/ride ID. Real Redis/TCP checks verify delivery, no matching-channel publication, minimal payload projection and unrelated-account rejection. Existing fixture cleanup now removes synthetic reviews before their parent rides.
+- Verification: **184 backend tests passed in 22.89 seconds**, including 27 new review/validation/migration/notification checks and five concurrent-write scenarios. Pip consistency and Alembic drift checks passed. Earlier targeted runs (29 review/migration, 46 review/realtime) and the initial 182-test run also passed; the final run adds two invalid-comment text cases. One existing TestClient/HTTPX deprecation warning remains.
+- React production build passed (29 modules). Manual review-form/summary/reload/draft-preservation checks remain pending under the earlier browser URL-policy rejection. Stripe real-provider/rendered-checkout checks remain user-deferred; external email remains unconfigured.
+- Final source review: all 25 changed/new candidates passed Python syntax, local document-link, whitespace and actual-credential absence checks. Private `.env` remains ignored with mode 0600; generated/dependency output remains ignored. No dependencies were added or updated. Test-owned TCP/worker/SMTP resources were cleaned up; existing PostgreSQL and Redis services were not changed.
+- Walkthrough, payloads, lock/aggregation explanation, migration behavior and manual steps are in `docs/REVIEWS.md`. Day 9 commit/push pending; Day 10 has not started.
 
 ## Daily completion record
 

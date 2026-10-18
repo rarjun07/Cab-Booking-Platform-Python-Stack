@@ -142,6 +142,20 @@ On 2026-10-18, the user explicitly chose to defer Stripe setup and real-provider
 - [x] Review, commit, push, and verify the Day 8 implementation checkpoint (`f70387c`) before Day 9.
 - [ ] Manual/visual React follow-up: page history, download/open a PDF, use the local catcher and check account separation; prior browser automation rejection remains unresolved.
 
+## Day 9 checklist (in progress)
+
+- [x] Verify Day 8's final documentation checkpoint on GitHub (`9f59017`) with a clean working tree.
+- [x] Add completed-trip participant review reads/writes with server-selected recipients, strict 1-5 ratings and bounded plain-text comments.
+- [x] Reuse one-review-per-author/trip uniqueness; return identical retries without duplicating feedback and reject conflicting submissions.
+- [x] Commit reviews and cached averages together, and compute summary average/count consistently; verify five concurrent-write scenarios.
+- [x] Apply `0007_review_timestamps`, preserve legacy feedback/unknown dates, and reconcile derived rating averages.
+- [x] Add history review forms, saved/received feedback and own summaries; keep mounted forms during background live refresh.
+- [x] Verify participant-only Redis/WebSocket notifications with no private comment payload or matching broadcast.
+- [x] Finish final backend regressions/source review: 184 tests, React build, schema/dependency checks and source checks passed.
+- [x] Document the two-account walkthrough, eligibility, aggregation and known manual follow-ups in `REVIEWS.md`.
+- [ ] Commit, push and verify the Day 9 checkpoint before Day 10.
+- [ ] Manual browser follow-up: submit/read both participants' feedback, check averages/reload, and confirm drafts survive live sync. Earlier browser automation remains blocked.
+
 ## Choices to resolve at the relevant milestone
 
 - Day 1 choices resolved: step-by-step teaching, confirmed GitHub repository, custom FastAPI/PostgreSQL authentication, and SQLAlchemy with local PostgreSQL.

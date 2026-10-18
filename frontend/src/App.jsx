@@ -48,7 +48,7 @@ export default function App() {
           <span className="brand-mark" aria-hidden="true">C</span>
           Cab Booking Platform
         </a>
-        <span className="day-label">Day 08 <span aria-hidden="true">/</span> History & receipts</span>
+        <span className="day-label">Day 09 <span aria-hidden="true">/</span> Ratings & reviews</span>
       </header>
 
       <main id="main">

@@ -12,6 +12,8 @@ Day 6 adds `RidePayment` to completed rides. It lazy-loads Stripe.js, renders St
 
 Day 8 adds `RideHistory` for both roles: account-owned completed/cancelled trips, cursor pagination, completed-trip PDF downloads, explicit email requests/status, and older rider payment details. Follow [history and receipts](../docs/HISTORY_RECEIPTS.md) for the local mail-catcher/worker setup. Email is disabled by default; PDF download is independent. The React build passes, while browser interaction remains a manual follow-up.
 
+Day 9 adds **Ratings and review** on completed history entries, **Your rating**, optional plain-text comments, and saved/received feedback. `review.changed` refreshes private summaries; manual controls remain. Background history sync now keeps open review/payment forms mounted so a live refresh does not discard a draft. Follow [the review walkthrough](../docs/REVIEWS.md); browser interaction is still unverified.
+
 ## What each tool does
 
 - React builds the interactive page from components.

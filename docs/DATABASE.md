@@ -18,7 +18,7 @@ Day 1 introduced accounts and sessions for the user's choice of custom authentic
 
 The database protects basic integrity: referenced records must exist, fares/distances/durations cannot be negative, ratings must be 1-5, reviewers cannot rate themselves, and pickup/drop/driver coordinates must be in range.
 
-Amounts use PostgreSQL `NUMERIC(10, 2)` and Python `Decimal`, preserving two decimal places without floating-point rounding. `rating_avg` starts at zero; aggregation is implemented when we reach Day 9.
+Amounts use PostgreSQL `NUMERIC(10, 2)` and Python `Decimal`, preserving two decimal places without floating-point rounding. `rating_avg` starts at zero; Day 9 maintains it atomically with review submissions while summary reads compute average/count from one query. See [REVIEWS.md](REVIEWS.md).
 
 Cross-record business rules remain the responsibility of the later APIs: driver profiles require driver-role users, ride requests require riders, and reviews require completed rides and the actual ride participants. Model constraints do not claim to implement those flows.
 
@@ -47,6 +47,7 @@ We now have five revisions:
 4. `0004_driver_matching` (Day 4): adds nullable driver location timestamps, geography expression indexes, a partial unique active-driver assignment index, and the `ride_declines` table. Legacy locations are ineligible for matching until refreshed. Existing duplicate active assignments must be reconciled before this migration can create its unique index.
 5. `0005_test_payments` (Day 6): adds payment INR currency, creation/paid timestamps, and a payment-event audit table. Existing payment amounts, status, and provider references are preserved; old `paid_at` values remain null rather than inventing payment times.
 6. `0006_receipt_emails` (Day 8): adds versioned receipt-email requests with private server-owned snapshots, bounded delivery attempts, status/timestamps, and ride/user indexes. Existing rides and invoices are unchanged.
+7. `0007_review_timestamps` (Day 9): adds a nullable review creation timestamp with a default for future inserts, preserving unknown legacy dates. Reconciles only the derived user rating average from existing reviews; account identity fields and feedback are preserved.
 
 Existing account fields, password hashes, IDs, and session records are retained. Added non-null user fields receive database defaults. Migrations import frozen schema definitions rather than future ORM models, so the historical steps remain stable.
 
@@ -64,7 +65,7 @@ python -m alembic check
 python -m scripts.db_status
 ```
 
-Expected current revision: `0006_receipt_emails (head)`.
+Expected current revision: `0007_review_timestamps (head)`.
 
 `alembic check` should report **No new upgrade operations detected**. `db_status` prints the installed PostGIS version and table/column names, without showing credentials or account data.
 

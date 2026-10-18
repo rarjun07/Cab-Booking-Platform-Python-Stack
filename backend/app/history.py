@@ -22,7 +22,7 @@ def participant(user):
     return Ride.rider_id == user.id if user.role == "rider" else Ride.driver_id == user.id
 
 
-def completed_ride(ride_id, user, db, *, lock=False):
+def completed_ride(ride_id, user, db, *, lock=False, purpose="Receipts"):
     query = select(Ride).where(Ride.id == ride_id, participant(user))
     if lock:
         query = query.with_for_update().execution_options(populate_existing=True)
@@ -30,7 +30,7 @@ def completed_ride(ride_id, user, db, *, lock=False):
     if ride is None:
         raise HTTPException(404, "Ride not found.")
     if ride.status != "completed":
-        raise HTTPException(409, "Receipts are available after the trip is completed.")
+        raise HTTPException(409, f"{purpose} are available after the trip is completed.")
     return ride
 
 

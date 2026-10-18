@@ -26,7 +26,7 @@ from app.database import get_db
 from app.events import EventPublisher, get_event_publisher
 from app.drivers import profile_response
 from app.main import app
-from app.models import AuthSession, Driver, Ride, User
+from app.models import AuthSession, Driver, Review, Ride, User
 from app.realtime import RealtimeStore, get_realtime_store, public_event
 
 ORIGIN = "http://127.0.0.1:5173"
@@ -119,6 +119,7 @@ def live_app(test_engine, monkeypatch):
         app.dependency_overrides.pop(get_event_publisher, None)
         publisher.close()
         with Session(test_engine) as cleanup:
+            cleanup.execute(delete(Review).where(Review.ride_id == ride_id))
             cleanup.execute(delete(Ride).where(Ride.rider_id.in_(list(users.values()))))
             cleanup.execute(delete(Driver).where(Driver.user_id.in_(list(users.values()))))
             cleanup.execute(delete(User).where(User.id.in_(list(users.values()))))
@@ -338,3 +339,37 @@ def test_live_sync_and_reconnect_restore_authorized_database_state(live_app):
 @pytest.mark.parametrize("data", ["bad-json", "[]", '{"type":"secret","password":"never-forward"}', '{"type":"ride.changed","ride_id":"bad"}'])
 def test_unknown_broker_data_is_not_forwarded(data):
     assert public_event(data) is None
+
+
+def test_review_notifications_reach_only_trip_participants_without_comment_payloads(live_app):
+    with live_app.http("driver") as driver:
+        path = f"/api/drivers/me/rides/{live_app.ride_id}"
+        assert driver.post(f"{path}/accept").status_code == 200
+        for status in ("arriving", "in_progress", "completed"):
+            assert driver.post(f"{path}/status", json={"status": status}).status_code == 200
+    with live_app.ws("rider") as rider, live_app.ws("driver") as driver, live_app.ws("other") as outsider:
+        for ws in (rider, driver, outsider):
+            receive_kind(ws, "ready")
+        with live_app.publisher.client.pubsub() as matching:
+            matching.subscribe(f"{live_app.prefix}:matching")
+            assert matching.get_message(timeout=1)["type"] == "subscribe"
+            with live_app.http("rider") as http:
+                result = http.post(f"/api/rides/{live_app.ride_id}/reviews", json={"rating": 5, "comment": "Private trip feedback"})
+                assert result.status_code == 201
+            expected = {"type": "review.changed", "ride_id": str(live_app.ride_id)}
+            assert receive_kind(rider, "review.changed") == expected
+            assert receive_kind(driver, "review.changed") == expected
+            assert matching.get_message(timeout=0.2) is None
+        # The outsider's next event must be periodic sync, not a review broadcast.
+        assert json.loads(outsider.recv(timeout=2))["type"] == "sync"
+        with live_app.http("driver") as http:
+            summary = http.get("/api/ratings/me").json()
+            assert summary["average"] == "5.00" and summary["count"] == 1
+        with live_app.http("other") as http:
+            assert http.get(f"/api/rides/{live_app.ride_id}/reviews").status_code == 404
+
+
+def test_review_broker_messages_are_reduced_to_minimal_notification_fields():
+    ride_id = str(uuid4())
+    raw = json.dumps({"type": "review.changed", "ride_id": ride_id, "comment": "Do not forward", "rating": 5})
+    assert public_event(raw) == {"type": "review.changed", "ride_id": ride_id}

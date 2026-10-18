@@ -64,6 +64,12 @@ class EventPublisher:
     def payment_changed(self, payment, ride):
         return self.publish([("rider", ride.rider_id)], "payment.changed", ride.id, matching=False)
 
+    def review_changed(self, ride):
+        recipients = [("rider", ride.rider_id)]
+        if ride.driver_id:
+            recipients.append(("driver", ride.driver_id))
+        return self.publish(recipients, "review.changed", ride.id, matching=False)
+
 
 @lru_cache
 def get_event_publisher():

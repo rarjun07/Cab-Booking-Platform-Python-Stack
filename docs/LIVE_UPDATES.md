@@ -112,3 +112,5 @@ Optional settings are documented in `backend/.env.example`: `REDIS_URL`, `REALTI
 References: [FastAPI WebSockets](https://fastapi.tiangolo.com/advanced/websockets/), [redis-py async cleanup and subscriptions](https://redis.io/docs/latest/develop/clients/redis-py/async/), and [Redis Pub/Sub delivery behavior](https://redis.io/docs/latest/develop/pubsub/).
 
 Day 6 follow-up: [test checkout](PAYMENTS.md) now uses `payment.changed` notifications for the owning rider and restores the latest completed ride when no open ride exists. The Day 5 evidence above remains historical; real payment-provider verification is still pending.
+
+Day 9 follow-up: [ratings/reviews](REVIEWS.md) use `review.changed` notifications for the trip's rider and driver only, without shared matching publication. WebSocket messages contain no comment/rating payload; clients reread protected review/summary endpoints. React history background refreshes preserve mounted forms. The Day 5 evidence above remains historical; new notification protocol tests are recorded in the Day 9 progress log.

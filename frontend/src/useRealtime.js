@@ -49,7 +49,7 @@ export default function useRealtime(user, onSessionExpired) {
           attempts = 0
           setStatus('connected')
           changed()
-        } else if (['sync', 'matching.changed', 'driver.changed', 'ride.changed', 'ride.location', 'payment.changed'].includes(event.type)) {
+        } else if (['sync', 'matching.changed', 'driver.changed', 'ride.changed', 'ride.location', 'payment.changed', 'review.changed'].includes(event.type)) {
           changed()
         } else if (event.request_id && pending.current.has(event.request_id)) {
           const item = pending.current.get(event.request_id)

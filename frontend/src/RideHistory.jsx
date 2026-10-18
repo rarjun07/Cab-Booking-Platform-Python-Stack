@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import RidePayment from './RidePayment.jsx'
+import RideReviews, { MyRating } from './RideReviews.jsx'
 
 const money = (value) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(Number(value))
 
@@ -28,14 +29,17 @@ export default function RideHistory({ user, liveRevision, onSessionExpired }) {
   const [emailEnabled, setEmailEnabled] = useState(false)
   const [jobs, setJobs] = useState({})
   const [paymentRide, setPaymentRide] = useState(null)
+  const [reviewRide, setReviewRide] = useState(null)
   const [refresh, setRefresh] = useState(0)
   const operation = useRef(null)
+  const loadedCursor = useRef(undefined)
 
   useEffect(() => () => operation.current?.abort(), [])
 
   useEffect(() => {
     const abort = new AbortController()
-    setLoading(true)
+    // Keep mounted checkout/review forms and unsaved drafts during live refreshes.
+    if (loadedCursor.current !== cursor) setLoading(true)
     const query = new URLSearchParams({ limit: '5' })
     if (cursor) query.set('cursor', cursor)
     Promise.all([
@@ -45,6 +49,7 @@ export default function RideHistory({ user, liveRevision, onSessionExpired }) {
       if (abort.signal.aborted) return
       setPage(saved)
       setEmailEnabled(config.email_enabled)
+      loadedCursor.current = cursor
     }).catch((error) => {
       if (abort.signal.aborted) return
       if (error.status === 401) onSessionExpired(null)
@@ -92,6 +97,7 @@ export default function RideHistory({ user, liveRevision, onSessionExpired }) {
     <p className="eyebrow">YOUR PAST JOURNEYS</p>
     <h2 id="history-title">Ride history and trip documents</h2>
     <p className="auth-description">Your completed and cancelled trips. Trip documents show the recorded payment status.</p>
+    <MyRating liveRevision={liveRevision} refresh={refresh} onSessionExpired={onSessionExpired} />
     <button className="secondary-button" type="button" disabled={busy || loading} onClick={() => { setMessage(''); setRefresh((v) => v + 1) }}>Refresh history</button>
     {loading && <p role="status">Loading your history…</p>}
     {!loading && page?.items.length === 0 && <p>No past trips on this page yet.</p>}
@@ -105,10 +111,12 @@ export default function RideHistory({ user, liveRevision, onSessionExpired }) {
           <button type="button" disabled={busy} onClick={() => act(ride, 'download')}>Download PDF</button>
           <button className="secondary-button" type="button" disabled={busy || !emailEnabled} onClick={() => act(ride, 'email')}>Email to my account</button>
           <button className="secondary-button" type="button" disabled={busy} onClick={() => act(ride, 'status')}>Check email status</button>
+          <button className="secondary-button" type="button" onClick={() => setReviewRide(reviewRide === ride.id ? null : ride.id)}>{reviewRide === ride.id ? 'Close reviews' : 'Ratings and review'}</button>
           {user.role === 'rider' && <button className="secondary-button" type="button" onClick={() => setPaymentRide(paymentRide === ride.id ? null : ride.id)}>{paymentRide === ride.id ? 'Close payment details' : 'View payment details'}</button>}
         </div>
         {jobs[ride.id] && <p className="fare-note">Email request: {jobs[ride.id].status} · attempts: {jobs[ride.id].attempts}</p>}
         {paymentRide === ride.id && <RidePayment key={ride.id} rideId={ride.id} liveRevision={liveRevision} onSessionExpired={onSessionExpired} />}
+        {reviewRide === ride.id && <RideReviews key={ride.id} rideId={ride.id} liveRevision={liveRevision} onSessionExpired={onSessionExpired} onSaved={() => setRefresh((value) => value + 1)} />}
       </>}
     </li>)}</ul>}
     {!emailEnabled && <p className="fare-note">Email delivery awaits local setup. Completed-trip PDFs remain available.</p>}

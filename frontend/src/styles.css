@@ -130,3 +130,10 @@ footer { display: flex; justify-content: space-between; gap: 16px; padding: 24px
 .history-list > li { padding: 1.4rem 0; border-bottom: 1px solid #dce4df; overflow-wrap: anywhere; }
 .history-list > li:first-child { border-top: 1px solid #dce4df; }
 .history-list .auth-actions { margin-top: 1rem; }
+.review-panel { margin-top: 1.5rem; padding: 1.25rem; border: 1px solid #dce4df; border-radius: 8px; }
+.rating-options { display: flex; flex-wrap: wrap; gap: .75rem; margin: .75rem 0 1rem; }
+.rating-options label { display: inline-flex; align-items: center; gap: .3rem; }
+.rating-options input { width: auto; }
+.review-panel textarea { width: 100%; padding: .75rem; border: 1px solid #b7c8be; border-radius: 6px; font: inherit; resize: vertical; }
+.review-comment { white-space: pre-wrap; overflow-wrap: anywhere; }
+.saved-review { padding: .75rem 0; border-bottom: 1px solid #dce4df; }

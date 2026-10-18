@@ -14,6 +14,8 @@ Day 6 adds Stripe test PaymentIntents and verified payment webhooks. Apply migra
 
 Day 8 adds account-owned history, WeasyPrint PDF documents and Celery receipt-email jobs. Apply `0006_receipt_emails` and follow [the history/receipt walkthrough](../docs/HISTORY_RECEIPTS.md). On this Mac, install Pango and set `DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib` before starting Python. PDF download works with email disabled; the walkthrough shows a free local mail catcher and worker.
 
+Day 9 adds completed-trip reviews for the rider and assigned driver, strict 1-5 ratings, private feedback, idempotent submissions and concurrency-safe rating aggregation. Apply `0007_review_timestamps`; no new dependency or service is needed. See [ratings and reviews](../docs/REVIEWS.md) for eligibility, locking, API payloads and the two-account walkthrough.
+
 ## What we added
 
 - `.venv/`: this project's isolated Python environment. It holds installed libraries locally and is ignored by Git.

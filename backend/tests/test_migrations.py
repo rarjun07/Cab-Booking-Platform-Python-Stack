@@ -25,7 +25,7 @@ def test_fresh_database_upgrade_and_downgrade_are_transactional(test_engine):
             assert "users" not in inspect(connection).get_table_names()
             command.upgrade(config, "head")
             assert {"users", "auth_sessions", "drivers", "rides", "payments", "reviews", "receipt_emails"} <= set(inspect(connection).get_table_names())
-            assert connection.scalar(text("SELECT version_num FROM alembic_version")) == "0006_receipt_emails"
+            assert connection.scalar(text("SELECT version_num FROM alembic_version")) == "0007_review_timestamps"
             command.check(config)
         finally:
             transaction.rollback()
@@ -85,6 +85,30 @@ def test_existing_payment_is_preserved_when_payment_audit_fields_are_added(test_
             row = connection.execute(text("SELECT stripe_payment_intent_id,amount,status,currency,created_at,paid_at FROM payments WHERE id=:id"), {"id": payment_id}).one()
             assert (row.stripe_payment_intent_id, row.amount, row.status, row.currency) == ("pi_preservedfixture", Decimal("104.38"), "succeeded", "inr")
             assert row.created_at is not None and row.paid_at is None
+        finally:
+            transaction.rollback()
+
+
+def test_review_migration_preserves_legacy_feedback_without_inventing_dates(test_engine):
+    with test_engine.connect() as connection:
+        transaction = connection.begin()
+        try:
+            config = config_for(connection)
+            command.downgrade(config, "0006_receipt_emails")
+            rider, driver, ride, review = uuid4(), uuid4(), uuid4(), uuid4()
+            for user_id, role in [(rider, "rider"), (driver, "driver")]:
+                connection.execute(text("INSERT INTO users (id,name,email,password_hash,role,rating_avg) VALUES (:id,'Legacy review user',:email,'preserve-review-user-hash',:role,1)"), {"id": user_id, "email": f"{user_id}@example.com", "role": role})
+            connection.execute(text("INSERT INTO drivers (user_id) VALUES (:id)"), {"id": driver})
+            connection.execute(text("INSERT INTO rides (id,rider_id,driver_id,status,pickup_point,drop_point,fare_estimate) VALUES (:id,:rider,:driver,'completed',ST_SetSRID(ST_MakePoint(77.209,28.6139),4326),ST_SetSRID(ST_MakePoint(77.2295,28.6129),4326),104.38)"), {"id": ride, "rider": rider, "driver": driver})
+            connection.execute(text("INSERT INTO reviews (id,ride_id,rater_id,rated_id,rating,comment) VALUES (:id,:ride,:rider,:driver,5,'Keep this legacy feedback')"), {"id": review, "ride": ride, "rider": rider, "driver": driver})
+            command.upgrade(config, "head")
+            row = connection.execute(text("SELECT rating,comment,created_at FROM reviews WHERE id=:id"), {"id": review}).one()
+            assert (row.rating, row.comment, row.created_at) == (5, "Keep this legacy feedback", None)
+            assert connection.scalar(text("SELECT rating_avg FROM users WHERE id=:id"), {"id": driver}) == Decimal("5.00")
+            assert connection.scalar(text("SELECT rating_avg FROM users WHERE id=:id"), {"id": rider}) == Decimal("0.00")
+            assert connection.scalar(text("SELECT password_hash FROM users WHERE id=:id"), {"id": rider}) == "preserve-review-user-hash"
+            connection.execute(text("INSERT INTO reviews (id,ride_id,rater_id,rated_id,rating) VALUES (:id,:ride,:driver,:rider,4)"), {"id": uuid4(), "ride": ride, "driver": driver, "rider": rider})
+            assert connection.scalar(text("SELECT created_at FROM reviews WHERE rater_id=:id"), {"id": driver}) is not None
         finally:
             transaction.rollback()
 

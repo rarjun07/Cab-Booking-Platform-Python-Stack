@@ -140,6 +140,7 @@ class Review(Base):
     rated_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"), index=True)
     rating: Mapped[int] = mapped_column(SmallInteger)
     comment: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
 class ReceiptEmail(Base):

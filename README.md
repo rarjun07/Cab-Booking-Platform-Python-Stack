@@ -43,9 +43,10 @@ Learning preference: step-by-step guidance with explanations.
 - [Stripe test-payment setup and verification](docs/PAYMENTS.md)
 - [First-week tests and manual checklist](docs/TESTING.md)
 - [Ride history, PDF receipts, and local receipt email](docs/HISTORY_RECEIPTS.md)
+- [Ratings and reviews](docs/REVIEWS.md)
 
 ## Current state
 
 Days 1-7 code checkpoints are pushed and verified. The user explicitly deferred Day 6 Stripe setup, a real test transaction, Stripe-delivered webhooks, and rendered checkout verification on 2026-10-18; payment-provider calls in automated tests use a controlled double.
 
-Day 8 adds private rider/driver history, WeasyPrint trip documents, and Celery receipt-email jobs. All 157 backend tests pass, including real Redis/worker/local SMTP attachment delivery; the React build, dependency and schema checks pass. The schema is at `0006_receipt_emails`. Email is disabled by default, with a free local-catcher setup in the walkthrough. Day 8 implementation commit `f70387c` is pushed and verified against GitHub. Browser interaction and earlier manual UI follow-ups remain unverified; real Stripe verification remains deferred. Day 9 has not started.
+Day 8 history/PDF/Celery email code is pushed and verified; email is disabled by default with a free local-catcher setup in its walkthrough. Day 9 adds private completed-trip reviews for both roles, own/counterpart rating summaries, duplicate-safe submissions, concurrency-safe average updates, and private live notifications. The schema is at `0007_review_timestamps`; no new dependency or secret is needed. All 184 backend tests, the React build, dependency and schema checks pass. Day 9's Git checkpoint is pending. Browser interaction and earlier manual UI follow-ups remain unverified; real Stripe verification remains deferred. Day 10 has not started.
