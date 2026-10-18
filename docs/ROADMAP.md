@@ -120,14 +120,14 @@ Do not begin the remaining Day 2 database models or migrations until every requi
 
 On 2026-10-18, the user explicitly chose to defer Stripe setup and real-provider/rendered-checkout verification and continue to Day 7. Those items remain unchecked; provider test doubles and locally signed fixture events do not substitute for real sandbox verification. Commit, push, and verify the Day 6 code checkpoint before Day 7. This is an exception for the deferred checks, not a claim that the payment integration is fully verified.
 
-## Day 7 checklist (in progress)
+## Day 7 checklist (tests pushed; follow-ups tracked)
 
 - [x] Verify the Day 6 code commit on GitHub (`d2e9e77`) before beginning, with the user's Stripe deferral recorded.
 - [x] Add a connected API journey covering accounts, signed quotes, duplicate booking, matching, guarded progression, restoration, disabled payments, and revoked-session replay.
 - [x] Run the complete backend regression suite and review first-week issues: 145 tests passed; no new application fix was required.
 - [x] Document beginner-friendly test commands and a manual two-account checklist in `TESTING.md`.
 - [x] Explicitly track pending browser checks, user-deferred Stripe verification, and the existing TestClient warning.
-- [ ] Review, commit, push, and verify the Day 7 checkpoint before Day 8.
+- [x] Review, commit, push, and verify the Day 7 implementation checkpoint (`4746d17`); Day 8 has not started.
 
 ## Choices to resolve at the relevant milestone
 

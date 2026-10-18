@@ -2,7 +2,7 @@
 
 ## Current checkpoint
 
-- Active milestone: Day 7 first-week testing. Day 6 code was committed, pushed, and verified; the user explicitly deferred Stripe setup and real-provider/rendered-checkout verification on 2026-10-18. Day 3-5 visual/manual UI follow-ups remain unverified.
+- Active milestone: Day 7 testing checkpoint passed, committed, pushed, and verified; awaiting the user's next instruction. Day 6 code was also pushed and verified; the user explicitly deferred Stripe setup and real-provider/rendered-checkout verification on 2026-10-18. Day 3-5 visual/manual UI follow-ups remain unverified.
 - Completed: read all nine PDF pages, checked the daily schedule, confirmed stack compatibility, and prepared the roadmap.
 - Learning preference: guide the user step by step with explanations.
 - Day 1 implementation: complete; custom FastAPI + PostgreSQL authentication is verified with real database tests and browser flows.
@@ -25,7 +25,8 @@
 - Day 5 implementation commit: `4a99f39759ec485565597b570a02b6866006530d`, pushed and verified against GitHub `refs/heads/main`.
 - Day 5 documentation checkpoint: `0d465f99e1c8585741f9d610add7dd63f3258422`, verified against GitHub before Day 6; working tree was clean.
 - Day 6 code checkpoint: `d2e9e778969be525ee5ff1a7983b1e185ffbf63d`, pushed to `origin/main`; `git ls-remote` returned that exact SHA. Working tree was clean before Day 7 began.
-- Next action: complete Day 7's regression review and Git checkpoint. Stripe setup, a real test transaction, signed Stripe delivery, and rendered checkout are explicitly deferred by the user, not verified. Day 8 has not started.
+- Day 7 implementation checkpoint: `4746d1750d948db614feca1619a552a3e22a41fc`, pushed to `origin/main`; `git ls-remote` returned that exact SHA. This completion record follows in a documentation commit; compare current HEAD with GitHub for the latest checkpoint.
+- Next action: await the user's next instruction. Day 8 will add ride history, PDF receipts, and configured background email tasks. Stripe setup, a real test transaction, signed Stripe delivery, and rendered checkout are explicitly deferred by the user, not verified. Day 8 has not started.
 
 ## Day 1, step 1: local Git setup
 
@@ -164,7 +165,7 @@
 - Repeated checkpoint verification: 144 backend tests passed in 13.38 seconds, React production build passed, pip check passed, and Alembic reported no new upgrade operations. The existing TestClient warning remains; these checks do not verify Stripe delivery or rendered checkout.
 - Day 6 code commit: `d2e9e778969be525ee5ff1a7983b1e185ffbf63d`; push succeeded and GitHub `refs/heads/main` matched exactly. Day 7 may proceed under the user's explicit deferral; this does not close the outstanding Stripe verification.
 
-## Day 7: first-week testing (in progress)
+## Day 7: first-week testing (checkpoint verified; follow-ups tracked)
 
 - Began only after the Day 6 code checkpoint was pushed and verified, with a clean working tree. No Day 8 work is included.
 - Added `backend/tests/test_week_one_flow.py`: one connected endpoint journey creates rider/driver accounts, estimates/books/retries a ride, matches a driver, rejects skipped progression, completes the trip, checks driver release, restores the rider after login, rejects disabled checkout without an invoice/final-fare write, prioritizes a new open request, and rejects replay of a logged-out session.
@@ -172,9 +173,20 @@
 - Verification: the new journey passed in 0.88 seconds; the complete suite then passed all 145 tests in 12.96 seconds. No new application bug was observed or production-code fix required. React build, pip consistency, and schema drift checks passed immediately before the test/documentation-only Day 7 changes; they were not needlessly repeated. The existing TestClient warning remains.
 - Added `docs/TESTING.md` explaining the commands, test boundaries, manual two-account checklist, and follow-ups. Browser rows remain pending rather than being marked passed from API results.
 - Known follow-ups: user-deferred Stripe setup/real sandbox payment/signed provider webhook/rendered checkout, pending Day 3-5/manual browser flows, and the existing TestClient/HTTPX deprecation warning. Day 7 can track these explicitly as allowed by the roadmap; it does not claim them resolved.
-- Day 7 commit/push pending. Day 8 has not started.
+- Source review: Python syntax, local documentation links, absence of actual local credentials in all five changed/new files, and whitespace checks passed. Day 7 changes contain tests and documentation only.
+- Day 7 implementation commit: `4746d1750d948db614feca1619a552a3e22a41fc`; push succeeded and GitHub `refs/heads/main` matched exactly. Day 8 has not started.
 
 ## Daily completion record
+
+Day 7:
+
+- Scope delivered: connected first-week rider/driver API journey, beginner-friendly testing guide, manual checklist, and explicit follow-up tracking. No new application feature or production-code fix was required by the observed checks.
+- Verification: 145 backend tests passed, including the new journey and existing PostgreSQL concurrency/TCP WebSocket/Redis suites. React build, pip consistency, and Alembic drift checks passed immediately before the test-only changes.
+- Limitations: browser checklist remains pending; Stripe setup and real provider/rendered-checkout verification are deferred by the user's explicit instruction. The existing TestClient deprecation warning remains. These items are tracked, not reported as fixed or verified.
+- Implementation commit: `4746d1750d948db614feca1619a552a3e22a41fc`.
+- Remote: `https://github.com/rarjun07/Cab-Booking-Platform-Python-Stack.git`, branch `main`.
+- Push result: succeeded; exact remote implementation SHA verified. This completion record follows in a documentation commit; compare current HEAD and GitHub for the latest checkpoint.
+- Ready for next milestone: after this documentation record is pushed and verified, await the user's instruction. Day 8 has not started.
 
 Day 5:
 
