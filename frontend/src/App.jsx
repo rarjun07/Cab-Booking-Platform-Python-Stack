@@ -49,32 +49,40 @@ export default function App() {
           <span className="brand-mark" aria-hidden="true">C</span>
           Cab Booking Platform
         </a>
-        <span className="day-label">Day 10 <span aria-hidden="true">/</span> Promos & wallet</span>
+        <span className="demo-label">Learning project · Test payments</span>
       </header>
 
-      <main id="main">
+      <main id="main" tabIndex={-1}>
         <section className="intro" aria-labelledby="page-title">
-          <p className="eyebrow">YOUR NEXT JOURNEY</p>
-          <h1 id="page-title">Where would you<br />like to go?</h1>
+          <p className="eyebrow">{user?.role === 'driver' ? 'YOUR DRIVER WORKSPACE' : 'YOUR NEXT JOURNEY'}</p>
+          <h1 id="page-title">{user?.role === 'driver' ? 'Ready for your next pickup?' : 'Where would you like to go?'}</h1>
           <p className="intro-copy">
-            Sign in, choose your pickup and destination, and get an estimate
-            before you request your ride.
+            {user?.role === 'driver' ? 'Save your vehicle, share your location, and manage your next trip.' : 'Choose your pickup and destination, check the fare, and request your ride.'}
           </p>
         </section>
 
+        <nav className="section-nav" aria-label="Workspace sections">
+          <a href="#account">Account</a>
+          <a href={user?.role === 'driver' ? '#driver' : '#booking'}>{user?.role === 'driver' ? 'Driver dashboard' : 'Book a ride'}</a>
+          {user?.role === 'rider' && <a href="#wallet">Wallet</a>}
+          {user && <a href="#history">Ride history</a>}
+        </nav>
         <AuthPanel user={user} onUserChange={setUser} />
         {user && <p className={`live-connection${live.status === 'connected' ? ' live-connected' : ''}`} role="status" aria-live="polite">{live.status === 'connected' ? 'Live updates connected' : live.status === 'connecting' ? 'Connecting live updates…' : 'Live updates reconnecting. Refresh is still available.'}</p>}
+        <div className={`workspace${user?.role === 'rider' ? ' rider-workspace' : ''}`}>
         {user?.role === 'driver'
           ? <DriverDashboard key={user.id} onSessionExpired={setUser} live={live} />
           : <RideBooking key={user?.id ?? 'signed-out'} user={user} onSessionExpired={setUser} liveRevision={live.revision} />}
         {user?.role === 'rider' && <Wallet key={user.id} liveRevision={live.revision} onSessionExpired={setUser} />}
+        </div>
         {user && <RideHistory key={user.id} user={user} liveRevision={live.revision} onSessionExpired={setUser} />}
 
+        <details className="connection-details">
+        <summary>Check the app connection</summary>
         <section className="connection-card" aria-labelledby="connection-title">
           <div>
-            <p className="eyebrow">THE FIRST CONNECTION</p>
-            <h2 id="connection-title">Let’s see if we’re connected.</h2>
-            <p className="card-copy">This button asks our API if it’s running.</p>
+            <h2 id="connection-title">Connection check</h2>
+            <p className="card-copy">Having trouble loading your trips? Check whether the app can reach its server.</p>
           </div>
 
           <div className={`status-panel status-${connection}`} role="status" aria-live="polite" aria-atomic="true">
@@ -86,19 +94,19 @@ export default function App() {
             {connection === 'checking' ? 'Checking…' : connection === 'idle' ? 'Check backend connection' : 'Check again'}
             <span aria-hidden="true">↗</span>
           </button>
-          <p className="endpoint-note">GET /api/health</p>
         </section>
+        </details>
 
         <section className="journey" aria-labelledby="journey-title">
-          <h2 id="journey-title">Your booking route</h2>
+          <h2 id="journey-title">{user?.role === 'driver' ? 'Your driver checklist' : 'Your booking route'}</h2>
           <ol>
-            <li><span className="step-number">01</span><div><h3>Your account</h3><p>Sign in as a rider.</p></div></li>
-            <li><span className="step-number">02</span><div><h3>Your estimate</h3><p>Road distance, travel time, and fare.</p></div></li>
-            <li><span className="step-number">03</span><div><h3>Your driver</h3><p>A nearby driver accepts your saved request.</p></div></li>
+            <li><span className="step-number" aria-hidden="true">01</span><div><h3>{user?.role === 'driver' ? 'Your vehicle' : 'Your account'}</h3><p>{user?.role === 'driver' ? 'Save your vehicle details before going online.' : 'Create an account or sign in as a rider.'}</p></div></li>
+            <li><span className="step-number" aria-hidden="true">02</span><div><h3>{user?.role === 'driver' ? 'Your availability' : 'Your estimate'}</h3><p>{user?.role === 'driver' ? 'Go online with a fresh location to find requests.' : 'Check road distance, travel time, and fare.'}</p></div></li>
+            <li><span className="step-number" aria-hidden="true">03</span><div><h3>{user?.role === 'driver' ? 'Your trip' : 'Your driver'}</h3><p>{user?.role === 'driver' ? 'Accept a request and update each trip step.' : 'A nearby driver accepts your saved request.'}</p></div></li>
           </ol>
         </section>
       </main>
-      <footer>Built with Python, FastAPI & React. <span>One day at a time.</span></footer>
+      <footer><span>Cab Booking Platform</span><span>Learning project · Test payments only</span></footer>
     </>
   )
 }

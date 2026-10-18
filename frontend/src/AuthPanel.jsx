@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 
 async function authRequest(path, body, signal) {
   const response = await fetch(`/api/auth/${path}`, {
@@ -26,6 +26,15 @@ export default function AuthPanel({ user, onUserChange }) {
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
   const [isError, setIsError] = useState(false)
+  const heading = useRef(null)
+  const feedback = useRef(null)
+  const focusAfterAction = useRef(null)
+
+  useEffect(() => {
+    if (focusAfterAction.current === 'heading') heading.current?.focus()
+    if (focusAfterAction.current === 'error') feedback.current?.focus()
+    focusAfterAction.current = null
+  }, [user?.id, message])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -58,9 +67,11 @@ export default function AuthPanel({ user, onUserChange }) {
     try {
       const data = await authRequest(mode, body)
       form.reset()
+      focusAfterAction.current = 'heading'
       setUser(data)
       setMessage(mode === 'register' ? 'Account created. You are signed in.' : 'Welcome back. You are signed in.')
     } catch (error) {
+      focusAfterAction.current = 'error'
       setIsError(true)
       setMessage(error.status ? error.message : 'Could not reach the backend. Please try again.')
     } finally {
@@ -75,6 +86,7 @@ export default function AuthPanel({ user, onUserChange }) {
     try {
       const data = await authRequest(action, {})
       if (action === 'logout') {
+        focusAfterAction.current = 'heading'
         setUser(null)
         setMode('login')
         setMessage('You have been signed out.')
@@ -83,6 +95,7 @@ export default function AuthPanel({ user, onUserChange }) {
         setMessage('Session verified by FastAPI and PostgreSQL.')
       }
     } catch (error) {
+      focusAfterAction.current = 'error'
       if (error.status === 401) setUser(null)
       setIsError(true)
       setMessage(error.status ? error.message : 'Could not reach the backend. Please try again.')
@@ -92,9 +105,9 @@ export default function AuthPanel({ user, onUserChange }) {
   }
 
   return (
-    <section className="auth-card" aria-labelledby="auth-title">
+    <section id="account" tabIndex={-1} className="auth-card" aria-labelledby="auth-title">
       <p className="eyebrow">YOUR ACCOUNT</p>
-      <h2 id="auth-title">{user ? `Welcome, ${user.name}.` : 'Your journey, your account.'}</h2>
+      <h2 id="auth-title" tabIndex={-1} ref={heading}>{user ? `Welcome, ${user.name}.` : 'Your journey, your account.'}</h2>
       <p className="auth-description">{user ? `${user.email} · ${user.role}` : 'Create an account or sign in to get started.'}</p>
 
       {restoring ? <p role="status">Checking your session…</p> : user ? (
@@ -111,7 +124,7 @@ export default function AuthPanel({ user, onUserChange }) {
           <form key={mode} onSubmit={submit} aria-busy={busy}>
             <fieldset disabled={busy}>
               {mode === 'register' && <div className="form-field"><label htmlFor={`${formId}-name`}>Name</label><input id={`${formId}-name`} name="name" autoComplete="name" maxLength={100} required /></div>}
-              <div className="form-field"><label htmlFor={`${formId}-email`}>Email</label><input id={`${formId}-email`} name="email" type="email" autoComplete="email" maxLength={254} required /></div>
+              <div className="form-field"><label htmlFor={`${formId}-email`}>Email</label><input id={`${formId}-email`} name="email" type="email" autoComplete="email" autoCapitalize="none" spellCheck={false} maxLength={254} required /></div>
               <div className="form-field"><label htmlFor={`${formId}-password`}>Password</label><input id={`${formId}-password`} name="password" type="password" autoComplete={mode === 'register' ? 'new-password' : 'current-password'} minLength={mode === 'register' ? 12 : 1} maxLength={128} aria-describedby={mode === 'register' ? `${formId}-hint` : undefined} required />{mode === 'register' && <small id={`${formId}-hint`}>Use at least 12 characters.</small>}</div>
               {mode === 'register' && <div className="form-field"><label htmlFor={`${formId}-role`}>I’m joining as a</label><select id={`${formId}-role`} name="role" defaultValue="rider"><option value="rider">Rider</option><option value="driver">Driver</option></select></div>}
               <button className="submit-button" type="submit">{busy ? 'Please wait…' : mode === 'register' ? 'Create my account' : 'Sign in to my account'}</button>
@@ -119,7 +132,7 @@ export default function AuthPanel({ user, onUserChange }) {
           </form>
         </>
       )}
-      <p className={`auth-message${isError ? ' auth-error' : ''}`} role="status" aria-live="polite" aria-atomic="true">{message}</p>
+      <p ref={feedback} tabIndex={-1} className={`auth-message${isError ? ' auth-error' : ''}`} role={isError ? 'alert' : 'status'} aria-atomic="true">{message}</p>
     </section>
   )
 }

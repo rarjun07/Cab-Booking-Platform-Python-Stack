@@ -148,7 +148,7 @@ export default function DriverDashboard({ onSessionExpired, live }) {
   }
 
   return (
-    <section className="auth-card driver-card" aria-labelledby="driver-title" aria-busy={loading || busy}>
+    <section id="driver" tabIndex={-1} className="auth-card driver-card" aria-labelledby="driver-title" aria-busy={loading || busy}>
       <p className="eyebrow">DRIVER DASHBOARD</p>
       <h2 id="driver-title">Your next pickup starts here.</h2>
       <p className="auth-description">Save your vehicle, go online, and choose a nearby request. Connected dashboards update automatically.</p>

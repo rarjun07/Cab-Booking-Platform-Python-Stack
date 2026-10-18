@@ -92,15 +92,16 @@ export default function Wallet({ liveRevision, onSessionExpired }) {
     setRevision((value) => value + 1)
   }
 
-  return <section className="auth-card wallet-card" aria-labelledby="wallet-title" aria-busy={busy}>
+  return <section id="wallet" tabIndex={-1} className="auth-card wallet-card" aria-labelledby="wallet-title" aria-busy={busy}>
     <p className="eyebrow">YOUR TEST WALLET</p>
     <h2 id="wallet-title">Wallet balance</h2>
-    <p className="fare-total">{saved ? money(saved.balance) : 'Checking balance…'}</p>
+    <p className="fare-total" aria-live="polite" aria-atomic="true">{saved ? money(saved.balance) : 'Checking balance…'}</p>
     <p className="fare-note">Verified test credits only. No real money is added in this project’s test mode.</p>
     {config?.configured === false && <p>Test top-ups await Stripe configuration. Your recorded balance remains available.</p>}
     {!selectedId && <form onSubmit={(event) => { event.preventDefault(); prepare() }}>
       <div className="form-field"><label htmlFor="wallet-amount">Top-up amount (INR)</label>
-        <input id="wallet-amount" type="number" min="50" max="10000" step="0.01" value={amount} required disabled={busy || Boolean(attempt.current)} onChange={(event) => setAmount(event.target.value)} />
+        <input id="wallet-amount" type="number" min="50" max="10000" step="0.01" value={amount} required aria-describedby="wallet-amount-hint" disabled={busy || Boolean(attempt.current)} onChange={(event) => setAmount(event.target.value)} />
+        <small id="wallet-amount-hint">INR 50–10,000, with up to two decimal places.</small>
       </div>
       <button type="submit" disabled={busy || !config?.configured}>{busy ? 'Preparing test top-up…' : attempt.current ? 'Retry this top-up' : 'Open test top-up'}</button>
     </form>}

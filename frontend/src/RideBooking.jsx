@@ -177,7 +177,7 @@ export default function RideBooking({ user, onSessionExpired, liveRevision = 0 }
   }
 
   return (
-    <section className="auth-card booking-card" aria-labelledby="booking-title">
+    <section id="booking" tabIndex={-1} className="auth-card booking-card" aria-labelledby="booking-title">
       <p className="eyebrow">PLAN YOUR RIDE</p>
       <h2 id="booking-title">A destination. An estimate. Let’s go.</h2>
       {!user ? <p className="auth-description">Sign in above to estimate and request a ride.</p> : user.role !== 'rider' ? <p className="auth-description">You’re signed in as a driver. Ride requests are available to rider accounts.</p> : (

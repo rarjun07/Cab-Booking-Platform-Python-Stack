@@ -45,6 +45,7 @@ Learning preference: step-by-step guidance with explanations.
 - [Ride history, PDF receipts, and local receipt email](docs/HISTORY_RECEIPTS.md)
 - [Ratings and reviews](docs/REVIEWS.md)
 - [Promo codes and test-wallet top-ups](docs/PROMOS_WALLET.md)
+- [UI polish, keyboard access and responsive layout](docs/UI_POLISH.md)
 
 ## Current state
 
@@ -52,4 +53,6 @@ Days 1-7 code checkpoints are pushed and verified. The user explicitly deferred 
 
 Day 8 history/PDF/Celery email and Day 9 ratings/reviews code checkpoints are pushed and verified. Email is disabled by default with a free local-catcher setup in its walkthrough.
 
-Day 10 adds server-priced promo discounts before invoice creation, discount snapshots in trip PDFs, and rider test-wallet top-ups with durable retries, an atomic credit ledger and private live refresh. The schema is at `0008_promos_wallet`; no new dependency or secret is needed beyond the existing optional Stripe configuration. All 230 backend tests, the React build, dependency and schema checks pass. Day 10 implementation commit `561181c` is pushed and verified against GitHub. Browser interaction and earlier manual UI follow-ups remain unverified; actual Stripe ride/top-up verification remains deferred. Day 11 has not started.
+Day 10 adds server-priced promo discounts before invoice creation, discount snapshots in trip PDFs, and rider test-wallet top-ups with durable retries, an atomic credit ledger and private live refresh. The schema is at `0008_promos_wallet`; no new dependency or secret is needed beyond the existing optional Stripe configuration. All 230 backend tests, the React build, dependency and schema checks passed at that checkpoint. Day 10 implementation commit `561181c` is pushed and verified against GitHub. Browser interaction and earlier manual UI follow-ups remain unverified; actual Stripe ride/top-up verification remains deferred.
+
+Day 11 implementation now adds role-aware navigation and copy, a responsive booking/wallet layout, consistent controls, keyboard focus after account actions, unique repeated payment-panel labels and accessible history disclosures. Nine focused React component/accessibility checks and the production build passed. Its Git checkpoint and actual browser/mobile/zoom/screen-reader checks are pending; no visual or WCAG conformance pass is claimed. See the walkthrough for the manual checklist. Day 12 has not started.

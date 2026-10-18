@@ -103,9 +103,9 @@ export default function RideReviews({ rideId, liveRevision, onSessionExpired, on
           <input type="radio" name={`${formId}-rating`} value={value} required checked={rating === String(value)} onChange={(event) => setRating(event.target.value)} /> {value} {value === 1 ? 'star' : 'stars'}
         </label>)}</div>
         <div className="form-field"><label htmlFor={`${formId}-comment`}>Comment (optional)</label>
-          <textarea id={`${formId}-comment`} value={comment} maxLength={2000} rows={3} onChange={(event) => setComment(event.target.value)} />
+          <textarea id={`${formId}-comment`} value={comment} maxLength={2000} rows={3} aria-describedby={`${formId}-comment-hint`} onChange={(event) => setComment(event.target.value)} />
+          <small id={`${formId}-comment-hint`}>Up to 2,000 characters. Visible to the other trip participant.</small>
         </div>
-        <p className="fare-note">Your feedback is visible to the other trip participant.</p>
         <button type="submit" disabled={!rating}>{busy ? 'Saving review…' : 'Submit review'}</button>
       </fieldset>
     </form>}

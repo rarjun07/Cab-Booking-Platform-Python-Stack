@@ -93,7 +93,7 @@ export default function RideHistory({ user, liveRevision, onSessionExpired }) {
     } finally { if (!abort.signal.aborted) setBusy(false) }
   }
 
-  return <section className="auth-card history-card" aria-labelledby="history-title" aria-busy={loading || busy}>
+  return <section id="history" tabIndex={-1} className="auth-card history-card" aria-labelledby="history-title" aria-busy={loading || busy}>
     <p className="eyebrow">YOUR PAST JOURNEYS</p>
     <h2 id="history-title">Ride history and trip documents</h2>
     <p className="auth-description">Your completed and cancelled trips. Trip documents show the recorded payment status.</p>
@@ -101,29 +101,29 @@ export default function RideHistory({ user, liveRevision, onSessionExpired }) {
     <button className="secondary-button" type="button" disabled={busy || loading} onClick={() => { setMessage(''); setRefresh((v) => v + 1) }}>Refresh history</button>
     {loading && <p role="status">Loading your history…</p>}
     {!loading && page?.items.length === 0 && <p>No past trips on this page yet.</p>}
-    {!loading && page && <ul className="history-list">{page.items.map((ride) => <li key={ride.id}>
-      <div className="matching-title"><strong>{ride.status.replaceAll('_', ' ')}</strong><span>{new Date(ride.created_at).toLocaleDateString()}</span></div>
+    {!loading && page && <ul className="history-list">{page.items.map((ride) => <li key={ride.id} className="history-item" aria-labelledby={`history-trip-${ride.id}`}>
+      <div className="matching-title"><h3 id={`history-trip-${ride.id}`}>{ride.status.replaceAll('_', ' ')} trip<span className="visually-hidden"> · {ride.id}</span></h3><span>{new Date(ride.created_at).toLocaleDateString()}</span></div>
       <p className="ride-reference">Reference: {ride.id}</p>
       <p>Pickup: {ride.pickup.latitude}, {ride.pickup.longitude}<br />Destination: {ride.destination.latitude}, {ride.destination.longitude}</p>
       <p>{ride.payment_amount != null ? 'Invoice' : ride.fare_actual != null ? 'Final fare' : 'Estimated fare'}: {money(ride.payment_amount ?? ride.fare_actual ?? ride.fare_estimate)} · Payment: {ride.payment_status?.replaceAll('_', ' ') ?? 'not paid'}</p>
       {ride.receipt_available && <>
-        <div className="auth-actions">
+        <div className="auth-actions" role="group" aria-label={`Actions for trip ${ride.id}`}>
           <button type="button" disabled={busy} onClick={() => act(ride, 'download')}>Download PDF</button>
           <button className="secondary-button" type="button" disabled={busy || !emailEnabled} onClick={() => act(ride, 'email')}>Email to my account</button>
           <button className="secondary-button" type="button" disabled={busy} onClick={() => act(ride, 'status')}>Check email status</button>
-          <button className="secondary-button" type="button" onClick={() => setReviewRide(reviewRide === ride.id ? null : ride.id)}>{reviewRide === ride.id ? 'Close reviews' : 'Ratings and review'}</button>
-          {user.role === 'rider' && <button className="secondary-button" type="button" onClick={() => setPaymentRide(paymentRide === ride.id ? null : ride.id)}>{paymentRide === ride.id ? 'Close payment details' : 'View payment details'}</button>}
+          <button className="secondary-button" type="button" aria-expanded={reviewRide === ride.id} aria-controls={reviewRide === ride.id ? `history-reviews-${ride.id}` : undefined} onClick={() => setReviewRide(reviewRide === ride.id ? null : ride.id)}>{reviewRide === ride.id ? 'Close reviews' : 'Ratings and review'}</button>
+          {user.role === 'rider' && <button className="secondary-button" type="button" aria-expanded={paymentRide === ride.id} aria-controls={paymentRide === ride.id ? `history-payment-${ride.id}` : undefined} onClick={() => setPaymentRide(paymentRide === ride.id ? null : ride.id)}>{paymentRide === ride.id ? 'Close payment details' : 'View payment details'}</button>}
         </div>
         {jobs[ride.id] && <p className="fare-note">Email request: {jobs[ride.id].status} · attempts: {jobs[ride.id].attempts}</p>}
-        {paymentRide === ride.id && <RidePayment key={ride.id} rideId={ride.id} liveRevision={liveRevision} onSessionExpired={onSessionExpired} />}
-        {reviewRide === ride.id && <RideReviews key={ride.id} rideId={ride.id} liveRevision={liveRevision} onSessionExpired={onSessionExpired} onSaved={() => setRefresh((value) => value + 1)} />}
+        {paymentRide === ride.id && <div id={`history-payment-${ride.id}`}><RidePayment key={ride.id} rideId={ride.id} liveRevision={liveRevision} onSessionExpired={onSessionExpired} /></div>}
+        {reviewRide === ride.id && <div id={`history-reviews-${ride.id}`}><RideReviews key={ride.id} rideId={ride.id} liveRevision={liveRevision} onSessionExpired={onSessionExpired} onSaved={() => setRefresh((value) => value + 1)} /></div>}
       </>}
     </li>)}</ul>}
     {!emailEnabled && <p className="fare-note">Email delivery awaits local setup. Completed-trip PDFs remain available.</p>}
-    <div className="auth-actions">
-      <button className="secondary-button" type="button" disabled={busy || loading || !previous.length} onClick={() => { setCursor(previous.at(-1)); setPrevious((saved) => saved.slice(0, -1)); setPaymentRide(null) }}>Previous page</button>
-      <button className="secondary-button" type="button" disabled={busy || loading || !page?.next_cursor} onClick={() => { setPrevious((saved) => [...saved, cursor]); setCursor(page.next_cursor); setPaymentRide(null) }}>Next page</button>
-    </div>
+    <nav className="auth-actions history-pagination" aria-label="Ride history pages">
+      <button className="secondary-button" type="button" disabled={busy || loading || !previous.length} onClick={() => { setCursor(previous.at(-1)); setPrevious((saved) => saved.slice(0, -1)); setPaymentRide(null); setReviewRide(null) }}>Previous page</button>
+      <button className="secondary-button" type="button" disabled={busy || loading || !page?.next_cursor} onClick={() => { setPrevious((saved) => [...saved, cursor]); setCursor(page.next_cursor); setPaymentRide(null); setReviewRide(null) }}>Next page</button>
+    </nav>
     <p className="auth-message" role="status" aria-live="polite">{message}</p>
   </section>
 }

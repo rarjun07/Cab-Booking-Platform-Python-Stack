@@ -16,6 +16,8 @@ Day 9 adds **Ratings and review** on completed history entries, **Your rating**,
 
 Day 10 adds an optional promo form before the first checkout and a rider **Wallet balance** panel with test top-up/retry/resume controls, recent attempts and verified credits. `wallet.changed` triggers private reads; manual refresh remains available. Both checkouts reuse the test-card form. Without Stripe configuration, the balance remains readable and promos work, while top-up checkout is disabled. Follow [promos and wallet](../docs/PROMOS_WALLET.md); real Stripe and manual browser verification remain pending.
 
+Day 11 adds section navigation, role-aware instructions, a rider booking/wallet grid that stacks on narrow screens, consistent touch controls, account-action focus, distinct IDs for repeated trip checkout forms and named history disclosures. Follow [the UI walkthrough](../docs/UI_POLISH.md). Nine jsdom/component checks passed, including selected axe structural rules and keyboard simulations. Actual visual/mobile/zoom/screen-reader checks remain pending; jsdom does not render the layout.
+
 ## What each tool does
 
 - React builds the interactive page from components.
@@ -47,7 +49,7 @@ cd "/Users/arjunsair/Desktop/Python_Developer/Cab Booking Platform/frontend"
 npm run dev
 ```
 
-Open <http://127.0.0.1:5173> and click **Check backend connection**. With FastAPI running, the page should report:
+Open <http://127.0.0.1:5173>, expand **Check the app connection** near the bottom and click **Check backend connection**. With FastAPI running, the page should report:
 
 ```text
 Connected! FastAPI returned a healthy response.
@@ -95,10 +97,14 @@ This proxy exists only in the development server. A deployed build will need an 
 | `src/useRealtime.js` | Opens the account socket, coalesces events, retries connections, and confirms location messages. |
 | `src/RidePayment.jsx` | Applies an optional promo before invoice creation, prepares owner-only test checkout, and exports the reusable test-card form. |
 | `src/Wallet.jsx` | Reads the rider balance/credit ledger and creates or resumes an owned test top-up; success comes from saved webhook state. |
+| `src/RideHistory.jsx` | Shows owned terminal trips, grouped document actions and expandable review/payment details. |
+| `src/RideReviews.jsx` | Keeps native labeled rating radios and a bounded comment form, preserving drafts during background reads. |
 | `src/styles.css` | Styles the desktop and mobile layouts. |
 | `vite.config.js` | Configures the React plugin, fixed frontend port, and API proxy. |
 | `package.json` | Lists dependencies and development/build commands. |
 | `package-lock.json` | Records exact installed dependency versions. |
+| `vitest.config.js` | Runs component checks in jsdom without starting a browser or the application services. |
+| `tests/accessibility.test.jsx` | Checks role-specific structure, ID/label references and selected keyboard/account/promo/review interactions against controlled API fixtures. |
 
 In `App.jsx`, `useState('idle')` remembers the connection status. Calling `setConnection(...)` updates it and React redraws the relevant parts of the page. `fetch(...)` makes the HTTP request. We check both the HTTP response and the returned `status` value before showing success.
 
@@ -111,6 +117,14 @@ npm run build
 ```
 
 Vite writes generated output into `dist/`, which is ignored by Git. A successful build confirms the app can be bundled; it does not by itself verify a running backend connection.
+
+## Day 11 component checks
+
+```bash
+npm test
+```
+
+This runs nine focused tests using pinned development tools: Vitest, jsdom, Testing Library and axe-core. The tests contact no backend, database or Stripe service. Color contrast/layout are excluded from the simulated axe run; the [manual checklist](../docs/UI_POLISH.md) remains necessary. Day 13 retains broader end-to-end journeys.
 
 ## Authentication and the Day 1 checkpoint
 

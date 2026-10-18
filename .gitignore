@@ -23,6 +23,7 @@ node_modules/
 dist/
 build/
 coverage/
+.vitest/
 *.tsbuildinfo
 
 # Local logs, editor files, and macOS metadata.

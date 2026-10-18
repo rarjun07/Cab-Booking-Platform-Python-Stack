@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
 import { loadStripe } from '@stripe/stripe-js/pure'
 
@@ -69,6 +69,7 @@ export function TestCardForm({ amount, onConfirmed, label = 'Pay' }) {
 }
 
 export default function RidePayment({ rideId, liveRevision, onSessionExpired }) {
+  const panelId = useId()
   const [config, setConfig] = useState(null)
   const [payment, setPayment] = useState(null)
   const [checkout, setCheckout] = useState(null)
@@ -175,15 +176,15 @@ export default function RidePayment({ rideId, liveRevision, onSessionExpired }) 
 
   const paid = payment?.status === 'succeeded'
   const closed = ['cancelled', 'refunded'].includes(payment?.status)
-  return <section className="payment-card" aria-labelledby={`payment-${rideId}`} aria-busy={busy || loading}>
+  return <section className="payment-card" aria-labelledby={`${panelId}-title`} aria-busy={busy || loading}>
     <p className="eyebrow">STRIPE TEST PAYMENT</p>
-    <h4 id={`payment-${rideId}`}>{paid ? 'Test payment received' : 'Pay for your completed trip'}</h4>
+    <h4 id={`${panelId}-title`}>{paid ? 'Test payment received' : 'Pay for your completed trip'}</h4>
     <p className="fare-note">Use Stripe test details only. No real money is charged in this project’s test mode.</p>
     {loading ? <p role="status">Checking payment status…</p> : <>
       {promo && <p className="fare-note">{promo.code}: {money(promo.base_amount)} − {money(promo.discount_amount)} = {money(promo.final_amount)}</p>}
       {!payment && !promo && <form onSubmit={applyPromo} className="promo-form">
-        <label htmlFor={`promo-${rideId}`}>Promo code (optional, before checkout)</label>
-        <div className="auth-actions"><input id={`promo-${rideId}`} value={promoCode} onChange={(event) => setPromoCode(event.target.value)} minLength={3} maxLength={20} pattern="[A-Za-z0-9]+" autoCapitalize="characters" required disabled={busy} /><button className="secondary-button" type="submit" disabled={busy || !promoCode.trim()}>Apply promo</button></div>
+        <label htmlFor={`${panelId}-promo`}>Promo code (optional, before checkout)</label>
+        <div className="auth-actions"><input id={`${panelId}-promo`} value={promoCode} onChange={(event) => setPromoCode(event.target.value)} minLength={3} maxLength={20} pattern="[A-Za-z0-9]+" autoCapitalize="characters" spellCheck={false} required disabled={busy} /><button className="secondary-button" type="submit" disabled={busy || !promoCode.trim()}>Apply promo</button></div>
       </form>}
       {payment && <p role="status">Invoice: {money(payment.amount)} · {payment.status.replaceAll('_', ' ')}</p>}
       {paid && <p>Payment verified by the backend’s signed Stripe webhook.</p>}
