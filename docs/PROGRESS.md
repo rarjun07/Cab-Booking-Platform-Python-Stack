@@ -2,7 +2,7 @@
 
 ## Current checkpoint
 
-- Active milestone: Day 10 promos/test-wallet implemented and locally verified; review/documentation and Git checkpoint are being finished before Day 11. The user explicitly deferred Stripe setup and real-provider/rendered-checkout verification on 2026-10-18. Earlier visual/manual React follow-ups remain unverified.
+- Active milestone: Day 10 promos/test-wallet implementation locally verified, reviewed, committed, pushed and verified against GitHub; awaiting the user's next instruction. The user explicitly deferred Stripe setup and real-provider/rendered-checkout verification on 2026-10-18. Earlier visual/manual React follow-ups remain unverified.
 - Completed: read all nine PDF pages, checked the daily schedule, confirmed stack compatibility, and prepared the roadmap.
 - Learning preference: guide the user step by step with explanations.
 - Day 1 implementation: complete; custom FastAPI + PostgreSQL authentication is verified with real database tests and browser flows.
@@ -31,7 +31,8 @@
 - Day 8 documentation checkpoint: `9f59017d2d4d39453aefb2a1fcd6f0c0e3a61e2f`, verified equal to GitHub before Day 9; working tree was clean.
 - Day 9 implementation checkpoint: `90bc586f9690772e0cac78654cb73a5d73305a76`, pushed to `origin/main`; `git ls-remote` returned that exact SHA. This completion record follows in a documentation commit; compare current HEAD and GitHub for the latest checkpoint.
 - Day 9 documentation checkpoint: `2bd51f92f28fc3dc40877991207d9ca22ba1dc9c`, verified equal to GitHub before Day 10; working tree was clean.
-- Next action: finish the Day 10 review, commit, push and exact remote verification. Real Stripe ride/top-up transactions, provider-delivered signed notifications and rendered checkout remain deferred; manual React checks remain pending. Day 11 has not started.
+- Day 10 implementation checkpoint: `561181c9b33fadc1f68df01609abee66b3d56ca8`, pushed to `origin/main`; `git ls-remote` returned that exact SHA. This completion record follows in a documentation commit; compare current HEAD and GitHub for the latest checkpoint.
+- Next action: await the user's next instruction; Day 11 covers React UI polish, accessibility and responsiveness. Real Stripe ride/top-up transactions, provider-delivered signed notifications and rendered checkout remain deferred; manual React checks remain pending. Day 11 has not started.
 
 ## Day 1, step 1: local Git setup
 
@@ -213,7 +214,7 @@
 - Final source review: all 25 changed/new candidates passed Python syntax, local document-link, whitespace and actual-credential absence checks. Private `.env` remains ignored with mode 0600; generated/dependency output remains ignored. No dependencies were added or updated. Test-owned TCP/worker/SMTP resources were cleaned up; existing PostgreSQL and Redis services were not changed.
 - Walkthrough, payloads, lock/aggregation explanation, migration behavior and manual steps are in `docs/REVIEWS.md`. Day 9 implementation commit `90bc586f9690772e0cac78654cb73a5d73305a76` was pushed successfully and GitHub `refs/heads/main` matched exactly. Day 10 has not started.
 
-## Day 10: promo codes and test-wallet top-ups (Git checkpoint pending)
+## Day 10: promo codes and test-wallet top-ups (implementation checkpoint verified)
 
 - User requested the next milestone, then continued the active work. Local HEAD and GitHub `refs/heads/main` matched Day 9's final documentation checkpoint `2bd51f92f28fc3dc40877991207d9ca22ba1dc9c` with a clean working tree before starting. The earlier Stripe setup/real-provider deferral is carried forward explicitly.
 - Added completed-trip rider-only promo application before invoice creation, normalized code validation, active dates, capped percentages, minimum fares and global/personal usage limits. A unique immutable redemption snapshots before/discount/final amounts, and the saved actual fare feeds later checkout/PDFs. Identical retries return the existing snapshot; stacking/removal and changes after invoice creation are rejected.
@@ -227,16 +228,19 @@
 - Final checks after that fix: **230 backend tests passed** (28.01s) with the existing TestClient/HTTPX deprecation warning; React production build passed; `pip check` found no broken requirements; `alembic check` found no new operations. Tests include eight separate-connection concurrency scenarios for promo retries/limits/invoice races and wallet retries/duplicate or distinct events/different top-ups, plus real Redis/WebSocket private notification checks.
 - New beginner walkthrough: `docs/PROMOS_WALLET.md`. No new dependency or secret introduced. Actual Stripe ride/top-up sandbox transactions, real signed deliveries and rendered checkout remain deferred. Wallet spending, withdrawals, refunds and automated reconciliation are outside this milestone. Day 11 has not started.
 - Final source review: actual local credentials absent from all 29 changed/new candidates; Python syntax, local Markdown links and whitespace checks passed. Private `.env` remains owner-only; local environment/dependencies/build output and sample PDFs remain ignored.
+- Day 10 implementation commit `561181c9b33fadc1f68df01609abee66b3d56ca8` was pushed successfully; local HEAD and GitHub `refs/heads/main` matched exactly and the working tree was clean before this completion-record edit. Day 11 has not started.
 
 ## Daily completion record
 
-Day 10 (local verification; Git checkpoint pending):
+Day 10:
 
 - Scope delivered: promo rules and frozen discounts, PDF discount details, rider test-wallet top-up retry/resume, verified-event credit ledger and private live refresh.
 - Verification: 230 backend tests, React build, pip/schema checks and one-page PDF visual inspection passed. Provider requests are controlled doubles and signed event fixtures; no actual Stripe transaction is claimed.
 - Known limits: user-deferred Stripe setup/real-provider/rendered-checkout checks and previous manual browser checks remain unverified. Wallet spending/refunds and scheduled reconciliation are not implemented. Existing TestClient warning remains.
-- Implementation commit / push / remote verification: pending.
-- Ready for next milestone: no; finish this Git checkpoint first. Day 11 has not started.
+- Implementation commit: `561181c9b33fadc1f68df01609abee66b3d56ca8`.
+- Remote: `https://github.com/rarjun07/Cab-Booking-Platform-Python-Stack.git`, branch `main`.
+- Push result: succeeded; exact remote implementation SHA verified. This completion record follows in a documentation commit; compare current HEAD and GitHub for the latest checkpoint.
+- Ready for next milestone: after this record is pushed and verified, await the user's next instruction, carrying deferred provider/manual checks explicitly. Day 11 has not started.
 
 Day 9:
 
