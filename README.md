@@ -40,7 +40,8 @@ Learning preference: step-by-step guidance with explanations.
 - [Driver dashboard and nearby matching](docs/RIDE_MATCHING.md)
 - [Live ride and location updates](docs/LIVE_UPDATES.md)
 - [Stripe test-payment setup and verification](docs/PAYMENTS.md)
+- [First-week tests and manual checklist](docs/TESTING.md)
 
 ## Current state
 
-Days 1-5 are implemented and pushed. Day 6 adds stored-fare test invoices, Stripe PaymentIntents, signed/deduplicated webhooks, and a React Payment Element. All 144 backend tests and the React build pass; payment API calls in the tests use a controlled provider double. The development schema is at `0005_test_payments`. On 2026-10-18, the user chose to defer Stripe setup, a real test transaction, Stripe-delivered webhooks, and rendered checkout verification and continue to Day 7 after the Day 6 code Git checkpoint. These checks remain unverified; Day 6 code is not committed/pushed yet and Day 7 has not started. Earlier manual UI follow-ups remain unverified after a browser URL-policy rejection.
+Days 1-5 are implemented and pushed. Day 6 adds stored-fare test invoices, Stripe PaymentIntents, signed/deduplicated webhooks, and a React Payment Element; its code commit `d2e9e77` is pushed and verified against GitHub. The development schema is at `0005_test_payments`. On 2026-10-18, the user chose to defer Stripe setup, a real test transaction, Stripe-delivered webhooks, and rendered checkout verification and continue to Day 7. Day 7 adds a connected rider/driver API journey test and a manual checklist; all 145 backend tests pass, and its Git checkpoint is pending. React build, pip check, and schema checks also passed before the test-only Day 7 changes. Payment API calls in automated tests use a controlled provider double. Earlier manual UI follow-ups and the deferred Stripe checks remain unverified.

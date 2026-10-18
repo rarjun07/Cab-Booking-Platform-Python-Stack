@@ -103,7 +103,7 @@ Do not begin the remaining Day 2 database models or migrations until every requi
 - [x] Commit, push, and verify the Day 5 implementation (`4a99f39`).
 - [ ] Manual/visual UI follow-up: earlier browser policy blocks automated preview; user has not tried the connection-badge check yet.
 
-## Day 6 checklist (in progress)
+## Day 6 checklist (code pushed; Stripe verification deferred)
 
 - [x] Verify Day 5's final documentation commit on GitHub (`0d465f9`).
 - [x] Add a versioned payment currency/timestamp and webhook audit schema while preserving existing rows.
@@ -116,9 +116,18 @@ Do not begin the remaining Day 2 database models or migrations until every requi
 - [ ] Configure the user's Stripe sandbox/test keys and local webhook listener.
 - [ ] Complete a real Stripe test transaction and verify a Stripe-delivered signed webhook updates the matching invoice.
 - [ ] Verify rendered checkout success/failure/retry behavior; prior browser automation remains unavailable.
-- [ ] Finish the Day 6 review, commit, push, and verify its Git checkpoint.
+- [x] Finish the Day 6 code review, local checks, commit, push, and verify its Git checkpoint (`d2e9e77`).
 
 On 2026-10-18, the user explicitly chose to defer Stripe setup and real-provider/rendered-checkout verification and continue to Day 7. Those items remain unchecked; provider test doubles and locally signed fixture events do not substitute for real sandbox verification. Commit, push, and verify the Day 6 code checkpoint before Day 7. This is an exception for the deferred checks, not a claim that the payment integration is fully verified.
+
+## Day 7 checklist (in progress)
+
+- [x] Verify the Day 6 code commit on GitHub (`d2e9e77`) before beginning, with the user's Stripe deferral recorded.
+- [x] Add a connected API journey covering accounts, signed quotes, duplicate booking, matching, guarded progression, restoration, disabled payments, and revoked-session replay.
+- [x] Run the complete backend regression suite and review first-week issues: 145 tests passed; no new application fix was required.
+- [x] Document beginner-friendly test commands and a manual two-account checklist in `TESTING.md`.
+- [x] Explicitly track pending browser checks, user-deferred Stripe verification, and the existing TestClient warning.
+- [ ] Review, commit, push, and verify the Day 7 checkpoint before Day 8.
 
 ## Choices to resolve at the relevant milestone
 
