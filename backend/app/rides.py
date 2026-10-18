@@ -84,8 +84,8 @@ def validate_quote(token: str, user: User):
         raise HTTPException(422, "This fare quote is invalid or expired. Get a new estimate.") from None
 
 
-def ride_response(ride: Ride, db) -> RidePublic:
-    pickup_x, pickup_y, destination_x, destination_y = db.execute(
+def ride_response(ride: Ride, db, *, coordinates=None) -> RidePublic:
+    pickup_x, pickup_y, destination_x, destination_y = coordinates if coordinates is not None else db.execute(
         select(func.ST_X(Ride.pickup_point), func.ST_Y(Ride.pickup_point),
                func.ST_X(Ride.drop_point), func.ST_Y(Ride.drop_point)).where(Ride.id == ride.id)
     ).one()

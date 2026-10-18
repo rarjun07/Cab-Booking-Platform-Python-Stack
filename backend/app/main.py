@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.auth import router as auth_router
 from app.rides import router as rides_router
@@ -15,14 +16,22 @@ from app.history import router as history_router
 from app.reviews import router as reviews_router
 from app.promos import router as promos_router
 from app.wallet import router as wallet_router
+from app.config import get_settings
+from app.security import RequestGuard, get_rate_limiter
 
 
 @asynccontextmanager
 async def lifespan(app):
     yield
     get_event_publisher().close()
+    get_rate_limiter().close()
+    get_rate_limiter.cache_clear()
 
 app = FastAPI(title="Cab Booking Platform API", version="0.1.0", lifespan=lifespan)
+app.add_middleware(RequestGuard)
+app.add_middleware(CORSMiddleware, allow_origins=get_settings().allowed_origins, allow_credentials=True,
+                   allow_methods=["GET", "POST", "PUT"], allow_headers=["Content-Type"],
+                   expose_headers=["Retry-After"], max_age=600)
 app.include_router(auth_router)
 app.include_router(rides_router)
 app.include_router(drivers_router)

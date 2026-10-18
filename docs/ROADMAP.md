@@ -181,9 +181,23 @@ Controlled provider tests and locally signed fixtures verify application logic; 
 - [x] Pass the React production build; preserve production dependency pins and backend/API/schema behavior.
 - [x] Document the implementation, test boundaries and desktop/mobile/zoom/keyboard/screen-reader checklist in `UI_POLISH.md`.
 - [x] Review, commit, push and verify the Day 11 code checkpoint (`a8bf1f8`).
-- [ ] Resolve actual browser/mobile/zoom/keyboard/screen-reader checks with observed results or explicit user deferral. Earlier browser automation remains unavailable; no simulated visual pass is claimed.
+- [ ] Actual browser/mobile/zoom/keyboard/screen-reader follow-up remains unverified. The user repeatedly requested continuation after the reminder; carry this pending item into later work without claiming a browser pass.
 
-Day 12 has not started. Carry earlier manual UI and explicitly deferred Stripe checks forward with their actual status.
+Day 11's code checkpoint is verified. The user requested continuation; Day 12 proceeds with earlier manual UI and deferred Stripe checks still pending.
+
+## Day 12 checklist (checks passed; Git checkpoint pending)
+
+- [x] Verify Day 11's final documentation checkpoint on GitHub (`caf8c1a`) with a clean working tree; retain the pending manual-review status.
+- [x] Add atomic shared Redis quotas for API/auth/estimate/checkout/document requests and WebSocket handshakes; handle exhaustion and Redis failure explicitly.
+- [x] Add bounded request-body reads, safe response headers and strict credentialed CORS while preserving Origin/session/ownership checks and signed Stripe bytes.
+- [x] Tighten unknown-field, finite-coordinate and PostgreSQL-safe text validation; bound incoming WebSocket message frequency.
+- [x] Apply index-only migration `0009_query_indexes` with row preservation; improve history/wallet/promo access paths and remove per-offer coordinate queries.
+- [x] Verify actual query plans on synthetic test data, Redis concurrency/TTL/failure and API/WebSocket boundary behavior.
+- [x] Pass 263 backend tests, 9 React component checks, production build and schema/dependency checks.
+- [x] Document limits, startup/proxy settings, test isolation, plan evidence and outstanding service/UI checks in `SECURITY_PERFORMANCE.md`.
+- [ ] Review, commit, push and verify the Day 12 code checkpoint before Day 13.
+
+Day 13 has not started. Pending manual UI and actual Stripe verification remain tracked.
 
 ## Choices to resolve at the relevant milestone
 

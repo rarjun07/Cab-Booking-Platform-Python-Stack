@@ -5,7 +5,7 @@ The goal is to turn two locations into a road-route estimate, then save an authe
 ## Try it step by step
 
 1. Apply the database migration from `backend/` with the virtual environment active: `python -m alembic upgrade head`.
-2. Keep FastAPI running with `python -m uvicorn app.main:app --reload`.
+2. Keep FastAPI running with `python -m uvicorn app.main:app --reload --no-proxy-headers`.
 3. In a separate terminal, run `npm run dev` from `frontend/` and open <http://127.0.0.1:5173/>.
 4. Sign up or sign in with a **rider** account. Driver accounts cannot request rides.
 5. Click **Use Delhi sample**. It fills pickup `28.6139,77.2090` and destination `28.6129,77.2295`; it does not send a routing request yet.

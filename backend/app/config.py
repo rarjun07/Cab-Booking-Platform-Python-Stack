@@ -3,6 +3,7 @@
 from functools import lru_cache
 from decimal import Decimal
 from pathlib import Path
+from urllib.parse import urlsplit
 
 from pydantic import EmailStr, Field, HttpUrl, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -28,6 +29,8 @@ class Settings(BaseSettings):
     matching_radius_meters: int = Field(default=5000, ge=100, le=50000)
     driver_location_max_age_seconds: int = Field(default=300, ge=60, le=3600)
     redis_url: SecretStr = SecretStr("redis://127.0.0.1:6379/0")
+    rate_limit_prefix: str = Field(default="cab_booking:limits:v1", pattern=r"^[a-zA-Z0-9:_-]{1,80}$")
+    max_request_body_bytes: int = Field(default=65536, ge=16384, le=1048576)
     realtime_channel_prefix: str = Field(default="cab_booking:realtime:v1", pattern=r"^[a-zA-Z0-9:_-]{1,80}$")
     websocket_session_check_seconds: float = Field(default=2.0, ge=0.1, le=10)
     websocket_sync_seconds: float = Field(default=15.0, ge=1, le=60)
@@ -49,6 +52,32 @@ class Settings(BaseSettings):
         "http://127.0.0.1:8000",
         "http://localhost:8000",
     ]
+
+    @field_validator("allowed_origins")
+    @classmethod
+    def explicit_origins(cls, values):
+        if not 1 <= len(values) <= 20:
+            raise ValueError("Configure 1-20 explicit HTTP(S) origins.")
+        normalized = []
+        for value in values:
+            try:
+                parts = urlsplit(value)
+                port = parts.port
+                if (parts.scheme not in {"http", "https"} or not parts.hostname or parts.username is not None
+                        or parts.password is not None or parts.path or parts.query or parts.fragment
+                        or "*" in value or not value.isascii() or any(char.isspace() for char in value)):
+                    raise ValueError
+                host = parts.hostname.lower()
+                if ":" in host:
+                    host = f"[{host}]"
+                origin = f"{parts.scheme}://{host}"
+                if port is not None and port != (443 if parts.scheme == "https" else 80):
+                    origin += f":{port}"
+            except ValueError:
+                raise ValueError("Use explicit HTTP(S) origins without wildcards, credentials, paths or query strings.") from None
+            if origin not in normalized:
+                normalized.append(origin)
+        return normalized
 
     @field_validator("jwt_secret")
     @classmethod

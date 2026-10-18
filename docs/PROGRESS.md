@@ -2,7 +2,7 @@
 
 ## Current checkpoint
 
-- Active milestone: Day 11 UI/accessibility/responsive code verified with component/build checks, reviewed, committed, pushed and verified against GitHub. Actual browser/mobile/zoom/screen-reader checks remain pending user review before Day 12. The user explicitly deferred Stripe setup and real-provider/rendered-checkout verification on 2026-10-18. Earlier visual/manual React follow-ups remain unverified.
+- Active milestone: Day 12 request protection/query improvements implemented and verified; review/documentation/Git checkpoint in progress. The user repeatedly requested continuation after the Day 11 manual-review reminder; browser/mobile/zoom/screen-reader checks remain pending and are not claimed passed. The earlier explicit Stripe setup/real-provider/rendered-checkout deferral remains in effect.
 - Completed: read all nine PDF pages, checked the daily schedule, confirmed stack compatibility, and prepared the roadmap.
 - Learning preference: guide the user step by step with explanations.
 - Day 1 implementation: complete; custom FastAPI + PostgreSQL authentication is verified with real database tests and browser flows.
@@ -34,7 +34,8 @@
 - Day 10 implementation checkpoint: `561181c9b33fadc1f68df01609abee66b3d56ca8`, pushed to `origin/main`; `git ls-remote` returned that exact SHA. This completion record follows in a documentation commit; compare current HEAD and GitHub for the latest checkpoint.
 - Day 10 documentation checkpoint: `5c93b7278c90ebb86568a7d58d176b8334152beb`, verified equal to GitHub before Day 11; working tree was clean.
 - Day 11 implementation checkpoint: `a8bf1f87adf641d58e422e0683070843622a16cb`, pushed to `origin/main`; `git ls-remote` returned that exact SHA. This completion record follows in a documentation commit; compare current HEAD and GitHub for the latest checkpoint.
-- Next action: resolve the Day 11 manual review through observed user checks or an explicit deferral before Day 12. Real Stripe ride/top-up transactions, provider-delivered signed notifications and rendered checkout remain deferred. Day 12 has not started.
+- Day 11 documentation checkpoint: `caf8c1af22dec626aade98455052b5237d6327cf`, verified equal to GitHub before Day 12; working tree was clean.
+- Next action: finish Day 12 review, commit, push and exact remote verification before Day 13. Manual UI checks remain pending; real Stripe ride/top-up transactions, provider-delivered signed notifications and rendered checkout remain deferred. Day 13 has not started.
 
 ## Day 1, step 1: local Git setup
 
@@ -246,7 +247,29 @@
 - Final source review passed for all 20 changed/new candidates: actual local secrets absent, JSON and local Markdown links valid, whitespace clean, no backend files changed and ignored private configuration/dependencies/build outputs remain untracked. `.env` retains owner-only permissions.
 - Day 11 code commit `a8bf1f87adf641d58e422e0683070843622a16cb` was pushed successfully; local HEAD and GitHub `refs/heads/main` matched exactly and the working tree was clean before this completion-record edit. Manual review remains unresolved; Day 12 has not started.
 
+## Day 12: request protection, validation and query performance (Git checkpoint pending)
+
+- The user repeatedly requested the next milestone after the Day 11 manual-review reminder. Continued with those checks pending; no tested-UI answer or browser pass is inferred. Local HEAD and GitHub `refs/heads/main` matched Day 11's final documentation checkpoint `caf8c1af22dec626aade98455052b5237d6327cf` with a clean working tree before starting.
+- Added shared fixed-window Redis quotas using an atomic multi-bucket Lua script with bounded timeouts/no retries, HMAC key identities, TTLs, 429/Retry-After and explicit 503 on protection failure. Middleware groups peer quotas; login separately checks normalized email before password work. Quotas cover API reads/writes, auth, estimates, checkout and documents. Health and signed Stripe delivery retain documented exceptions; no Redis data was flushed.
+- Added per-peer WebSocket handshake quotas and a bounded rolling incoming-message window. Existing session/Origin/privacy/location/message-size checks remain. Real TCP flood testing closes the socket with 1008; Redis handshake failure follows the 1013 path. No total concurrent-connection limit is claimed.
+- Added actual/declared/chunked request size checks, a ten-second body read bound, JSON media enforcement, safe no-store/nosniff/referrer/frame headers and strict explicit CORS with GET/POST/PUT and credentials. Preserved the receipt's private/no-store header after the full suite exposed an overbroad initial replacement. Updated local startup commands to `--no-proxy-headers`; production trusted-edge setup remains Day 14 work.
+- Authentication rejects unknown fields; coordinates require finite numeric values and no extras; names/vehicle text reject NUL/invalid Unicode before PostgreSQL/JSONB. Existing password/input redaction and ownership checks are preserved.
+- Added `0009_query_indexes`: two partial ordered history indexes, two ordered wallet indexes and one promo/user composite, replacing three redundant single-column indexes. Development upgrade fingerprinted every row across all 13 application tables before/after: unchanged. Alembic reports the new head with no drift; no development downgrade was run.
+- Removed driver-offer coordinate N+1 queries by selecting and reusing coordinates in the nearby-offer query. A regression returned 20 offers with one coordinate-bearing statement; other authorization/profile reads remain.
+- Real PostgreSQL query plans on a rolled-back `_test` fixture (4,000 rides, 2,000 top-ups and 2,000 credits) selected all four history/wallet indexes without sort nodes, preserving returned rows and balance through upgrade/downgrade. Warm-cache shared-hit blocks: rider history 3 -> 3, driver history 86 -> 3, wallet entries 24 -> 3, top-ups 31 -> 3. These fixture-specific observations are not production performance guarantees.
+- Final backend suite: **263 passed in 32.79s**, with the existing TestClient/HTTPX deprecation warning. Thirty new security cases cover actual Redis concurrency/expiry/atomic denial, rate/Origin/CORS/body/input/config boundaries and failure behavior; further regressions cover frame flooding, offer-query count and migration/query plans. Existing business-flow suites isolate quotas; dedicated limiter tests use real Redis with scoped key cleanup.
+- React component suite: **9 passed**; production build passed. Pip consistency and schema checks passed. No new dependency/package pin was introduced. Documentation is in `docs/SECURITY_PERFORMANCE.md`. Manual UI and user-deferred actual Stripe verification remain pending. Day 13 has not started.
+- Final source review passed across 36 changed/new candidates: actual local secrets absent, Python syntax/local Markdown links valid and whitespace clean. Local `.env` remains owner-only; configuration, dependencies, generated builds and sample PDFs remain ignored. Frontend feature code is unchanged.
+
 ## Daily completion record
+
+Day 12 (checks passed; Git checkpoint pending):
+
+- Scope delivered: shared Redis quotas, bounded HTTP/WebSocket inputs, strict browser origin settings, safe response/input handling, index-only migration and fewer offer-coordinate reads.
+- Verification: 263 backend tests, 9 React checks, production build, pip/schema checks, development row preservation and synthetic real-planner comparisons passed.
+- Known limits: fixed windows/NAT sharing, protected-request Redis dependency, trusted proxy configuration needed at deployment, pending manual UI and actual Stripe provider checks. Existing TestClient warning remains; fixture plans do not establish production capacity.
+- Commit / push / remote verification: pending.
+- Ready for Day 13: no; finish the reviewed Git checkpoint first.
 
 Day 11 (code checkpoint verified; manual checks pending):
 

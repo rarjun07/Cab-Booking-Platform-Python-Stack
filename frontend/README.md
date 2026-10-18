@@ -18,6 +18,8 @@ Day 10 adds an optional promo form before the first checkout and a rider **Walle
 
 Day 11 adds section navigation, role-aware instructions, a rider booking/wallet grid that stacks on narrow screens, consistent touch controls, account-action focus, distinct IDs for repeated trip checkout forms and named history disclosures. Follow [the UI walkthrough](../docs/UI_POLISH.md). Nine jsdom/component checks passed, including selected axe structural rules and keyboard simulations. Actual visual/mobile/zoom/screen-reader checks remain pending; jsdom does not render the layout.
 
+Day 12 keeps the same frontend/API payloads, with server-side quotas and stricter validation. Keep local Redis running, restart FastAPI with `--no-proxy-headers`, and wait when the API reports too many requests. A Redis outage returns a safe unavailable message for protected reads/writes. See [the security walkthrough](../docs/SECURITY_PERFORMANCE.md); UI and real Stripe follow-ups remain pending.
+
 ## What each tool does
 
 - React builds the interactive page from components.
@@ -37,7 +39,7 @@ Keep two terminals open. Each server stays running in its own terminal.
 cd "/Users/arjunsair/Desktop/Python_Developer/Cab Booking Platform/backend"
 source .venv/bin/activate
 export DYLD_FALLBACK_LIBRARY_PATH="/opt/homebrew/lib${DYLD_FALLBACK_LIBRARY_PATH:+:$DYLD_FALLBACK_LIBRARY_PATH}"
-python -m uvicorn app.main:app --reload --ws-max-size 2048
+python -m uvicorn app.main:app --reload --no-proxy-headers --ws-max-size 2048
 ```
 
 If FastAPI is already running on port 8000, reuse it rather than starting another copy.

@@ -16,6 +16,7 @@ from app.config import get_settings
 from app.database import get_db
 from app.models import AuthSession, User
 from app.schemas import LoginInput, RegisterInput, UserPublic
+from app import security
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 password_hasher = PasswordHash.recommended()
@@ -109,6 +110,7 @@ def register(data: RegisterInput, response: Response, db: DB):
 
 @router.post("/login", response_model=UserPublic, dependencies=[Depends(check_origin)])
 def login(data: LoginInput, response: Response, db: DB):
+    security.get_rate_limiter().check([("login_account", str(data.email), 10, 60)])
     user = db.scalar(select(User).where(User.email == str(data.email)))
     valid = password_hasher.verify(data.password, user.password_hash if user else dummy_hash)
     if user is None or not valid:

@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.ride_schemas import Coordinate, RidePublic
 
@@ -13,6 +13,17 @@ class VehicleInfo(BaseModel):
     make: str = Field(min_length=2, max_length=50)
     model: str = Field(min_length=1, max_length=50)
     plate: str = Field(min_length=3, max_length=20)
+
+    @field_validator("make", "model", "plate")
+    @classmethod
+    def safe_vehicle_text(cls, value):
+        if "\x00" in value:
+            raise ValueError("Vehicle details cannot contain a null character.")
+        try:
+            value.encode("utf-8")
+        except UnicodeEncodeError:
+            raise ValueError("Use valid Unicode text in vehicle details.") from None
+        return value
 
 
 class DriverProfileInput(BaseModel):

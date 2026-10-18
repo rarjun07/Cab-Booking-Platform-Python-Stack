@@ -16,6 +16,19 @@ from app.config import get_settings
 from app.database import get_db
 from app.main import app
 from app.events import get_event_publisher
+from app import security
+
+
+class NoQuotas:
+    def check(self, policies):
+        pass
+
+
+@pytest.fixture(autouse=True)
+def isolate_quotas(monkeypatch):
+    # Business-flow tests isolate request counters; dedicated security tests
+    # replace this with real Redis under their own temporary namespace.
+    monkeypatch.setattr(security, "get_rate_limiter", lambda: NoQuotas())
 
 
 class SilentEvents:

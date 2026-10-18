@@ -18,6 +18,8 @@ Day 9 adds completed-trip reviews for the rider and assigned driver, strict 1-5 
 
 Day 10 adds promo rules/redemptions and rider test-wallet top-ups. Apply `0008_promos_wallet`, then optionally run `python -m scripts.seed_demo_promo` to create the local `WELCOME10` example. Promo discounts must precede invoice creation. Wallet credits require signed notifications and canonical test-payment verification; no browser action directly changes a balance. See [promos and wallet](../docs/PROMOS_WALLET.md). Real Stripe verification remains deferred; reading the wallet and applying a promo need no Stripe keys.
 
+Day 12 adds Redis request quotas, body bounds, explicit CORS/Origin configuration, stricter inputs and index migration `0009_query_indexes`. **Redis is now required for protected API requests**; an outage returns 503 instead of bypassing quotas. Health and signed Stripe delivery retain their documented exceptions. Restart the server using `--no-proxy-headers` below so client-IP quotas cannot trust arbitrary local forwarded headers. See [security and performance](../docs/SECURITY_PERFORMANCE.md) for limits, setup, tests and query-plan evidence. No new package is needed.
+
 ## What we added
 
 - `.venv/`: this project's isolated Python environment. It holds installed libraries locally and is ignored by Git.
@@ -46,7 +48,7 @@ From the project root:
 cd backend
 source .venv/bin/activate
 export DYLD_FALLBACK_LIBRARY_PATH="/opt/homebrew/lib${DYLD_FALLBACK_LIBRARY_PATH:+:$DYLD_FALLBACK_LIBRARY_PATH}"
-python -m uvicorn app.main:app --reload --ws-max-size 2048
+python -m uvicorn app.main:app --reload --no-proxy-headers --ws-max-size 2048
 ```
 
 If your terminal is already inside `backend/`, skip `cd backend`.

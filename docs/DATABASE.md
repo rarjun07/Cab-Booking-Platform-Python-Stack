@@ -43,7 +43,7 @@ GiST spatial indexes exist on the driver's current location and both ride points
 
 A model describes the desired table structure in Python. An Alembic migration records a versioned change to the actual database. Changing a model alone does not update an existing database.
 
-We now have eight revisions:
+We now have nine revisions:
 
 1. `0001_auth_baseline`: on a fresh database, creates the frozen Day 1 user/session schema. On an existing Day 1 database, checks its columns, indexes, foreign keys, primary keys, and role constraint before adopting it. It refuses unexpected unversioned tables or schema drift rather than silently stamping them as correct.
 2. `0002_booking_models`: requires an administrator-enabled PostGIS extension, adds user profile fields/defaults, and creates the driver, ride, payment, and review tables and indexes.
@@ -53,6 +53,7 @@ We now have eight revisions:
 6. `0006_receipt_emails` (Day 8): adds versioned receipt-email requests with private server-owned snapshots, bounded delivery attempts, status/timestamps, and ride/user indexes. Existing rides and invoices are unchanged.
 7. `0007_review_timestamps` (Day 9): adds a nullable review creation timestamp with a default for future inserts, preserving unknown legacy dates. Reconciles only the derived user rating average from existing reviews; account identity fields and feedback are preserved.
 8. `0008_promos_wallet` (Day 10): adds a zero-default wallet balance, promo rules/redemptions, durable top-ups and unique credit entries. Extends the global event audit with an exactly-one-target constraint; existing ride events are preserved. Its downgrade deletes Day 10 tables/balance and wallet-targeted audit rows, retaining ride events.
+9. `0009_query_indexes` (Day 12): adds partial ordered rider/driver history indexes and composite wallet/promo indexes, replacing three redundant single-column indexes. Both directions preserve application rows; existing spatial/uniqueness constraints remain. See [query-plan checks](SECURITY_PERFORMANCE.md).
 
 Existing account fields, password hashes, IDs, and session records are retained. Added non-null user fields receive database defaults. Migrations import frozen schema definitions rather than future ORM models, so the historical steps remain stable.
 
@@ -70,7 +71,7 @@ python -m alembic check
 python -m scripts.db_status
 ```
 
-Expected current revision: `0008_promos_wallet (head)`.
+Expected current revision: `0009_query_indexes (head)`.
 
 `alembic check` should report **No new upgrade operations detected**. `db_status` prints the installed PostGIS version and table/column names, without showing credentials or account data.
 

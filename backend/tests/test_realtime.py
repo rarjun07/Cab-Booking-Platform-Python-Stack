@@ -84,7 +84,7 @@ def live_app(test_engine, monkeypatch):
         listener = socket.socket()
         listener.bind(("127.0.0.1", 0))
         port = listener.getsockname()[1]
-        server = uvicorn.Server(uvicorn.Config(app, log_level="error", ws_max_size=2048))
+        server = uvicorn.Server(uvicorn.Config(app, log_level="error", ws_max_size=2048, proxy_headers=False))
         thread = Thread(target=server.run, kwargs={"sockets": [listener]}, daemon=True)
         thread.start()
         deadline = time.monotonic() + 5
@@ -124,6 +124,18 @@ def live_app(test_engine, monkeypatch):
             cleanup.execute(delete(Driver).where(Driver.user_id.in_(list(users.values()))))
             cleanup.execute(delete(User).where(User.id.in_(list(users.values()))))
             cleanup.commit()
+
+
+def test_incoming_frame_flood_is_closed_without_losing_private_state(live_app):
+    with live_app.ws("rider") as ws:
+        receive_kind(ws, "ready")
+        for _ in range(30):
+            ws.send('{"type":"ping"}')
+            receive_kind(ws, "pong")
+        ws.send('{"type":"ping"}')
+        with pytest.raises(ConnectionClosedError) as caught:
+            ws.recv(timeout=2)
+        assert caught.value.rcvd.code == 1008
 
 
 def receive_kind(ws, kind):

@@ -7,6 +7,7 @@
 - Follow `docs/ROADMAP.md` and read `docs/PROGRESS.md` before continuing work.
 - Work on the current day only. Before starting the next day, finish and verify the current day's scope, commit it, push it to the user's confirmed GitHub repository, and verify the remote commit.
 - On 2026-10-18, the user explicitly deferred Day 6 Stripe account setup and real-provider/rendered-checkout verification to continue to Day 7. Carry those checks as unverified follow-ups; this exception does not waive the Day 6 code review, local checks, commit, push, or remote verification before Day 7.
+- After the Day 11 manual-review reminder, the user repeatedly requested the next milestone. Continue to Day 12 while carrying the manual browser/mobile/zoom/screen-reader checks as pending; do not claim they passed or repeatedly block continuation on the same question. Daily code checks and verified Git checkpoints still apply.
 - A GitHub profile URL is not a repository remote. Confirm the repository before creating or changing a remote.
 - Do not claim a day, integration, test, commit, or push is complete without evidence.
 - Keep configuration secrets out of source control. Document required variables with safe examples.

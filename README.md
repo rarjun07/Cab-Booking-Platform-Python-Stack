@@ -46,6 +46,7 @@ Learning preference: step-by-step guidance with explanations.
 - [Ratings and reviews](docs/REVIEWS.md)
 - [Promo codes and test-wallet top-ups](docs/PROMOS_WALLET.md)
 - [UI polish, keyboard access and responsive layout](docs/UI_POLISH.md)
+- [Request protection and query performance](docs/SECURITY_PERFORMANCE.md)
 
 ## Current state
 
@@ -55,4 +56,6 @@ Day 8 history/PDF/Celery email and Day 9 ratings/reviews code checkpoints are pu
 
 Day 10 adds server-priced promo discounts before invoice creation, discount snapshots in trip PDFs, and rider test-wallet top-ups with durable retries, an atomic credit ledger and private live refresh. The schema is at `0008_promos_wallet`; no new dependency or secret is needed beyond the existing optional Stripe configuration. All 230 backend tests, the React build, dependency and schema checks passed at that checkpoint. Day 10 implementation commit `561181c` is pushed and verified against GitHub. Browser interaction and earlier manual UI follow-ups remain unverified; actual Stripe ride/top-up verification remains deferred.
 
-Day 11 implementation now adds role-aware navigation and copy, a responsive booking/wallet layout, consistent controls, keyboard focus after account actions, unique repeated payment-panel labels and accessible history disclosures. Nine focused React component/accessibility checks and the production build passed. Implementation commit `a8bf1f8` is pushed and verified against GitHub. Actual browser/mobile/zoom/screen-reader checks remain pending; no visual or WCAG conformance pass is claimed. See the walkthrough for the manual checklist. Day 12 has not started.
+Day 11 implementation adds role-aware navigation and copy, a responsive booking/wallet layout, consistent controls, keyboard focus after account actions, unique repeated payment-panel labels and accessible history disclosures. Nine focused React component/accessibility checks and the production build passed. Implementation commit `a8bf1f8` is pushed and verified against GitHub. Actual browser/mobile/zoom/screen-reader checks remain pending; the user requested continuation after the reminder. No visual or WCAG conformance pass is claimed.
+
+Day 12 adds atomic Redis quotas, bounded request bodies, explicit credentialed CORS, stricter inputs, targeted indexes and fewer driver-offer coordinate queries. The development schema is at `0009_query_indexes` with all existing application rows preserved. All 263 backend tests, 9 React checks, the build and dependency/schema checks passed. The Day 12 Git checkpoint is pending; Day 13 has not started. Redis is now required for protected API requests. Follow the new walkthrough and restart the local backend with `--no-proxy-headers`.

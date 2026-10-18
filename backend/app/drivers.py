@@ -127,11 +127,13 @@ def ride_offers(user: DriverUser, db: DB):
     driver_point = select(Driver.current_location).where(Driver.user_id == user.id).scalar_subquery()
     distance = func.ST_Distance(geography(Ride.pickup_point), geography(driver_point))
     declined = exists(select(RideDecline.ride_id).where(RideDecline.ride_id == Ride.id, RideDecline.driver_id == user.id))
-    rows = db.execute(select(Ride, distance).where(
+    rows = db.execute(select(Ride, distance, func.ST_X(Ride.pickup_point), func.ST_Y(Ride.pickup_point),
+                             func.ST_X(Ride.drop_point), func.ST_Y(Ride.drop_point)).where(
         Ride.status == "requested", Ride.driver_id.is_(None), ~declined,
         func.ST_DWithin(geography(Ride.pickup_point), geography(driver_point), get_settings().matching_radius_meters),
     ).order_by(distance, Ride.created_at, Ride.id).limit(20)).all()
-    return [RideOffer(ride=ride_response(ride, db), pickup_distance_meters=math.ceil(meters)) for ride, meters in rows]
+    return [RideOffer(ride=ride_response(ride, db, coordinates=(x, y, dx, dy)), pickup_distance_meters=math.ceil(meters))
+            for ride, meters, x, y, dx, dy in rows]
 
 
 @router.get("/rides/{ride_id}/drivers", response_model=list[NearbyDriver])

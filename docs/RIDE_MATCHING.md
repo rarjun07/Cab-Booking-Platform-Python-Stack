@@ -14,7 +14,7 @@ Backend:
 cd "/Users/arjunsair/Desktop/Python_Developer/Cab Booking Platform/backend"
 source .venv/bin/activate
 python -m alembic upgrade head
-python -m uvicorn app.main:app --reload
+python -m uvicorn app.main:app --reload --no-proxy-headers
 ```
 
 Frontend:

@@ -73,7 +73,7 @@ Backend:
 ```bash
 python -m pip install -r requirements-dev.txt
 python -m alembic upgrade head
-python -m uvicorn app.main:app --reload --ws-max-size 2048
+python -m uvicorn app.main:app --reload --no-proxy-headers --ws-max-size 2048
 ```
 
 Restart FastAPI after configuring keys; settings are cached. Keep PostgreSQL and Redis running as documented for earlier days. The new dependencies include `stripe==16.0.0`, `@stripe/react-stripe-js==7.0.0`, and `@stripe/stripe-js==10.1.0`.

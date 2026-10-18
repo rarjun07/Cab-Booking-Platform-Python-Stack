@@ -31,7 +31,7 @@ cd "/Users/arjunsair/Desktop/Python_Developer/Cab Booking Platform/backend"
 source .venv/bin/activate
 python -m alembic upgrade head
 export DYLD_FALLBACK_LIBRARY_PATH="/opt/homebrew/lib${DYLD_FALLBACK_LIBRARY_PATH:+:$DYLD_FALLBACK_LIBRARY_PATH}"
-python -m uvicorn app.main:app --reload --ws-max-size 2048
+python -m uvicorn app.main:app --reload --no-proxy-headers --ws-max-size 2048
 ```
 
 Migration `0007_review_timestamps` adds a nullable creation timestamp, then sets its default for future inserts. Existing reviews keep unknown/null dates; their feedback and IDs are preserved. It reconciles each user's derived average from existing reviews, including zero for users with none. Identity fields, password hashes, sessions, rides and invoices are not rewritten. No `create_all` is used.

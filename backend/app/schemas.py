@@ -7,6 +7,7 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 
 class LoginInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     email: EmailStr = Field(max_length=254)
     password: str = Field(min_length=1, max_length=128, repr=False)
 
@@ -26,6 +27,12 @@ class RegisterInput(LoginInput):
     def clean_name(cls, value: str) -> str:
         if not value.strip():
             raise ValueError("Name cannot be blank.")
+        if "\x00" in value:
+            raise ValueError("Name cannot contain a null character.")
+        try:
+            value.encode("utf-8")
+        except UnicodeEncodeError:
+            raise ValueError("Use valid Unicode text in the name.") from None
         return value.strip()
 
 

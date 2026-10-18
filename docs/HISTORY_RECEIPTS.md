@@ -28,7 +28,7 @@ source .venv/bin/activate
 python -m pip install -r requirements-dev.txt
 python -m alembic upgrade head
 export DYLD_FALLBACK_LIBRARY_PATH="/opt/homebrew/lib${DYLD_FALLBACK_LIBRARY_PATH:+:$DYLD_FALLBACK_LIBRARY_PATH}"
-python -m uvicorn app.main:app --reload --ws-max-size 2048
+python -m uvicorn app.main:app --reload --no-proxy-headers --ws-max-size 2048
 ```
 
 The library path above is for this Apple Silicon Homebrew installation. Use your actual Homebrew library directory on another Mac. It must be set before Python starts and in each PDF/Celery/test terminal. Linux requires Pango/Harfbuzz system libraries instead; consult the linked WeasyPrint instructions. Missing native libraries produce a safe 503 on PDF download, not a fabricated receipt.
@@ -70,7 +70,7 @@ RECEIPT_EMAIL_ENABLED=true SMTP_STARTTLS=false python -m celery -A app.tasks:cel
 Restart the backend terminal with the same local email flags:
 
 ```bash
-RECEIPT_EMAIL_ENABLED=true SMTP_STARTTLS=false python -m uvicorn app.main:app --reload --ws-max-size 2048
+RECEIPT_EMAIL_ENABLED=true SMTP_STARTTLS=false python -m uvicorn app.main:app --reload --no-proxy-headers --ws-max-size 2048
 ```
 
 These process-only flags leave the ignored `.env` unchanged. Defaults use SMTP host `127.0.0.1`, port `1025`, and sender `receipts@example.com`. If your private `.env` overrides SMTP settings, explicitly set the matching local values for both processes; do not point this test at a real mail provider. The optional settings are documented in `backend/.env.example`.

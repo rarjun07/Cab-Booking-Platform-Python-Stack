@@ -27,7 +27,7 @@ cd "/Users/arjunsair/Desktop/Python_Developer/Cab Booking Platform/backend"
 source .venv/bin/activate
 python -m pip install -r requirements-dev.txt
 python -m alembic upgrade head
-python -m uvicorn app.main:app --reload --ws-max-size 2048
+python -m uvicorn app.main:app --reload --no-proxy-headers --ws-max-size 2048
 ```
 
 The dependencies now include `redis==8.1.0` and `websockets==17.2`. Installation is needed only when dependencies are missing or have changed. If an older backend is already running, stop it in its terminal and restart with the command above to apply the transport frame limit. The application also rejects text messages larger than 2 KiB.

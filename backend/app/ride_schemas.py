@@ -8,9 +8,9 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class Coordinate(BaseModel):
-    model_config = ConfigDict(frozen=True, allow_inf_nan=False)
-    latitude: float = Field(ge=-90, le=90)
-    longitude: float = Field(ge=-180, le=180)
+    model_config = ConfigDict(frozen=True, allow_inf_nan=False, extra="forbid")
+    latitude: float = Field(ge=-90, le=90, strict=True)
+    longitude: float = Field(ge=-180, le=180, strict=True)
 
 
 class RouteMetrics(BaseModel):

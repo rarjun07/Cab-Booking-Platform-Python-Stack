@@ -1,5 +1,6 @@
 """Cookie-authenticated WebSockets with Redis pub/sub and short DB sessions."""
 import asyncio
+from collections import deque
 from contextlib import suppress
 import json
 import time
@@ -88,6 +89,7 @@ async def live_connection(websocket: WebSocket, role: Literal["rider", "driver"]
         return
     await websocket.accept()
     tasks = set()
+    frames = deque()
     try:
         async with Redis.from_url(settings.redis_url.get_secret_value(), decode_responses=True, protocol=2,
                                   socket_connect_timeout=1, socket_timeout=2,
@@ -125,6 +127,12 @@ async def live_connection(websocket: WebSocket, role: Literal["rider", "driver"]
                         incoming = receive.result()
                         if incoming["type"] == "websocket.disconnect":
                             return
+                        while frames and frames[0] <= now - 10:
+                            frames.popleft()
+                        if len(frames) >= 30:
+                            await websocket.close(code=1008, reason="Too many live messages.")
+                            return
+                        frames.append(now)
                         text = incoming.get("text")
                         if text is None:
                             await websocket.close(code=1003)

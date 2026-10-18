@@ -69,6 +69,10 @@ class Ride(Base):
         CheckConstraint("driver_id IS NULL OR rider_id <> driver_id", name="ck_rides_distinct_participants"),
         CheckConstraint("ST_X(pickup_point) BETWEEN -180 AND 180 AND ST_Y(pickup_point) BETWEEN -90 AND 90 AND ST_X(drop_point) BETWEEN -180 AND 180 AND ST_Y(drop_point) BETWEEN -90 AND 90", name="ck_rides_coordinates"),
         Index("ix_rides_rider_created", "rider_id", "created_at"),
+        Index("ix_rides_rider_history", "rider_id", text("created_at DESC"), text("id DESC"),
+              postgresql_where=text("status IN ('completed', 'cancelled')")),
+        Index("ix_rides_driver_history", "driver_id", text("created_at DESC"), text("id DESC"),
+              postgresql_where=text("status IN ('completed', 'cancelled')")),
         Index("uq_rides_active_driver", "driver_id", unique=True,
               postgresql_where=text("driver_id IS NOT NULL AND status IN ('accepted', 'arriving', 'in_progress')")),
     )
@@ -193,10 +197,11 @@ class PromoCode(Base):
 class PromoRedemption(Base):
     __tablename__ = "promo_redemptions"
     __table_args__ = (
+        Index("ix_promo_redemptions_code_user", "promo_id", "user_id"),
         CheckConstraint("base_amount > 0 AND discount_amount > 0 AND final_amount >= 50 AND base_amount = discount_amount + final_amount", name="ck_promo_redemptions_amounts"),
     )
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
-    promo_id: Mapped[UUID] = mapped_column(ForeignKey("promo_codes.id", ondelete="RESTRICT"), index=True)
+    promo_id: Mapped[UUID] = mapped_column(ForeignKey("promo_codes.id", ondelete="RESTRICT"))
     ride_id: Mapped[UUID] = mapped_column(ForeignKey("rides.id", ondelete="RESTRICT"), unique=True)
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"), index=True)
     code: Mapped[str] = mapped_column(String(20))
@@ -209,12 +214,13 @@ class PromoRedemption(Base):
 class WalletTopup(Base):
     __tablename__ = "wallet_topups"
     __table_args__ = (
+        Index("ix_wallet_topups_owner_created", "user_id", text("created_at DESC"), text("id DESC")),
         UniqueConstraint("user_id", "request_key", name="uq_wallet_topups_request"),
         CheckConstraint("amount BETWEEN 50 AND 10000 AND currency = 'inr'", name="ck_wallet_topups_amount"),
         CheckConstraint("status IN ('pending','processing','succeeded','failed','cancelled')", name="ck_wallet_topups_status"),
     )
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
-    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"), index=True)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"))
     request_key: Mapped[UUID] = mapped_column(Uuid)
     amount: Mapped[Decimal] = mapped_column(Numeric(10, 2))
     currency: Mapped[str] = mapped_column(String(3), server_default="inr")
@@ -227,11 +233,12 @@ class WalletTopup(Base):
 class WalletEntry(Base):
     __tablename__ = "wallet_entries"
     __table_args__ = (
+        Index("ix_wallet_entries_owner_created", "user_id", text("created_at DESC"), text("id DESC")),
         UniqueConstraint("topup_id", name="uq_wallet_entries_topup"),
         CheckConstraint("amount > 0", name="ck_wallet_entries_amount"),
     )
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
-    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"), index=True)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"))
     topup_id: Mapped[UUID] = mapped_column(ForeignKey("wallet_topups.id", ondelete="RESTRICT"))
     amount: Mapped[Decimal] = mapped_column(Numeric(10, 2))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

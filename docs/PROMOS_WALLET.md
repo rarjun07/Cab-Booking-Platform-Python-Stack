@@ -40,7 +40,7 @@ This local operator command creates `WELCOME10`: 10% off, capped at INR 50, mini
 Start the backend with the native PDF library path set as above:
 
 ```bash
-python -m uvicorn app.main:app --reload --ws-max-size 2048
+python -m uvicorn app.main:app --reload --no-proxy-headers --ws-max-size 2048
 ```
 
 In another terminal:

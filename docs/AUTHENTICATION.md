@@ -28,7 +28,7 @@ Keep these two terminals running:
 # Terminal 1
 cd "/Users/arjunsair/Desktop/Python_Developer/Cab Booking Platform/backend"
 source .venv/bin/activate
-python -m uvicorn app.main:app --reload
+python -m uvicorn app.main:app --reload --no-proxy-headers
 ```
 
 ```bash

@@ -12,7 +12,7 @@ Use the existing [two-terminal startup instructions](../frontend/README.md). On 
 cd "/Users/arjunsair/Desktop/Python_Developer/Cab Booking Platform/backend"
 source .venv/bin/activate
 export DYLD_FALLBACK_LIBRARY_PATH="/opt/homebrew/lib${DYLD_FALLBACK_LIBRARY_PATH:+:$DYLD_FALLBACK_LIBRARY_PATH}"
-python -m uvicorn app.main:app --reload --ws-max-size 2048
+python -m uvicorn app.main:app --reload --no-proxy-headers --ws-max-size 2048
 ```
 
 In a separate terminal:
@@ -85,6 +85,6 @@ Try the following and record the actual browser/device and result in [PROGRESS.m
 - [ ] Reviews/history: select a radio with arrow keys, type a comment, check its draft during live refresh, submit, open/close details, and page history. Ensure each action clearly belongs to its trip.
 - [ ] VoiceOver or another screen reader: check landmarks/headings, field labels/hints, error focus, disclosure state, rating group, live status and wallet value. Check increased contrast/forced-colors where supported.
 
-Actual Stripe Elements rendering, confirmation/failure/retry and a real test webhook remain part of the user's deferred payment setup. Do not substitute fixture results for those checks. Day 12 must wait for this milestone's Git checkpoint and resolution or explicit deferral of the manual review.
+Actual Stripe Elements rendering, confirmation/failure/retry and a real test webhook remain part of the user's deferred payment setup. Do not substitute fixture results for those checks. After the verified Day 11 Git checkpoint and manual-review reminder, the user repeatedly requested continuation. Day 12 proceeds with the manual checklist still pending; no browser pass is claimed.
 
 References: W3C's [reflow](https://www.w3.org/WAI/WCAG22/Understanding/reflow.html), [visible focus](https://www.w3.org/WAI/WCAG22/Understanding/focus-visible.html) and [target size](https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html) guidance; [Vitest setup](https://vitest.dev/guide/), [Testing Library keyboard simulation](https://testing-library.com/docs/user-event/keyboard/) and [axe-core API](https://github.com/dequelabs/axe-core/blob/develop/doc/API.md).

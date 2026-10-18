@@ -7,7 +7,7 @@ from uuid import uuid4
 from fastapi import HTTPException
 from geoalchemy2 import WKTElement
 import pytest
-from sqlalchemy import delete, func, select, text
+from sqlalchemy import delete, event, func, select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -87,6 +87,23 @@ def test_profile_owned_upsert_and_availability_lifecycle(client, driver_account,
     assert offline["current_location"] is None and offline["location_updated_at"] is None
     assert not offline["available_for_matching"]
     assert db.scalar(select(func.count()).select_from(Driver)) == 1
+
+
+def test_twenty_nearby_offers_read_coordinates_in_one_query(client, online_driver, requested_ride, db):
+    for _ in range(19): add_ride(db, requested_ride.rider_id)
+    db.flush()
+    statements = []
+    connection = db.connection()
+    def record(conn, cursor, statement, parameters, context, executemany):
+        if "st_x(" in statement.lower(): statements.append(statement)
+    event.listen(connection, "before_cursor_execute", record)
+    try:
+        result = client.get("/api/drivers/me/offers")
+        assert result.status_code == 200 and len(result.json()) == 20
+        assert len(statements) == 1
+        assert result.json()[0]["ride"]["pickup"] == {"latitude": 28.6139, "longitude": 77.209}
+    finally:
+        event.remove(connection, "before_cursor_execute", record)
 
 
 def test_profile_vehicle_validation_and_verified_cannot_be_self_assigned(client, driver_account, db):
