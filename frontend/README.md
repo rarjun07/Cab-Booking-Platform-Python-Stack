@@ -14,6 +14,8 @@ Day 8 adds `RideHistory` for both roles: account-owned completed/cancelled trips
 
 Day 9 adds **Ratings and review** on completed history entries, **Your rating**, optional plain-text comments, and saved/received feedback. `review.changed` refreshes private summaries; manual controls remain. Background history sync now keeps open review/payment forms mounted so a live refresh does not discard a draft. Follow [the review walkthrough](../docs/REVIEWS.md); browser interaction is still unverified.
 
+Day 10 adds an optional promo form before the first checkout and a rider **Wallet balance** panel with test top-up/retry/resume controls, recent attempts and verified credits. `wallet.changed` triggers private reads; manual refresh remains available. Both checkouts reuse the test-card form. Without Stripe configuration, the balance remains readable and promos work, while top-up checkout is disabled. Follow [promos and wallet](../docs/PROMOS_WALLET.md); real Stripe and manual browser verification remain pending.
+
 ## What each tool does
 
 - React builds the interactive page from components.
@@ -32,6 +34,7 @@ Keep two terminals open. Each server stays running in its own terminal.
 ```bash
 cd "/Users/arjunsair/Desktop/Python_Developer/Cab Booking Platform/backend"
 source .venv/bin/activate
+export DYLD_FALLBACK_LIBRARY_PATH="/opt/homebrew/lib${DYLD_FALLBACK_LIBRARY_PATH:+:$DYLD_FALLBACK_LIBRARY_PATH}"
 python -m uvicorn app.main:app --reload --ws-max-size 2048
 ```
 
@@ -90,7 +93,8 @@ This proxy exists only in the development server. A deployed build will need an 
 | `src/RideBooking.jsx` | Requests estimates, displays their expiry and price, saves a ride, and refreshes its status. |
 | `src/DriverDashboard.jsx` | Restores the driver profile/assignment, saves vehicle details, updates availability/location, and accepts or declines nearby requests. |
 | `src/useRealtime.js` | Opens the account socket, coalesces events, retries connections, and confirms location messages. |
-| `src/RidePayment.jsx` | Prepares owner-only test checkout, hosts Stripe Elements, and reads signed-webhook payment state. |
+| `src/RidePayment.jsx` | Applies an optional promo before invoice creation, prepares owner-only test checkout, and exports the reusable test-card form. |
+| `src/Wallet.jsx` | Reads the rider balance/credit ledger and creates or resumes an owned test top-up; success comes from saved webhook state. |
 | `src/styles.css` | Styles the desktop and mobile layouts. |
 | `vite.config.js` | Configures the React plugin, fixed frontend port, and API proxy. |
 | `package.json` | Lists dependencies and development/build commands. |

@@ -4,19 +4,24 @@ from html import escape
 
 from sqlalchemy import func, select
 
-from app.models import Payment, User
+from app.models import Payment, PromoRedemption, User
 
 
 def receipt_snapshot(ride, db):
-    payment = db.scalar(select(Payment).where(Payment.ride_id == ride.id))
+    # One database snapshot keeps a newly applied promo and its fare together,
+    # including when the caller loaded this ride before the promo committed.
+    trip = type(ride)
+    ride, payment, promo, x, y, dx, dy = db.execute(select(
+        trip, Payment, PromoRedemption,
+        func.ST_X(trip.pickup_point), func.ST_Y(trip.pickup_point),
+        func.ST_X(trip.drop_point), func.ST_Y(trip.drop_point),
+    ).outerjoin(Payment, Payment.ride_id == trip.id)
+     .outerjoin(PromoRedemption, PromoRedemption.ride_id == trip.id)
+     .where(trip.id == ride.id).execution_options(populate_existing=True)).one()
     rider = db.get(User, ride.rider_id)
     driver = db.get(User, ride.driver_id) if ride.driver_id else None
-    x, y, dx, dy = db.execute(select(
-        func.ST_X(type(ride).pickup_point), func.ST_Y(type(ride).pickup_point),
-        func.ST_X(type(ride).drop_point), func.ST_Y(type(ride).drop_point),
-    ).where(type(ride).id == ride.id)).one()
     amount = payment.amount if payment else ride.fare_actual if ride.fare_actual is not None else ride.fare_estimate
-    return {
+    snapshot = {
         "ride_id": str(ride.id), "rider": rider.name, "driver": driver.name if driver else "Not recorded",
         "requested_at": ride.created_at.isoformat(), "pickup": f"{y:.6f}, {x:.6f}",
         "destination": f"{dy:.6f}, {dx:.6f}", "amount": f"{amount:.2f}",
@@ -26,6 +31,9 @@ def receipt_snapshot(ride, db):
         "payment_status": payment.status if payment else "not_paid",
         "paid_at": payment.paid_at.isoformat() if payment and payment.paid_at else None,
     }
+    if promo:
+        snapshot.update(promo_code=promo.code, base_amount=f"{promo.base_amount:.2f}", discount_amount=f"{promo.discount_amount:.2f}")
+    return snapshot
 
 
 def no_external_resources(url, *args, **kwargs):
@@ -43,6 +51,8 @@ def render_receipt_pdf(snapshot):
             if paid else "Trip completion does not confirm payment. This statement is not proof of payment.")
     requested = datetime.fromisoformat(snapshot["requested_at"]).astimezone(timezone.utc).strftime("%d %b %Y, %H:%M UTC")
     paid_at = escape(snapshot["paid_at"] or "Not recorded")
+    promo_rows = (f'<tr><th>Before discount</th><td>INR {value("base_amount")}</td></tr>'
+                  f'<tr><th>Promo {value("promo_code")}</th><td>- INR {value("discount_amount")}</td></tr>') if snapshot.get("promo_code") else ""
     html = f"""<!doctype html><html lang="en"><meta charset="utf-8"><title>{title}</title>
     <style>
     @page {{ size:A4; margin:20mm; @bottom-center {{ content:'Cab Booking Platform | Learning project | ' counter(page); font:9pt sans-serif; color:#60706c; }} }}
@@ -54,14 +64,14 @@ def render_receipt_pdf(snapshot):
     .amount {{ background:#edf3ef; padding:16pt; margin-top:24pt; border-left:4pt solid #456854; }}
     .amount strong {{ display:block; font-size:27pt; margin-top:4pt; }}
     table {{ width:100%; border-collapse:collapse; table-layout:fixed; }}
-    th,td {{ padding:9pt 0; border-bottom:1px solid #dce4df; vertical-align:top; text-align:left; overflow-wrap:anywhere; }}
+    th,td {{ padding:6pt 0; border-bottom:1px solid #dce4df; vertical-align:top; text-align:left; overflow-wrap:anywhere; }}
     th {{ width:32%; color:#52665e; font-weight:normal; padding-right:10pt; }}
-    .note {{ margin-top:22pt; padding:12pt; border:1px solid #dce4df; font-size:10pt; }}
+    .note {{ margin-top:16pt; padding:10pt; border:1px solid #dce4df; font-size:10pt; }}
     .footer {{ font-size:9pt; color:#52665e; margin-top:18pt; }}
     </style><body><p class="brand">Cab Booking Platform</p><h1>{title}</h1>
     <p class="reference">Ride reference: {value('ride_id')}</p>
     <div class="amount">{value('amount_label')}<strong>INR {value('amount')}</strong></div>
-    <h2>Trip details</h2><table><tr><th>Trip status</th><td>Completed</td></tr>
+    <h2>Trip details</h2><table>{promo_rows}<tr><th>Trip status</th><td>Completed</td></tr>
     <tr><th>Requested</th><td>{requested}</td></tr>
     <tr><th>Rider</th><td>{value('rider')}</td></tr><tr><th>Driver</th><td>{value('driver')}</td></tr>
     <tr><th>Pickup</th><td>{value('pickup')}</td></tr><tr><th>Destination</th><td>{value('destination')}</td></tr>

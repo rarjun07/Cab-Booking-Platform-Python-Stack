@@ -19,6 +19,9 @@ from app.events import get_event_publisher
 
 
 class SilentEvents:
+    def wallet_changed(self, user_id):
+        pass
+
     def review_changed(self, ride):
         pass
 

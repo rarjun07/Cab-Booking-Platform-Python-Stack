@@ -70,6 +70,9 @@ class EventPublisher:
             recipients.append(("driver", ride.driver_id))
         return self.publish(recipients, "review.changed", ride.id, matching=False)
 
+    def wallet_changed(self, user_id):
+        return self.publish([("rider", user_id)], "wallet.changed", matching=False)
+
 
 @lru_cache
 def get_event_publisher():

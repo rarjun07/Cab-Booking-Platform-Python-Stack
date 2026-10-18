@@ -44,9 +44,12 @@ Learning preference: step-by-step guidance with explanations.
 - [First-week tests and manual checklist](docs/TESTING.md)
 - [Ride history, PDF receipts, and local receipt email](docs/HISTORY_RECEIPTS.md)
 - [Ratings and reviews](docs/REVIEWS.md)
+- [Promo codes and test-wallet top-ups](docs/PROMOS_WALLET.md)
 
 ## Current state
 
 Days 1-7 code checkpoints are pushed and verified. The user explicitly deferred Day 6 Stripe setup, a real test transaction, Stripe-delivered webhooks, and rendered checkout verification on 2026-10-18; payment-provider calls in automated tests use a controlled double.
 
-Day 8 history/PDF/Celery email code is pushed and verified; email is disabled by default with a free local-catcher setup in its walkthrough. Day 9 adds private completed-trip reviews for both roles, own/counterpart rating summaries, duplicate-safe submissions, concurrency-safe average updates, and private live notifications. The schema is at `0007_review_timestamps`; no new dependency or secret is needed. All 184 backend tests, the React build, dependency and schema checks pass. Day 9 implementation commit `90bc586` is pushed and verified against GitHub. Browser interaction and earlier manual UI follow-ups remain unverified; real Stripe verification remains deferred. Day 10 has not started.
+Day 8 history/PDF/Celery email and Day 9 ratings/reviews code checkpoints are pushed and verified. Email is disabled by default with a free local-catcher setup in its walkthrough.
+
+Day 10 adds server-priced promo discounts before invoice creation, discount snapshots in trip PDFs, and rider test-wallet top-ups with durable retries, an atomic credit ledger and private live refresh. The schema is at `0008_promos_wallet`; no new dependency or secret is needed beyond the existing optional Stripe configuration. All 230 backend tests, the React build, dependency and schema checks pass. Day 10's Git checkpoint is pending. Browser interaction and earlier manual UI follow-ups remain unverified; actual Stripe ride/top-up verification remains deferred. Day 11 has not started.

@@ -24,8 +24,8 @@ def test_fresh_database_upgrade_and_downgrade_are_transactional(test_engine):
             command.downgrade(config, "base")
             assert "users" not in inspect(connection).get_table_names()
             command.upgrade(config, "head")
-            assert {"users", "auth_sessions", "drivers", "rides", "payments", "reviews", "receipt_emails"} <= set(inspect(connection).get_table_names())
-            assert connection.scalar(text("SELECT version_num FROM alembic_version")) == "0007_review_timestamps"
+            assert {"users", "auth_sessions", "drivers", "rides", "payments", "reviews", "receipt_emails", "promo_codes", "promo_redemptions", "wallet_topups", "wallet_entries"} <= set(inspect(connection).get_table_names())
+            assert connection.scalar(text("SELECT version_num FROM alembic_version")) == "0008_promos_wallet"
             command.check(config)
         finally:
             transaction.rollback()
@@ -109,6 +109,34 @@ def test_review_migration_preserves_legacy_feedback_without_inventing_dates(test
             assert connection.scalar(text("SELECT password_hash FROM users WHERE id=:id"), {"id": rider}) == "preserve-review-user-hash"
             connection.execute(text("INSERT INTO reviews (id,ride_id,rater_id,rated_id,rating) VALUES (:id,:ride,:driver,:rider,4)"), {"id": uuid4(), "ride": ride, "driver": driver, "rider": rider})
             assert connection.scalar(text("SELECT created_at FROM reviews WHERE rater_id=:id"), {"id": driver}) is not None
+        finally:
+            transaction.rollback()
+
+
+def test_wallet_migration_preserves_ride_payment_events_and_starts_balances_at_zero(test_engine):
+    with test_engine.connect() as connection:
+        transaction = connection.begin()
+        try:
+            config = config_for(connection)
+            command.downgrade(config, "0007_review_timestamps")
+            user_id, ride_id, payment_id = uuid4(), uuid4(), uuid4()
+            event_id = "evt_legacy"+uuid4().hex
+            connection.execute(text("INSERT INTO users (id,name,email,password_hash,role) VALUES (:id,'Legacy wallet user',:email,'keep-wallet-user-hash','rider')"), {"id": user_id, "email": f"{user_id}@example.com"})
+            connection.execute(text("INSERT INTO rides (id,rider_id,status,pickup_point,drop_point,fare_estimate) VALUES (:id,:rider,'completed',ST_SetSRID(ST_MakePoint(77.209,28.6139),4326),ST_SetSRID(ST_MakePoint(77.2295,28.6129),4326),104.38)"), {"id": ride_id, "rider": user_id})
+            connection.execute(text("INSERT INTO payments (id,ride_id,amount,status) VALUES (:id,:ride,104.38,'succeeded')"), {"id": payment_id, "ride": ride_id})
+            connection.execute(text("INSERT INTO payment_events (stripe_event_id,payment_id,event_type) VALUES (:id,:payment,'payment_intent.succeeded')"), {"id": event_id, "payment": payment_id})
+            command.upgrade(config, "head")
+            assert connection.scalar(text("SELECT wallet_balance FROM users WHERE id=:id"), {"id": user_id}) == Decimal("0.00")
+            row = connection.execute(text("SELECT payment_id,wallet_topup_id FROM payment_events WHERE stripe_event_id=:id"), {"id": event_id}).one()
+            assert (row.payment_id, row.wallet_topup_id) == (payment_id, None)
+            assert connection.scalar(text("SELECT amount FROM payments WHERE id=:id"), {"id": payment_id}) == Decimal("104.38")
+            topup_id = uuid4()
+            connection.execute(text("INSERT INTO wallet_topups (id,user_id,request_key,amount,status,credited_at) VALUES (:id,:user,:key,100,'succeeded',now())"), {"id": topup_id, "user": user_id, "key": uuid4()})
+            connection.execute(text("INSERT INTO payment_events (stripe_event_id,wallet_topup_id,event_type) VALUES (:id,:topup,'payment_intent.succeeded')"), {"id": "evt_wallet"+uuid4().hex, "topup": topup_id})
+            command.downgrade(config, "0007_review_timestamps")
+            assert connection.scalar(text("SELECT payment_id FROM payment_events WHERE stripe_event_id=:id"), {"id": event_id}) == payment_id
+            assert connection.scalar(text("SELECT password_hash FROM users WHERE id=:id"), {"id": user_id}) == "keep-wallet-user-hash"
+            command.upgrade(config, "head")
         finally:
             transaction.rollback()
 

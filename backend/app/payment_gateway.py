@@ -37,6 +37,17 @@ class StripeGateway:
         except stripe.StripeError:
             raise HTTPException(503, "Could not verify the test payment. Please retry.") from None
 
+    def create_topup(self, topup):
+        try:
+            return self.client().v1.payment_intents.create(
+                {"amount": int(topup.amount * 100), "currency": topup.currency,
+                 "payment_method_types": ["card"], "capture_method": "automatic",
+                 "metadata": {"project": "cab-booking-platform", "kind": "wallet_topup",
+                              "wallet_topup_id": str(topup.id), "user_id": str(topup.user_id)}},
+                options={"idempotency_key": f"cab-booking-wallet:{topup.id}"}).to_dict()
+        except stripe.StripeError:
+            raise HTTPException(503, "Could not prepare the test top-up. Please retry.") from None
+
 
 def get_payment_gateway():
     return StripeGateway()

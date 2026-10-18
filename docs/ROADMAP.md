@@ -156,6 +156,22 @@ On 2026-10-18, the user explicitly chose to defer Stripe setup and real-provider
 - [x] Commit, push and verify the Day 9 implementation checkpoint (`90bc586`) before Day 10.
 - [ ] Manual browser follow-up: submit/read both participants' feedback, check averages/reload, and confirm drafts survive live sync. Earlier browser automation remains blocked.
 
+## Day 10 checklist (local verification; Git checkpoint pending)
+
+- [x] Verify Day 9's final documentation checkpoint on GitHub (`2bd51f9`) with a clean working tree.
+- [x] Add completed-trip promos before invoice creation, eligibility/limit checks, frozen Decimal discounts and invoice/PDF integration.
+- [x] Add Alembic `0008_promos_wallet`, preserve ride payment events and initialize existing balances to zero.
+- [x] Add durable top-up retry keys, owned resume/status and signed canonical test-payment validation.
+- [x] Atomically credit a uniquely linked ledger/balance once; verify concurrent requests/events/top-ups and promo/invoice races.
+- [x] Add React promo/wallet panels, reusable test-card form and private live refresh with manual fallbacks.
+- [x] Pass 230 backend tests, React build, schema/dependency checks and visual inspection of the discounted sample PDF; reproduce/fix a concurrent promo/receipt stale-total race.
+- [x] Document local `WELCOME10` setup, workflow, retry/reconciliation limits and deferred checks in `PROMOS_WALLET.md`.
+- [ ] Review, commit, push and verify the Day 10 implementation before Day 11.
+- [ ] Deferred with the user's earlier Stripe setup decision: verify a real Stripe sandbox top-up and signed provider delivery credit exactly once.
+- [ ] Manual browser follow-up: apply a promo, inspect the PDF, check wallet balance/retry/resume/reload and rendered payment success/failure.
+
+Controlled provider tests and locally signed fixtures verify application logic; they do not satisfy the outstanding real-provider check. Wallet spending/refunds are outside Day 10's top-up scope. Day 11 has not started.
+
 ## Choices to resolve at the relevant milestone
 
 - Day 1 choices resolved: step-by-step teaching, confirmed GitHub repository, custom FastAPI/PostgreSQL authentication, and SQLAlchemy with local PostgreSQL.

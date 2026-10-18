@@ -137,3 +137,6 @@ footer { display: flex; justify-content: space-between; gap: 16px; padding: 24px
 .review-panel textarea { width: 100%; padding: .75rem; border: 1px solid #b7c8be; border-radius: 6px; font: inherit; resize: vertical; }
 .review-comment { white-space: pre-wrap; overflow-wrap: anywhere; }
 .saved-review { padding: .75rem 0; border-bottom: 1px solid #dce4df; }
+.promo-form { margin: 1rem 0; }
+.promo-form input { max-width: 16rem; padding: .65rem; font: inherit; text-transform: uppercase; }
+.wallet-card h3 { margin-top: 1.5rem; }

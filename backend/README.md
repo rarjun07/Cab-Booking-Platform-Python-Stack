@@ -16,6 +16,8 @@ Day 8 adds account-owned history, WeasyPrint PDF documents and Celery receipt-em
 
 Day 9 adds completed-trip reviews for the rider and assigned driver, strict 1-5 ratings, private feedback, idempotent submissions and concurrency-safe rating aggregation. Apply `0007_review_timestamps`; no new dependency or service is needed. See [ratings and reviews](../docs/REVIEWS.md) for eligibility, locking, API payloads and the two-account walkthrough.
 
+Day 10 adds promo rules/redemptions and rider test-wallet top-ups. Apply `0008_promos_wallet`, then optionally run `python -m scripts.seed_demo_promo` to create the local `WELCOME10` example. Promo discounts must precede invoice creation. Wallet credits require signed notifications and canonical test-payment verification; no browser action directly changes a balance. See [promos and wallet](../docs/PROMOS_WALLET.md). Real Stripe verification remains deferred; reading the wallet and applying a promo need no Stripe keys.
+
 ## What we added
 
 - `.venv/`: this project's isolated Python environment. It holds installed libraries locally and is ignored by Git.
@@ -74,6 +76,6 @@ The root URL `/` returns 404; use `/docs` to explore the API or open the React a
 
 ## Scope of this checkpoint
 
-The health endpoint checks API availability only. Custom authentication uses PostgreSQL user/session tables. Day 2 adds PostGIS and the driver, ride, payment, and review models through Alembic. Day 3 implements estimates, ride creation, and owned ride status; Day 4 adds driver availability and matching; Day 5 adds realtime and trip progression. Day 6 payment code is tested locally but awaits real Stripe sandbox verification. Reviews remain later work. See the progress log for verification and Git checkpoints.
+The health endpoint checks API availability only. Custom authentication uses PostgreSQL user/session tables. Day 2 adds PostGIS and the driver, ride, payment, and review models through Alembic. Day 3 implements estimates, ride creation, and owned ride status; Day 4 adds driver availability and matching; Day 5 adds realtime and trip progression. Days 8-10 add history/PDF/email, reviews, promos and test-wallet credits. Ride and wallet payment code is tested locally but awaits real Stripe sandbox verification. Wallet spending is outside the current scope. See the progress log for verification and Git checkpoints.
 
 Reference: [FastAPI's official first-steps tutorial](https://fastapi.tiangolo.com/tutorial/first-steps/).

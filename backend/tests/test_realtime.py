@@ -373,3 +373,21 @@ def test_review_broker_messages_are_reduced_to_minimal_notification_fields():
     ride_id = str(uuid4())
     raw = json.dumps({"type": "review.changed", "ride_id": ride_id, "comment": "Do not forward", "rating": 5})
     assert public_event(raw) == {"type": "review.changed", "ride_id": ride_id}
+
+
+def test_wallet_notifications_are_private_and_cannot_change_balance(live_app):
+    with live_app.ws("rider") as rider, live_app.ws("driver") as driver, live_app.ws("other") as outsider:
+        for ws in (rider, driver, outsider):
+            receive_kind(ws, "ready")
+        with live_app.publisher.client.pubsub() as matching:
+            matching.subscribe(f"{live_app.prefix}:matching")
+            assert matching.get_message(timeout=1)["type"] == "subscribe"
+            live_app.publisher.wallet_changed(live_app.users["rider"])
+            assert receive_kind(rider, "wallet.changed") == {"type": "wallet.changed"}
+            assert matching.get_message(timeout=0.2) is None
+        assert json.loads(driver.recv(timeout=2))["type"] == "sync"
+        assert json.loads(outsider.recv(timeout=2))["type"] == "sync"
+        with live_app.http("rider") as http:
+            assert http.get("/api/wallet").json()["balance"] == "0.00"
+        raw = json.dumps({"type": "wallet.changed", "balance": 999, "email": "private@example.com"})
+        assert public_event(raw) == {"type": "wallet.changed"}

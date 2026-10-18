@@ -4,6 +4,7 @@ import RideBooking from './RideBooking.jsx'
 import DriverDashboard from './DriverDashboard.jsx'
 import useRealtime from './useRealtime.js'
 import RideHistory from './RideHistory.jsx'
+import Wallet from './Wallet.jsx'
 
 const connectionMessages = {
   idle: 'Ready when you are. Start FastAPI, then check the connection.',
@@ -48,7 +49,7 @@ export default function App() {
           <span className="brand-mark" aria-hidden="true">C</span>
           Cab Booking Platform
         </a>
-        <span className="day-label">Day 09 <span aria-hidden="true">/</span> Ratings & reviews</span>
+        <span className="day-label">Day 10 <span aria-hidden="true">/</span> Promos & wallet</span>
       </header>
 
       <main id="main">
@@ -66,6 +67,7 @@ export default function App() {
         {user?.role === 'driver'
           ? <DriverDashboard key={user.id} onSessionExpired={setUser} live={live} />
           : <RideBooking key={user?.id ?? 'signed-out'} user={user} onSessionExpired={setUser} liveRevision={live.revision} />}
+        {user?.role === 'rider' && <Wallet key={user.id} liveRevision={live.revision} onSessionExpired={setUser} />}
         {user && <RideHistory key={user.id} user={user} liveRevision={live.revision} onSessionExpired={setUser} />}
 
         <section className="connection-card" aria-labelledby="connection-title">

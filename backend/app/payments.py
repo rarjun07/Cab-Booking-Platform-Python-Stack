@@ -15,11 +15,11 @@ from app.models import Payment, PaymentEvent, Ride
 from app.payment_gateway import Gateway, payment_settings
 from app.payment_schemas import PaymentInput, PaymentIntentPublic, PaymentPublic
 from app.rides import RiderUser
+from app.stripe_validation import canonical_status, checkout_secret, validate_test_intent
 
 router = APIRouter(prefix="/api", tags=["Test payments"])
 HANDLED_EVENTS = {"payment_intent.succeeded", "payment_intent.processing", "payment_intent.payment_failed", "payment_intent.canceled"}
 MAX_WEBHOOK_BYTES = 262144
-INTENT_STATUSES = {"succeeded", "processing", "canceled", "requires_payment_method", "requires_confirmation", "requires_action"}
 
 
 def owned_ride(ride_id, user, db, *, lock=False):
@@ -35,17 +35,9 @@ def owned_ride(ride_id, user, db, *, lock=False):
 def validate_intent(intent, payment, ride):
     expected_metadata = {"project": "cab-booking-platform", "payment_id": str(payment.id),
                          "ride_id": str(ride.id), "rider_id": str(ride.rider_id)}
-    metadata = intent.get("metadata")
-    intent_id = intent.get("id")
-    if (intent.get("object") != "payment_intent" or intent.get("livemode") is not False
-            or intent.get("status") not in INTENT_STATUSES
-            or not isinstance(intent_id, str) or len(intent_id) > 255 or not re.fullmatch(r"pi_[A-Za-z0-9]+", intent_id)
-            or intent.get("amount") != int(payment.amount * 100) or intent.get("currency") != payment.currency
-            or not isinstance(metadata, dict) or any(metadata.get(key) != value for key, value in expected_metadata.items())
-            or (payment.stripe_payment_intent_id and intent["id"] != payment.stripe_payment_intent_id)):
+    validate_test_intent(intent, payment.amount, payment.currency, expected_metadata, payment.stripe_payment_intent_id)
+    if intent["metadata"].get("kind") not in (None, "ride"):
         raise HTTPException(409, "The test payment does not match this ride's invoice.")
-    if intent.get("status") == "succeeded" and intent.get("amount_received") != int(payment.amount * 100):
-        raise HTTPException(409, "The received test amount does not match the invoice.")
 
 
 @router.get("/payments/config")
@@ -90,10 +82,7 @@ def prepare_payment(ride_id: UUID, data: PaymentInput, user: RiderUser, db: DB, 
     payment.stripe_payment_intent_id = intent["id"]
     db.commit()
     db.refresh(payment)
-    client_secret = intent.get("client_secret") if intent.get("status") not in ("succeeded", "processing") and payment.status != "succeeded" else None
-    requires_form = intent["status"] not in ("succeeded", "processing") and payment.status != "succeeded"
-    if requires_form and (not isinstance(client_secret, str) or not client_secret.startswith(f'{intent["id"]}_secret_')):
-        raise HTTPException(502, "The payment service returned an invalid checkout.")
+    client_secret = checkout_secret(intent, paid=payment.status == "succeeded")
     return PaymentIntentPublic(payment=PaymentPublic.model_validate(payment), publishable_key=settings.stripe_publishable_key,
                                client_secret=client_secret, stripe_status=intent["status"])
 
@@ -119,7 +108,8 @@ def process_webhook(payload, signature, db, gateway, events):
     payment = db.scalar(select(Payment).where(Payment.stripe_payment_intent_id == intent_id)
                         .with_for_update().execution_options(populate_existing=True))
     if payment is None:
-        return {"received": True, "ignored": True}
+        from app.wallet import process_topup_webhook
+        return process_topup_webhook(event, intent_id, db, gateway, events)
     recorded = db.get(PaymentEvent, event["id"])
     if recorded:
         if recorded.payment_id != payment.id:
@@ -129,12 +119,7 @@ def process_webhook(payload, signature, db, gateway, events):
     # Fetch canonical state under the payment lock: deliveries can arrive out of order.
     intent = gateway.retrieve(intent_id)
     validate_intent(intent, payment, ride)
-    statuses = {"succeeded": "succeeded", "processing": "processing", "canceled": "cancelled",
-                "requires_payment_method": "failed" if intent.get("last_payment_error") else "pending",
-                "requires_confirmation": "pending", "requires_action": "pending"}
-    status = statuses.get(intent.get("status"))
-    if status is None:
-        raise HTTPException(409, "Unsupported Stripe payment state.")
+    status = canonical_status(intent)
     if payment.status not in ("succeeded", "refunded", "cancelled"):
         payment.status = status
         if status == "succeeded":

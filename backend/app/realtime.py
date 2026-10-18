@@ -59,7 +59,7 @@ def public_event(raw):
     """Ignore unknown/malformed broker data; never forward raw messages."""
     try:
         data = json.loads(raw)
-        if data["type"] in ("matching.changed", "driver.changed"):
+        if data["type"] in ("matching.changed", "driver.changed", "wallet.changed"):
             return {"type": data["type"]}
         if data["type"] in ("ride.changed", "ride.location", "payment.changed", "review.changed"):
             return {"type": data["type"], "ride_id": str(UUID(data["ride_id"]))}

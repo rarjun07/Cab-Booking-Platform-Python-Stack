@@ -13,6 +13,8 @@ from app.realtime import router as realtime_router
 from app.payments import router as payments_router
 from app.history import router as history_router
 from app.reviews import router as reviews_router
+from app.promos import router as promos_router
+from app.wallet import router as wallet_router
 
 
 @asynccontextmanager
@@ -28,6 +30,8 @@ app.include_router(realtime_router)
 app.include_router(payments_router)
 app.include_router(history_router)
 app.include_router(reviews_router)
+app.include_router(promos_router)
+app.include_router(wallet_router)
 
 
 @app.exception_handler(RequestValidationError)

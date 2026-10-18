@@ -2,7 +2,7 @@
 
 ## Current checkpoint
 
-- Active milestone: Day 9 ratings/reviews implemented, verified with backend/build checks, committed, pushed and verified against GitHub; awaiting the user's next instruction. The user explicitly deferred Stripe setup and real-provider/rendered-checkout verification on 2026-10-18. Earlier visual/manual React follow-ups remain unverified.
+- Active milestone: Day 10 promos/test-wallet implemented and locally verified; review/documentation and Git checkpoint are being finished before Day 11. The user explicitly deferred Stripe setup and real-provider/rendered-checkout verification on 2026-10-18. Earlier visual/manual React follow-ups remain unverified.
 - Completed: read all nine PDF pages, checked the daily schedule, confirmed stack compatibility, and prepared the roadmap.
 - Learning preference: guide the user step by step with explanations.
 - Day 1 implementation: complete; custom FastAPI + PostgreSQL authentication is verified with real database tests and browser flows.
@@ -30,7 +30,8 @@
 - Day 8 implementation checkpoint: `f70387c95fbf4e69736a3a7ee6b41f6c875da426`, pushed to `origin/main`; `git ls-remote` returned that exact SHA. This completion record follows in a documentation commit; compare current HEAD with GitHub for the latest checkpoint.
 - Day 8 documentation checkpoint: `9f59017d2d4d39453aefb2a1fcd6f0c0e3a61e2f`, verified equal to GitHub before Day 9; working tree was clean.
 - Day 9 implementation checkpoint: `90bc586f9690772e0cac78654cb73a5d73305a76`, pushed to `origin/main`; `git ls-remote` returned that exact SHA. This completion record follows in a documentation commit; compare current HEAD and GitHub for the latest checkpoint.
-- Next action: await the user's next instruction; Day 10 covers promo codes and wallet features. Stripe setup, a real test transaction, signed Stripe delivery, and rendered checkout remain explicitly deferred. Day 10 has not started.
+- Day 9 documentation checkpoint: `2bd51f92f28fc3dc40877991207d9ca22ba1dc9c`, verified equal to GitHub before Day 10; working tree was clean.
+- Next action: finish the Day 10 review, commit, push and exact remote verification. Real Stripe ride/top-up transactions, provider-delivered signed notifications and rendered checkout remain deferred; manual React checks remain pending. Day 11 has not started.
 
 ## Day 1, step 1: local Git setup
 
@@ -212,7 +213,30 @@
 - Final source review: all 25 changed/new candidates passed Python syntax, local document-link, whitespace and actual-credential absence checks. Private `.env` remains ignored with mode 0600; generated/dependency output remains ignored. No dependencies were added or updated. Test-owned TCP/worker/SMTP resources were cleaned up; existing PostgreSQL and Redis services were not changed.
 - Walkthrough, payloads, lock/aggregation explanation, migration behavior and manual steps are in `docs/REVIEWS.md`. Day 9 implementation commit `90bc586f9690772e0cac78654cb73a5d73305a76` was pushed successfully and GitHub `refs/heads/main` matched exactly. Day 10 has not started.
 
+## Day 10: promo codes and test-wallet top-ups (Git checkpoint pending)
+
+- User requested the next milestone, then continued the active work. Local HEAD and GitHub `refs/heads/main` matched Day 9's final documentation checkpoint `2bd51f92f28fc3dc40877991207d9ca22ba1dc9c` with a clean working tree before starting. The earlier Stripe setup/real-provider deferral is carried forward explicitly.
+- Added completed-trip rider-only promo application before invoice creation, normalized code validation, active dates, capped percentages, minimum fares and global/personal usage limits. A unique immutable redemption snapshots before/discount/final amounts, and the saved actual fare feeds later checkout/PDFs. Identical retries return the existing snapshot; stacking/removal and changes after invoice creation are rejected.
+- Added Alembic `0008_promos_wallet`: zero-default balance, promo rules/redemptions, top-up request UUIDs, unique credit ledger and an exactly-one-target extension to the global Stripe event audit. Upgrade applied to development with no schema drift. Migration tests preserve existing ride payment/events and explicitly exercise destructive wallet-data downgrade only within a rolled-back test transaction.
+- Created `WELCOME10` locally: 10% capped at INR 50, minimum INR 80, one use/rider, 100 total, valid 30 days. Rerunning the seed preserved the existing code/rules/expiry. No public promo-management API or synthetic development wallet credit was added.
+- Added rider wallet reads, bounded INR 50-10,000 test top-up creation/retry and owned resume/status. Durable user/request UUIDs and provider idempotency keys survive response uncertainty. Old unlinked attempts are refused for reconciliation. Browser/provider responses cannot credit balances.
+- Reused raw-body Stripe SDK signature verification and shared canonical test-intent checks for ID, amount/received amount, currency and owner/project/kind metadata. One transaction records the event, unique credit, balance and success time; top-up/user locks prevent duplicate/lost concurrent credits. Terminal state cannot regress. No actual Stripe provider call or charge was used in tests.
+- Added React promo and wallet panels, reuse of the test-card form, saved attempt retry/resume, recent credits, private `wallet.changed` refresh and manual fallbacks. Missing Stripe configuration disables top-ups while allowing balance reads/promos. Manual browser interaction remains unverified.
+- Added discount rows to PDF snapshots. Rendered and visually inspected the synthetic INR 104.38 -> INR 10.44 discount -> INR 93.94 unpaid statement as one readable page, retaining its not-proof-of-payment notice. Existing unpromoted receipt fingerprints remain stable.
+- Review found a receipt race: a promo committed after the caller loaded the ride could display a new discount with the old total. A two-session regression reproduced that failure. Snapshot generation now refreshes and reads ride, invoice and redemption in one database statement; the regression passes without holding a ride lock through PDF rendering.
+- Final checks after that fix: **230 backend tests passed** (28.01s) with the existing TestClient/HTTPX deprecation warning; React production build passed; `pip check` found no broken requirements; `alembic check` found no new operations. Tests include eight separate-connection concurrency scenarios for promo retries/limits/invoice races and wallet retries/duplicate or distinct events/different top-ups, plus real Redis/WebSocket private notification checks.
+- New beginner walkthrough: `docs/PROMOS_WALLET.md`. No new dependency or secret introduced. Actual Stripe ride/top-up sandbox transactions, real signed deliveries and rendered checkout remain deferred. Wallet spending, withdrawals, refunds and automated reconciliation are outside this milestone. Day 11 has not started.
+- Final source review: actual local credentials absent from all 29 changed/new candidates; Python syntax, local Markdown links and whitespace checks passed. Private `.env` remains owner-only; local environment/dependencies/build output and sample PDFs remain ignored.
+
 ## Daily completion record
+
+Day 10 (local verification; Git checkpoint pending):
+
+- Scope delivered: promo rules and frozen discounts, PDF discount details, rider test-wallet top-up retry/resume, verified-event credit ledger and private live refresh.
+- Verification: 230 backend tests, React build, pip/schema checks and one-page PDF visual inspection passed. Provider requests are controlled doubles and signed event fixtures; no actual Stripe transaction is claimed.
+- Known limits: user-deferred Stripe setup/real-provider/rendered-checkout checks and previous manual browser checks remain unverified. Wallet spending/refunds and scheduled reconciliation are not implemented. Existing TestClient warning remains.
+- Implementation commit / push / remote verification: pending.
+- Ready for next milestone: no; finish this Git checkpoint first. Day 11 has not started.
 
 Day 9:
 

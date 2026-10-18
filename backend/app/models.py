@@ -20,6 +20,7 @@ class User(Base):
     __table_args__ = (
         CheckConstraint("role IN ('rider', 'driver')", name="valid_user_role"),
         CheckConstraint("rating_avg BETWEEN 0 AND 5", name="ck_users_rating_avg"),
+        CheckConstraint("wallet_balance >= 0", name="ck_users_wallet_balance"),
     )
 
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
@@ -30,6 +31,7 @@ class User(Base):
     phone: Mapped[str | None] = mapped_column(String(32), unique=True)
     profile_pic: Mapped[str | None] = mapped_column(String(2048))
     rating_avg: Mapped[Decimal] = mapped_column(Numeric(3, 2), server_default="0")
+    wallet_balance: Mapped[Decimal] = mapped_column(Numeric(14, 2), server_default="0")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
@@ -118,9 +120,11 @@ class Payment(Base):
 
 class PaymentEvent(Base):
     __tablename__ = "payment_events"
+    __table_args__ = (CheckConstraint("(payment_id IS NOT NULL AND wallet_topup_id IS NULL) OR (payment_id IS NULL AND wallet_topup_id IS NOT NULL)", name="ck_payment_events_target"),)
 
     stripe_event_id: Mapped[str] = mapped_column(String(255), primary_key=True)
-    payment_id: Mapped[UUID] = mapped_column(ForeignKey("payments.id", ondelete="RESTRICT"), index=True)
+    payment_id: Mapped[UUID | None] = mapped_column(ForeignKey("payments.id", ondelete="RESTRICT"), index=True)
+    wallet_topup_id: Mapped[UUID | None] = mapped_column(ForeignKey("wallet_topups.id", ondelete="RESTRICT"), index=True)
     event_type: Mapped[str] = mapped_column(String(80))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
@@ -162,3 +166,72 @@ class ReceiptEmail(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     last_attempt_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class PromoCode(Base):
+    __tablename__ = "promo_codes"
+    __table_args__ = (
+        UniqueConstraint("code", name="uq_promo_codes_code"),
+        CheckConstraint("code ~ '^[A-Z0-9]{3,20}$'", name="ck_promo_codes_code"),
+        CheckConstraint("percent_off BETWEEN 1 AND 90", name="ck_promo_codes_percent"),
+        CheckConstraint("min_fare >= 0 AND max_discount > 0", name="ck_promo_codes_amounts"),
+        CheckConstraint("max_uses > 0 AND per_user_limit > 0 AND per_user_limit <= max_uses", name="ck_promo_codes_limits"),
+        CheckConstraint("expires_at > starts_at", name="ck_promo_codes_dates"),
+    )
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
+    code: Mapped[str] = mapped_column(String(20))
+    percent_off: Mapped[int] = mapped_column(SmallInteger)
+    min_fare: Mapped[Decimal] = mapped_column(Numeric(10, 2))
+    max_discount: Mapped[Decimal] = mapped_column(Numeric(10, 2))
+    max_uses: Mapped[int] = mapped_column(Integer)
+    per_user_limit: Mapped[int] = mapped_column(Integer)
+    active: Mapped[bool] = mapped_column(Boolean, server_default=text("true"))
+    starts_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class PromoRedemption(Base):
+    __tablename__ = "promo_redemptions"
+    __table_args__ = (
+        CheckConstraint("base_amount > 0 AND discount_amount > 0 AND final_amount >= 50 AND base_amount = discount_amount + final_amount", name="ck_promo_redemptions_amounts"),
+    )
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
+    promo_id: Mapped[UUID] = mapped_column(ForeignKey("promo_codes.id", ondelete="RESTRICT"), index=True)
+    ride_id: Mapped[UUID] = mapped_column(ForeignKey("rides.id", ondelete="RESTRICT"), unique=True)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"), index=True)
+    code: Mapped[str] = mapped_column(String(20))
+    base_amount: Mapped[Decimal] = mapped_column(Numeric(10, 2))
+    discount_amount: Mapped[Decimal] = mapped_column(Numeric(10, 2))
+    final_amount: Mapped[Decimal] = mapped_column(Numeric(10, 2))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class WalletTopup(Base):
+    __tablename__ = "wallet_topups"
+    __table_args__ = (
+        UniqueConstraint("user_id", "request_key", name="uq_wallet_topups_request"),
+        CheckConstraint("amount BETWEEN 50 AND 10000 AND currency = 'inr'", name="ck_wallet_topups_amount"),
+        CheckConstraint("status IN ('pending','processing','succeeded','failed','cancelled')", name="ck_wallet_topups_status"),
+    )
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"), index=True)
+    request_key: Mapped[UUID] = mapped_column(Uuid)
+    amount: Mapped[Decimal] = mapped_column(Numeric(10, 2))
+    currency: Mapped[str] = mapped_column(String(3), server_default="inr")
+    stripe_payment_intent_id: Mapped[str | None] = mapped_column(String(255), unique=True)
+    status: Mapped[str] = mapped_column(String(20), server_default="pending")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    credited_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class WalletEntry(Base):
+    __tablename__ = "wallet_entries"
+    __table_args__ = (
+        UniqueConstraint("topup_id", name="uq_wallet_entries_topup"),
+        CheckConstraint("amount > 0", name="ck_wallet_entries_amount"),
+    )
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"), index=True)
+    topup_id: Mapped[UUID] = mapped_column(ForeignKey("wallet_topups.id", ondelete="RESTRICT"))
+    amount: Mapped[Decimal] = mapped_column(Numeric(10, 2))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

@@ -5,16 +5,16 @@ import { loadStripe } from '@stripe/stripe-js/pure'
 const stripeClients = new Map()
 const money = (value) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(Number(value))
 
-function stripeClient(key) {
+export function stripeClient(key) {
   if (!stripeClients.has(key)) stripeClients.set(key, loadStripe(key))
   return stripeClients.get(key)
 }
 
-async function paymentRequest(path, { post = false, signal } = {}) {
+async function paymentRequest(path, { post = false, signal, body } = {}) {
   const response = await fetch(`/api/${path}`, {
     method: post ? 'POST' : 'GET', credentials: 'same-origin',
     headers: post ? { 'Content-Type': 'application/json' } : {},
-    body: post ? '{}' : undefined,
+    body: post ? JSON.stringify(body ?? {}) : undefined,
     signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(20000)]) : AbortSignal.timeout(20000),
   })
   const data = await response.json()
@@ -26,7 +26,7 @@ async function paymentRequest(path, { post = false, signal } = {}) {
   return data
 }
 
-function TestCardForm({ amount, onConfirmed }) {
+export function TestCardForm({ amount, onConfirmed, label = 'Pay' }) {
   const stripe = useStripe()
   const elements = useElements()
   const [submitting, setSubmitting] = useState(false)
@@ -63,7 +63,7 @@ function TestCardForm({ amount, onConfirmed }) {
   return <form className="stripe-form" onSubmit={confirm} aria-busy={submitting}>
     <PaymentElement options={{ layout: 'tabs' }} onReady={() => { setReady(true); setUnavailable(false) }} onLoadError={() => setUnavailable(true)} />
     {unavailable && !ready && <p role="status">The Stripe test form has not loaded. Check your connection, then reopen checkout.</p>}
-    <button type="submit" disabled={!stripe || !elements || !ready || submitting}>{submitting ? 'Confirming test payment…' : `Pay ${money(amount)} in test mode`}</button>
+    <button type="submit" disabled={!stripe || !elements || !ready || submitting}>{submitting ? 'Confirming test payment…' : `${label} ${money(amount)} in test mode`}</button>
     <p className="auth-message auth-error" role="status" aria-live="polite">{message}</p>
   </form>
 }
@@ -77,6 +77,8 @@ export default function RidePayment({ rideId, liveRevision, onSessionExpired }) 
   const [busy, setBusy] = useState(false)
   const [awaitingWebhook, setAwaitingWebhook] = useState(false)
   const [message, setMessage] = useState('')
+  const [promo, setPromo] = useState(null)
+  const [promoCode, setPromoCode] = useState('')
   const mounted = useRef(true)
   const controller = useRef(null)
 
@@ -91,16 +93,19 @@ export default function RidePayment({ rideId, liveRevision, onSessionExpired }) 
   }
 
   useEffect(() => {
+    if (busy) return
     const abort = new AbortController()
     async function read() {
       try {
-        const [saved, available] = await Promise.all([
+        const [saved, available, discount] = await Promise.all([
           paymentRequest(`rides/${rideId}/payment`, { signal: abort.signal }),
           paymentRequest('payments/config', { signal: abort.signal }),
+          paymentRequest(`rides/${rideId}/promo`, { signal: abort.signal }),
         ])
         if (abort.signal.aborted) return
         setPayment(saved)
         setConfig(available)
+        setPromo(discount)
         if (saved?.status === 'succeeded') { setCheckout(null); setAwaitingWebhook(false) }
         if (['failed', 'cancelled', 'refunded'].includes(saved?.status)) setAwaitingWebhook(false)
       } catch (error) { if (!abort.signal.aborted) showError(error) }
@@ -108,7 +113,20 @@ export default function RidePayment({ rideId, liveRevision, onSessionExpired }) 
     }
     read()
     return () => abort.abort()
-  }, [rideId, liveRevision, onSessionExpired])
+  }, [rideId, liveRevision, busy, onSessionExpired])
+
+  async function applyPromo(event) {
+    event.preventDefault()
+    const abort = new AbortController()
+    controller.current = abort
+    setBusy(true)
+    setMessage('')
+    try {
+      const discount = await paymentRequest(`rides/${rideId}/promo`, { post: true, signal: abort.signal, body: { code: promoCode } })
+      if (mounted.current && !abort.signal.aborted) { setPromo(discount); setMessage('Promo applied. Your discounted fare is fixed for this trip.') }
+    } catch (error) { if (mounted.current && !abort.signal.aborted) showError(error) }
+    finally { if (mounted.current) setBusy(false) }
+  }
 
   async function refresh() {
     const saved = await paymentRequest(`rides/${rideId}/payment`)
@@ -162,6 +180,11 @@ export default function RidePayment({ rideId, liveRevision, onSessionExpired }) 
     <h4 id={`payment-${rideId}`}>{paid ? 'Test payment received' : 'Pay for your completed trip'}</h4>
     <p className="fare-note">Use Stripe test details only. No real money is charged in this project’s test mode.</p>
     {loading ? <p role="status">Checking payment status…</p> : <>
+      {promo && <p className="fare-note">{promo.code}: {money(promo.base_amount)} − {money(promo.discount_amount)} = {money(promo.final_amount)}</p>}
+      {!payment && !promo && <form onSubmit={applyPromo} className="promo-form">
+        <label htmlFor={`promo-${rideId}`}>Promo code (optional, before checkout)</label>
+        <div className="auth-actions"><input id={`promo-${rideId}`} value={promoCode} onChange={(event) => setPromoCode(event.target.value)} minLength={3} maxLength={20} pattern="[A-Za-z0-9]+" autoCapitalize="characters" required disabled={busy} /><button className="secondary-button" type="submit" disabled={busy || !promoCode.trim()}>Apply promo</button></div>
+      </form>}
       {payment && <p role="status">Invoice: {money(payment.amount)} · {payment.status.replaceAll('_', ' ')}</p>}
       {paid && <p>Payment verified by the backend’s signed Stripe webhook.</p>}
       {!paid && config?.configured === false && <p>Stripe test payments are awaiting local configuration. Follow the Day 6 setup guide before opening checkout.</p>}
