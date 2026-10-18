@@ -4,7 +4,7 @@ from functools import lru_cache
 from decimal import Decimal
 from pathlib import Path
 
-from pydantic import Field, HttpUrl, SecretStr, field_validator
+from pydantic import EmailStr, Field, HttpUrl, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -34,6 +34,15 @@ class Settings(BaseSettings):
     stripe_secret_key: SecretStr | None = None
     stripe_publishable_key: str | None = None
     stripe_webhook_secret: SecretStr | None = None
+    receipt_email_enabled: bool = False
+    celery_broker_url: SecretStr | None = None
+    celery_key_prefix: str = Field(default="cab_booking:tasks:v1:", pattern=r"^[a-zA-Z0-9:_-]{1,80}$")
+    smtp_host: str = Field(default="127.0.0.1", min_length=1, max_length=253)
+    smtp_port: int = Field(default=1025, ge=1, le=65535)
+    smtp_starttls: bool = True
+    smtp_username: str | None = None
+    smtp_password: SecretStr | None = None
+    smtp_from: EmailStr = "receipts@example.com"
     allowed_origins: list[str] = [
         "http://127.0.0.1:5173",
         "http://localhost:5173",
@@ -68,6 +77,19 @@ class Settings(BaseSettings):
         if value is not None and not value.get_secret_value().startswith("whsec_"):
             raise ValueError("Use the signing secret for the test webhook listener.")
         return value
+
+    @model_validator(mode="after")
+    def smtp_transport(self):
+        if not self.smtp_starttls and self.smtp_host not in {"127.0.0.1", "localhost", "::1"}:
+            raise ValueError("Unencrypted SMTP is allowed only for a loopback mail catcher.")
+        if bool(self.smtp_username) != bool(self.smtp_password):
+            raise ValueError("Configure both SMTP_USERNAME and SMTP_PASSWORD, or neither.")
+        return self
+
+    @field_validator("smtp_username", "smtp_password", mode="before")
+    @classmethod
+    def empty_smtp_credentials(cls, value):
+        return None if value == "" else value
 
 
 @lru_cache

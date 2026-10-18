@@ -2,7 +2,7 @@
 
 ## Current checkpoint
 
-- Active milestone: Day 7 testing checkpoint passed, committed, pushed, and verified; awaiting the user's next instruction. Day 6 code was also pushed and verified; the user explicitly deferred Stripe setup and real-provider/rendered-checkout verification on 2026-10-18. Day 3-5 visual/manual UI follow-ups remain unverified.
+- Active milestone: Day 8 history, PDF receipts and background receipt email; final review/Git checkpoint pending. The user explicitly deferred Stripe setup and real-provider/rendered-checkout verification on 2026-10-18. Earlier visual/manual React follow-ups remain unverified.
 - Completed: read all nine PDF pages, checked the daily schedule, confirmed stack compatibility, and prepared the roadmap.
 - Learning preference: guide the user step by step with explanations.
 - Day 1 implementation: complete; custom FastAPI + PostgreSQL authentication is verified with real database tests and browser flows.
@@ -26,7 +26,8 @@
 - Day 5 documentation checkpoint: `0d465f99e1c8585741f9d610add7dd63f3258422`, verified against GitHub before Day 6; working tree was clean.
 - Day 6 code checkpoint: `d2e9e778969be525ee5ff1a7983b1e185ffbf63d`, pushed to `origin/main`; `git ls-remote` returned that exact SHA. Working tree was clean before Day 7 began.
 - Day 7 implementation checkpoint: `4746d1750d948db614feca1619a552a3e22a41fc`, pushed to `origin/main`; `git ls-remote` returned that exact SHA. This completion record follows in a documentation commit; compare current HEAD with GitHub for the latest checkpoint.
-- Next action: await the user's next instruction. Day 8 will add ride history, PDF receipts, and configured background email tasks. Stripe setup, a real test transaction, signed Stripe delivery, and rendered checkout are explicitly deferred by the user, not verified. Day 8 has not started.
+- Day 7 documentation checkpoint: `f415d80e2dbeacfcd8c4666818a5e818e3276ea9`, verified equal to GitHub before Day 8; the working tree was clean.
+- Next action: finish Day 8 source review, commit/push and remote verification. Stripe setup, a real test transaction, signed Stripe delivery, and rendered checkout remain explicitly deferred. Day 9 has not started.
 
 ## Day 1, step 1: local Git setup
 
@@ -175,6 +176,23 @@
 - Known follow-ups: user-deferred Stripe setup/real sandbox payment/signed provider webhook/rendered checkout, pending Day 3-5/manual browser flows, and the existing TestClient/HTTPX deprecation warning. Day 7 can track these explicitly as allowed by the roadmap; it does not claim them resolved.
 - Source review: Python syntax, local documentation links, absence of actual local credentials in all five changed/new files, and whitespace checks passed. Day 7 changes contain tests and documentation only.
 - Day 7 implementation commit: `4746d1750d948db614feca1619a552a3e22a41fc`; push succeeded and GitHub `refs/heads/main` matched exactly. Day 8 has not started.
+
+## Day 8: history and receipts (in progress)
+
+- User requested the next milestone. Verified local HEAD and GitHub `refs/heads/main` both equal Day 7's final documentation checkpoint `f415d80e2dbeacfcd8c4666818a5e818e3276ea9` before starting; working tree was clean.
+- Rechecked the mentor's Day 8 requirements: history endpoints, WeasyPrint PDF receipts and Celery email tasks. Added pinned Celery 5.6.3, WeasyPrint 70.0 and runtime dependencies; pinned PDF-extraction/loopback-catcher dependencies are development-only. Existing package versions remain unchanged.
+- Installed Pango 1.58.2 with Homebrew and its native dependencies; Homebrew updated/cleaned required library dependencies as part of installation. Existing PostgreSQL and Redis services were not restarted or reconfigured. On this Mac, Python needs `DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib` before startup; documented for API, worker and tests. Initial native import failed without it and then passed with it.
+- Added role/participant-owned completed/cancelled history, bounded stable `(created_at, id)` cursor pagination, payment summaries and private completed-trip PDF downloads. No fare/payment state is changed by downloads. Unpaid trips produce explicitly unpaid trip statements; succeeded test ledger entries produce test receipts.
+- WeasyPrint renders escaped server-owned fields with external/file resource fetching denied. No arbitrary HTML, recipient, amount or template is accepted. PDF includes only trip participant names and trip/payment details, without account emails/passwords/provider secrets.
+- Applied Alembic `0006_receipt_emails` to development; no schema drift. Durable job snapshots/fingerprints deduplicate repeated requests per participant/document; changed payment data creates a new version. Job IDs alone cross Redis. Saved jobs survive publication failure for explicit republishing; no automatic outbox sweep is claimed.
+- Added Celery worker with its own DB sessions, job row locks, duplicate skipping, three bounded attempts, a one-minute failed-job manual retry cooldown and ten-second SMTP I/O timeout. Stable Message-ID does not guarantee exactly-once SMTP delivery across a crash before DB commit; this limit is documented. Sent means accepted by SMTP, not inbox delivery.
+- React adds paginated history for both roles, protected PDF downloads, explicit email request/status controls and older rider payment details. Email remains disabled in ordinary local configuration; the documented local catcher never forwards messages externally. No actual external email provider is configured or tested.
+- Verification: **157 backend tests passed in 19.80 seconds**, including 12 new history/PDF/job/local-worker checks. A real Celery subprocess consumed duplicate copies over uniquely namespaced Redis, the loopback SMTP catcher accepted one message/PDF attachment, and PostgreSQL recorded sent with one attempt. Synthetic committed test rows and only the test's Redis keys were removed; no Redis flush occurred.
+- React production build passed (28 modules); pip check and Alembic drift check passed. Migration upgrade/downgrade and existing-account/invoice preservation tests passed at the new head. One existing TestClient/HTTPX deprecation warning remains.
+- Generated an ignored synthetic unpaid PDF, rendered it to PNG using Poppler and visually inspected the one-page layout: readable text, correct amount/status, and no clipping/overlap. New PDF content tests cover paid amount selection, escaping, completion/ownership guards and private response headers.
+- Browser interaction remains unverified after the earlier URL-policy rejection; no workaround or visual React pass is claimed. Manual history/download/email follow-up is recorded in `docs/HISTORY_RECEIPTS.md`. Earlier Day 3-5 manual checks and the user-deferred real Stripe checks remain pending.
+- Source review: Python syntax, local documentation links, whitespace and absence of actual local credentials passed for all 26 changed/new files. Existing runtime version pins are retained; private `.env` remains ignored with mode 0600, and generated samples/dependencies/build output remain ignored. All test-owned worker/SMTP/socket processes were cleaned up; no development preview server was started in this milestone.
+- No Day 8 commit or push yet; Day 9 has not started.
 
 ## Daily completion record
 

@@ -24,6 +24,7 @@ Use the existing backend virtual environment:
 ```bash
 cd "/Users/arjunsair/Desktop/Python_Developer/Cab Booking Platform/backend"
 source .venv/bin/activate
+export DYLD_FALLBACK_LIBRARY_PATH="/opt/homebrew/lib${DYLD_FALLBACK_LIBRARY_PATH:+:$DYLD_FALLBACK_LIBRARY_PATH}"
 python -m pytest tests/test_week_one_flow.py -q
 python -m pytest -q
 python -m pip check
@@ -31,6 +32,8 @@ python -m alembic check
 ```
 
 `pytest` checks expected behavior, `pip check` checks installed dependency compatibility, and `alembic check` detects model changes lacking a migration. The test fixture requires a separate PostgreSQL database whose name ends in `_test`; it refuses the development database. PostGIS must already be enabled by an administrator. See [DATABASE.md](DATABASE.md).
+
+Since Day 8, the full suite also needs Pango/WeasyPrint and uses a local Celery subprocess/SMTP catcher for receipt tests. The library-path line above is for this Mac's Homebrew installation. See [HISTORY_RECEIPTS.md](HISTORY_RECEIPTS.md) for native dependencies and the full receipt walkthrough. These tests send no external email.
 
 The journey test rolls back its accounts and rides. The concurrency/realtime suites create committed synthetic fixtures in the test database and remove them afterward. Redis tests use unique channel prefixes and do not flush Redis. They briefly bind local test servers and close them afterward. No test needs real Stripe keys.
 

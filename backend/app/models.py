@@ -140,3 +140,24 @@ class Review(Base):
     rated_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"), index=True)
     rating: Mapped[int] = mapped_column(SmallInteger)
     comment: Mapped[str | None] = mapped_column(Text)
+
+
+class ReceiptEmail(Base):
+    __tablename__ = "receipt_emails"
+    __table_args__ = (
+        UniqueConstraint("ride_id", "user_id", "document_key", name="uq_receipt_emails_document"),
+        CheckConstraint("status IN ('queued', 'sent', 'failed')", name="ck_receipt_emails_status"),
+        CheckConstraint("attempts BETWEEN 0 AND 3", name="ck_receipt_emails_attempts"),
+    )
+
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
+    ride_id: Mapped[UUID] = mapped_column(ForeignKey("rides.id", ondelete="RESTRICT"), index=True)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"), index=True)
+    document_key: Mapped[str] = mapped_column(String(64))
+    recipient: Mapped[str] = mapped_column(String(254))
+    snapshot: Mapped[dict] = mapped_column(JSONB)
+    status: Mapped[str] = mapped_column(String(20), server_default="queued")
+    attempts: Mapped[int] = mapped_column(Integer, server_default="0")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    last_attempt_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

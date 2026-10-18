@@ -11,7 +11,8 @@ An internship project based on the mentor's **Cab Booking Platform - Python Stac
 - Routing: OSRM with OpenStreetMap data, the user's free alternative to Google Maps.
 - Realtime: FastAPI WebSockets backed by Redis Pub/Sub.
 - Payments: Stripe sandbox integration is in progress; real provider verification remains pending.
-- Additional services will be introduced on their scheduled days: Celery and Docker.
+- Background jobs: Celery with the existing Redis broker; SMTP receipt delivery can be tested with a local mail catcher.
+- Docker remains scheduled for Day 14.
 
 ## How we will work
 
@@ -41,7 +42,10 @@ Learning preference: step-by-step guidance with explanations.
 - [Live ride and location updates](docs/LIVE_UPDATES.md)
 - [Stripe test-payment setup and verification](docs/PAYMENTS.md)
 - [First-week tests and manual checklist](docs/TESTING.md)
+- [Ride history, PDF receipts, and local receipt email](docs/HISTORY_RECEIPTS.md)
 
 ## Current state
 
-Days 1-5 are implemented and pushed. Day 6 adds stored-fare test invoices, Stripe PaymentIntents, signed/deduplicated webhooks, and a React Payment Element; its code commit `d2e9e77` is pushed and verified against GitHub. The development schema is at `0005_test_payments`. On 2026-10-18, the user chose to defer Stripe setup, a real test transaction, Stripe-delivered webhooks, and rendered checkout verification and continue to Day 7. Day 7 adds a connected rider/driver API journey test and a manual checklist; all 145 backend tests pass, and its implementation checkpoint `4746d17` is pushed and verified against GitHub. React build, pip check, and schema checks also passed before the test-only Day 7 changes. Payment API calls in automated tests use a controlled provider double. Earlier manual UI follow-ups and the deferred Stripe checks remain unverified. Day 8 has not started.
+Days 1-7 code checkpoints are pushed and verified. The user explicitly deferred Day 6 Stripe setup, a real test transaction, Stripe-delivered webhooks, and rendered checkout verification on 2026-10-18; payment-provider calls in automated tests use a controlled double.
+
+Day 8 adds private rider/driver history, WeasyPrint trip documents, and Celery receipt-email jobs. All 157 backend tests pass, including real Redis/worker/local SMTP attachment delivery; the React build, dependency and schema checks pass. The schema is at `0006_receipt_emails`. Email is disabled by default, with a free local-catcher setup in the walkthrough. Day 8's Git checkpoint is pending. Browser interaction and earlier manual UI follow-ups remain unverified; real Stripe verification remains deferred. Day 9 has not started.

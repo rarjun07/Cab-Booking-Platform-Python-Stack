@@ -126,3 +126,7 @@ footer { display: flex; justify-content: space-between; gap: 16px; padding: 24px
   .journey li { gap: 12px; }
   footer { flex-direction: column; gap: 4px; }
 }
+.history-list { list-style: none; padding: 0; margin: 1.5rem 0; }
+.history-list > li { padding: 1.4rem 0; border-bottom: 1px solid #dce4df; overflow-wrap: anywhere; }
+.history-list > li:first-child { border-top: 1px solid #dce4df; }
+.history-list .auth-actions { margin-top: 1rem; }

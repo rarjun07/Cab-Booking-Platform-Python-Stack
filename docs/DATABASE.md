@@ -14,6 +14,7 @@ Day 1 introduced accounts and sessions for the user's choice of custom authentic
 | `reviews` | Ride, reviewer, reviewed user, rating, and optional comment. | One review per reviewer per ride. |
 | `ride_declines` (Day 4) | Driver decisions to decline specific requests. | Composite ride/driver primary key; both reference their existing records. |
 | `payment_events` (Day 6) | Processed signed Stripe event IDs, types, and timestamps. | References one local payment; primary key prevents replaying an event. |
+| `receipt_emails` (Day 8) | Requesting account, private recipient/snapshot, document fingerprint, attempts and delivery status. | References ride/user; unique document per account/ride prevents duplicate jobs. |
 
 The database protects basic integrity: referenced records must exist, fares/distances/durations cannot be negative, ratings must be 1-5, reviewers cannot rate themselves, and pickup/drop/driver coordinates must be in range.
 
@@ -45,6 +46,7 @@ We now have five revisions:
 3. `0003_ride_quote` (Day 3): adds nullable, unique `rides.quote_id` to prevent duplicate ride creation when a signed estimate is retried. Existing rides can retain a null quote ID.
 4. `0004_driver_matching` (Day 4): adds nullable driver location timestamps, geography expression indexes, a partial unique active-driver assignment index, and the `ride_declines` table. Legacy locations are ineligible for matching until refreshed. Existing duplicate active assignments must be reconciled before this migration can create its unique index.
 5. `0005_test_payments` (Day 6): adds payment INR currency, creation/paid timestamps, and a payment-event audit table. Existing payment amounts, status, and provider references are preserved; old `paid_at` values remain null rather than inventing payment times.
+6. `0006_receipt_emails` (Day 8): adds versioned receipt-email requests with private server-owned snapshots, bounded delivery attempts, status/timestamps, and ride/user indexes. Existing rides and invoices are unchanged.
 
 Existing account fields, password hashes, IDs, and session records are retained. Added non-null user fields receive database defaults. Migrations import frozen schema definitions rather than future ORM models, so the historical steps remain stable.
 
@@ -62,7 +64,7 @@ python -m alembic check
 python -m scripts.db_status
 ```
 
-Expected current revision: `0005_test_payments (head)`.
+Expected current revision: `0006_receipt_emails (head)`.
 
 `alembic check` should report **No new upgrade operations detected**. `db_status` prints the installed PostGIS version and table/column names, without showing credentials or account data.
 

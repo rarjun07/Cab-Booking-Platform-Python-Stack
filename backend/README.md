@@ -12,6 +12,8 @@ Day 5 adds cookie-authenticated FastAPI WebSockets and Redis notifications, manu
 
 Day 6 adds Stripe test PaymentIntents and verified payment webhooks. Apply migration `0005_test_payments` and follow [the payment setup walkthrough](../docs/PAYMENTS.md) to configure private test keys and the listener. `python -m scripts.configure_test_payments` saves entered test keys without echoing them. Without configuration, checkout stays disabled; real Stripe provider verification is pending.
 
+Day 8 adds account-owned history, WeasyPrint PDF documents and Celery receipt-email jobs. Apply `0006_receipt_emails` and follow [the history/receipt walkthrough](../docs/HISTORY_RECEIPTS.md). On this Mac, install Pango and set `DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib` before starting Python. PDF download works with email disabled; the walkthrough shows a free local mail catcher and worker.
+
 ## What we added
 
 - `.venv/`: this project's isolated Python environment. It holds installed libraries locally and is ignored by Git.
@@ -39,6 +41,7 @@ From the project root:
 ```bash
 cd backend
 source .venv/bin/activate
+export DYLD_FALLBACK_LIBRARY_PATH="/opt/homebrew/lib${DYLD_FALLBACK_LIBRARY_PATH:+:$DYLD_FALLBACK_LIBRARY_PATH}"
 python -m uvicorn app.main:app --reload --ws-max-size 2048
 ```
 

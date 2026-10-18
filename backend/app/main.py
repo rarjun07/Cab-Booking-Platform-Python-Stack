@@ -11,6 +11,7 @@ from app.drivers import router as drivers_router
 from app.events import get_event_publisher
 from app.realtime import router as realtime_router
 from app.payments import router as payments_router
+from app.history import router as history_router
 
 
 @asynccontextmanager
@@ -24,6 +25,7 @@ app.include_router(rides_router)
 app.include_router(drivers_router)
 app.include_router(realtime_router)
 app.include_router(payments_router)
+app.include_router(history_router)
 
 
 @app.exception_handler(RequestValidationError)

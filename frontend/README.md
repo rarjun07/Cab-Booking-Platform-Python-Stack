@@ -10,6 +10,8 @@ Day 5 adds live updates through `useRealtime`, an announced connection status, a
 
 Day 6 adds `RidePayment` to completed rides. It lazy-loads Stripe.js, renders Stripe's Payment Element, confirms test payments, and displays only backend-verified payment success. Test keys belong in the backend's ignored `.env`; no frontend secret variables are required. Follow [the payment walkthrough](../docs/PAYMENTS.md). The build passes; rendered Stripe checkout and a real provider transaction remain unverified until setup is complete.
 
+Day 8 adds `RideHistory` for both roles: account-owned completed/cancelled trips, cursor pagination, completed-trip PDF downloads, explicit email requests/status, and older rider payment details. Follow [history and receipts](../docs/HISTORY_RECEIPTS.md) for the local mail-catcher/worker setup. Email is disabled by default; PDF download is independent. The React build passes, while browser interaction remains a manual follow-up.
+
 ## What each tool does
 
 - React builds the interactive page from components.

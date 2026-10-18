@@ -127,7 +127,20 @@ On 2026-10-18, the user explicitly chose to defer Stripe setup and real-provider
 - [x] Run the complete backend regression suite and review first-week issues: 145 tests passed; no new application fix was required.
 - [x] Document beginner-friendly test commands and a manual two-account checklist in `TESTING.md`.
 - [x] Explicitly track pending browser checks, user-deferred Stripe verification, and the existing TestClient warning.
-- [x] Review, commit, push, and verify the Day 7 implementation checkpoint (`4746d17`); Day 8 has not started.
+- [x] Review, commit, push, and verify the Day 7 implementation checkpoint (`4746d17`); final documentation checkpoint `f415d80` was verified before Day 8.
+
+## Day 8 checklist (in progress)
+
+- [x] Verify Day 7's final documentation checkpoint on GitHub (`f415d80`) with a clean working tree.
+- [x] Add participant-owned completed/cancelled history with stable bounded cursor pagination.
+- [x] Generate private completed-trip PDFs with WeasyPrint, escaped text and no external resource fetches; distinguish unpaid statements from test-payment receipts.
+- [x] Add durable versioned email requests through Alembic, Celery/Redis publication, bounded worker retries and explicit status access.
+- [x] Add React history, PDF download, email controls, and older rider payment details.
+- [x] Verify real Celery/Redis/local SMTP delivery with a PDF attachment and duplicate-task handling; no external email sent.
+- [x] Pass 157 backend tests, React build, pip consistency and schema checks; render/visually inspect the PDF sample.
+- [x] Document native PDF dependencies, four-terminal local setup, retry/delivery limits and manual UI follow-ups.
+- [ ] Review, commit, push, and verify the Day 8 checkpoint before Day 9.
+- [ ] Manual/visual React follow-up: page history, download/open a PDF, use the local catcher and check account separation; prior browser automation rejection remains unresolved.
 
 ## Choices to resolve at the relevant milestone
 
