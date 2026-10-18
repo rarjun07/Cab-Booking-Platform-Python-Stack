@@ -2,7 +2,7 @@
 
 ## Current checkpoint
 
-- Active milestone: Day 12 request protection/query improvements implemented and verified; review/documentation/Git checkpoint in progress. The user repeatedly requested continuation after the Day 11 manual-review reminder; browser/mobile/zoom/screen-reader checks remain pending and are not claimed passed. The earlier explicit Stripe setup/real-provider/rendered-checkout deferral remains in effect.
+- Active milestone: Day 12 request protection/query improvements implemented, verified, reviewed, committed, pushed and verified against GitHub; awaiting the user's next instruction. The user repeatedly requested continuation after the Day 11 manual-review reminder; browser/mobile/zoom/screen-reader checks remain pending and are not claimed passed. The earlier explicit Stripe setup/real-provider/rendered-checkout deferral remains in effect.
 - Completed: read all nine PDF pages, checked the daily schedule, confirmed stack compatibility, and prepared the roadmap.
 - Learning preference: guide the user step by step with explanations.
 - Day 1 implementation: complete; custom FastAPI + PostgreSQL authentication is verified with real database tests and browser flows.
@@ -35,7 +35,8 @@
 - Day 10 documentation checkpoint: `5c93b7278c90ebb86568a7d58d176b8334152beb`, verified equal to GitHub before Day 11; working tree was clean.
 - Day 11 implementation checkpoint: `a8bf1f87adf641d58e422e0683070843622a16cb`, pushed to `origin/main`; `git ls-remote` returned that exact SHA. This completion record follows in a documentation commit; compare current HEAD and GitHub for the latest checkpoint.
 - Day 11 documentation checkpoint: `caf8c1af22dec626aade98455052b5237d6327cf`, verified equal to GitHub before Day 12; working tree was clean.
-- Next action: finish Day 12 review, commit, push and exact remote verification before Day 13. Manual UI checks remain pending; real Stripe ride/top-up transactions, provider-delivered signed notifications and rendered checkout remain deferred. Day 13 has not started.
+- Day 12 implementation checkpoint: `713017c28dc3812adcecabd765cddd381e23cf35`, pushed to `origin/main`; `git ls-remote` returned that exact SHA. This completion record follows in a documentation commit; compare current HEAD and GitHub for the latest checkpoint.
+- Next action: await the user's next instruction; Day 13 covers broader end-to-end and multiple-driver/multiple-ride scenarios. Manual UI checks remain pending; real Stripe ride/top-up transactions, provider-delivered signed notifications and rendered checkout remain deferred. Day 13 has not started.
 
 ## Day 1, step 1: local Git setup
 
@@ -247,7 +248,7 @@
 - Final source review passed for all 20 changed/new candidates: actual local secrets absent, JSON and local Markdown links valid, whitespace clean, no backend files changed and ignored private configuration/dependencies/build outputs remain untracked. `.env` retains owner-only permissions.
 - Day 11 code commit `a8bf1f87adf641d58e422e0683070843622a16cb` was pushed successfully; local HEAD and GitHub `refs/heads/main` matched exactly and the working tree was clean before this completion-record edit. Manual review remains unresolved; Day 12 has not started.
 
-## Day 12: request protection, validation and query performance (Git checkpoint pending)
+## Day 12: request protection, validation and query performance (implementation checkpoint verified)
 
 - The user repeatedly requested the next milestone after the Day 11 manual-review reminder. Continued with those checks pending; no tested-UI answer or browser pass is inferred. Local HEAD and GitHub `refs/heads/main` matched Day 11's final documentation checkpoint `caf8c1af22dec626aade98455052b5237d6327cf` with a clean working tree before starting.
 - Added shared fixed-window Redis quotas using an atomic multi-bucket Lua script with bounded timeouts/no retries, HMAC key identities, TTLs, 429/Retry-After and explicit 503 on protection failure. Middleware groups peer quotas; login separately checks normalized email before password work. Quotas cover API reads/writes, auth, estimates, checkout and documents. Health and signed Stripe delivery retain documented exceptions; no Redis data was flushed.
@@ -260,16 +261,19 @@
 - Final backend suite: **263 passed in 32.79s**, with the existing TestClient/HTTPX deprecation warning. Thirty new security cases cover actual Redis concurrency/expiry/atomic denial, rate/Origin/CORS/body/input/config boundaries and failure behavior; further regressions cover frame flooding, offer-query count and migration/query plans. Existing business-flow suites isolate quotas; dedicated limiter tests use real Redis with scoped key cleanup.
 - React component suite: **9 passed**; production build passed. Pip consistency and schema checks passed. No new dependency/package pin was introduced. Documentation is in `docs/SECURITY_PERFORMANCE.md`. Manual UI and user-deferred actual Stripe verification remain pending. Day 13 has not started.
 - Final source review passed across 36 changed/new candidates: actual local secrets absent, Python syntax/local Markdown links valid and whitespace clean. Local `.env` remains owner-only; configuration, dependencies, generated builds and sample PDFs remain ignored. Frontend feature code is unchanged.
+- Day 12 implementation commit `713017c28dc3812adcecabd765cddd381e23cf35` was pushed successfully; local HEAD and GitHub `refs/heads/main` matched exactly and the working tree was clean before this completion-record edit. Day 13 has not started.
 
 ## Daily completion record
 
-Day 12 (checks passed; Git checkpoint pending):
+Day 12:
 
 - Scope delivered: shared Redis quotas, bounded HTTP/WebSocket inputs, strict browser origin settings, safe response/input handling, index-only migration and fewer offer-coordinate reads.
 - Verification: 263 backend tests, 9 React checks, production build, pip/schema checks, development row preservation and synthetic real-planner comparisons passed.
 - Known limits: fixed windows/NAT sharing, protected-request Redis dependency, trusted proxy configuration needed at deployment, pending manual UI and actual Stripe provider checks. Existing TestClient warning remains; fixture plans do not establish production capacity.
-- Commit / push / remote verification: pending.
-- Ready for Day 13: no; finish the reviewed Git checkpoint first.
+- Implementation commit: `713017c28dc3812adcecabd765cddd381e23cf35`.
+- Remote: `https://github.com/rarjun07/Cab-Booking-Platform-Python-Stack.git`, branch `main`.
+- Push result: succeeded; exact remote implementation SHA verified. This record follows in a documentation commit; compare current HEAD and GitHub for the latest checkpoint.
+- Ready for Day 13: after this record is pushed and verified, await the user's next instruction while carrying the pending UI/Stripe checks explicitly.
 
 Day 11 (code checkpoint verified; manual checks pending):
 

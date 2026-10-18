@@ -185,7 +185,7 @@ Controlled provider tests and locally signed fixtures verify application logic; 
 
 Day 11's code checkpoint is verified. The user requested continuation; Day 12 proceeds with earlier manual UI and deferred Stripe checks still pending.
 
-## Day 12 checklist (checks passed; Git checkpoint pending)
+## Day 12 checklist (implementation checkpoint verified)
 
 - [x] Verify Day 11's final documentation checkpoint on GitHub (`caf8c1a`) with a clean working tree; retain the pending manual-review status.
 - [x] Add atomic shared Redis quotas for API/auth/estimate/checkout/document requests and WebSocket handshakes; handle exhaustion and Redis failure explicitly.
@@ -195,7 +195,7 @@ Day 11's code checkpoint is verified. The user requested continuation; Day 12 pr
 - [x] Verify actual query plans on synthetic test data, Redis concurrency/TTL/failure and API/WebSocket boundary behavior.
 - [x] Pass 263 backend tests, 9 React component checks, production build and schema/dependency checks.
 - [x] Document limits, startup/proxy settings, test isolation, plan evidence and outstanding service/UI checks in `SECURITY_PERFORMANCE.md`.
-- [ ] Review, commit, push and verify the Day 12 code checkpoint before Day 13.
+- [x] Review, commit, push and verify the Day 12 code checkpoint (`713017c`) before Day 13.
 
 Day 13 has not started. Pending manual UI and actual Stripe verification remain tracked.
 
