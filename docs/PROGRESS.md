@@ -2,7 +2,7 @@
 
 ## Current checkpoint
 
-- Active milestone: Day 11 UI/accessibility/responsive implementation verified with component/build checks; finishing review and Git checkpoint. Actual browser/mobile/zoom/screen-reader checks remain pending. The user explicitly deferred Stripe setup and real-provider/rendered-checkout verification on 2026-10-18. Earlier visual/manual React follow-ups remain unverified.
+- Active milestone: Day 11 UI/accessibility/responsive code verified with component/build checks, reviewed, committed, pushed and verified against GitHub. Actual browser/mobile/zoom/screen-reader checks remain pending user review before Day 12. The user explicitly deferred Stripe setup and real-provider/rendered-checkout verification on 2026-10-18. Earlier visual/manual React follow-ups remain unverified.
 - Completed: read all nine PDF pages, checked the daily schedule, confirmed stack compatibility, and prepared the roadmap.
 - Learning preference: guide the user step by step with explanations.
 - Day 1 implementation: complete; custom FastAPI + PostgreSQL authentication is verified with real database tests and browser flows.
@@ -33,7 +33,8 @@
 - Day 9 documentation checkpoint: `2bd51f92f28fc3dc40877991207d9ca22ba1dc9c`, verified equal to GitHub before Day 10; working tree was clean.
 - Day 10 implementation checkpoint: `561181c9b33fadc1f68df01609abee66b3d56ca8`, pushed to `origin/main`; `git ls-remote` returned that exact SHA. This completion record follows in a documentation commit; compare current HEAD and GitHub for the latest checkpoint.
 - Day 10 documentation checkpoint: `5c93b7278c90ebb86568a7d58d176b8334152beb`, verified equal to GitHub before Day 11; working tree was clean.
-- Next action: finish the Day 11 Git checkpoint, then resolve the manual review through observed user checks or an explicit deferral before Day 12. Real Stripe ride/top-up transactions, provider-delivered signed notifications and rendered checkout remain deferred. Day 12 has not started.
+- Day 11 implementation checkpoint: `a8bf1f87adf641d58e422e0683070843622a16cb`, pushed to `origin/main`; `git ls-remote` returned that exact SHA. This completion record follows in a documentation commit; compare current HEAD and GitHub for the latest checkpoint.
+- Next action: resolve the Day 11 manual review through observed user checks or an explicit deferral before Day 12. Real Stripe ride/top-up transactions, provider-delivered signed notifications and rendered checkout remain deferred. Day 12 has not started.
 
 ## Day 1, step 1: local Git setup
 
@@ -231,7 +232,7 @@
 - Final source review: actual local credentials absent from all 29 changed/new candidates; Python syntax, local Markdown links and whitespace checks passed. Private `.env` remains owner-only; local environment/dependencies/build output and sample PDFs remain ignored.
 - Day 10 implementation commit `561181c9b33fadc1f68df01609abee66b3d56ca8` was pushed successfully; local HEAD and GitHub `refs/heads/main` matched exactly and the working tree was clean before this completion-record edit. Day 11 has not started.
 
-## Day 11: UI polish, accessibility and responsiveness (code checks passed; manual/Git checks pending)
+## Day 11: UI polish, accessibility and responsiveness (code checkpoint verified; manual checks pending)
 
 - User requested the next milestone. Verified local HEAD and GitHub `refs/heads/main` both match Day 10's final documentation checkpoint `5c93b7278c90ebb86568a7d58d176b8334152beb`; working tree was clean before starting. No Day 12 work is included.
 - Added named native section links and focusable targets, role-aware driver/rider copy/checklists and a clear test-project label. Moved the connection checker into a native disclosure. Rider booking/wallet panels use a wide-screen grid, retain DOM reading order and stack at narrower widths.
@@ -243,16 +244,19 @@
 - Asked for manual desktop/phone-width/Tab checks while continuing independent work. No answer or visual pass is recorded yet. Earlier browser automation policy rejection was respected; no new browser automation/workaround attempted. jsdom excludes painted color contrast and does not verify layout, zoom, focus appearance, screen-reader behavior or Stripe iframes. No WCAG conformance claim is made.
 - Added `docs/UI_POLISH.md` with files, commands, explanations, verification boundaries and the pending manual checklist. Real Stripe checks remain user-deferred. Day 12 has not started.
 - Final source review passed for all 20 changed/new candidates: actual local secrets absent, JSON and local Markdown links valid, whitespace clean, no backend files changed and ignored private configuration/dependencies/build outputs remain untracked. `.env` retains owner-only permissions.
+- Day 11 code commit `a8bf1f87adf641d58e422e0683070843622a16cb` was pushed successfully; local HEAD and GitHub `refs/heads/main` matched exactly and the working tree was clean before this completion-record edit. Manual review remains unresolved; Day 12 has not started.
 
 ## Daily completion record
 
-Day 11 (code checks passed; manual/Git checks pending):
+Day 11 (code checkpoint verified; manual checks pending):
 
 - Scope delivered: existing React screen polish, responsive CSS, role-specific section navigation, account focus, form/disclosure semantics and targeted component accessibility checks.
 - Verification: 9 focused simulated-DOM tests and React production build passed. Representative text palette ratios calculated. No actual browser visual/mobile/keyboard/screen-reader pass claimed.
 - Known limits: manual checklist needs actual results or explicit user deferral; prior Stripe checks remain deferred. Backend unchanged; no Day 12 features added.
-- Commit / push / remote verification: pending.
-- Ready for Day 12: no; finish Git checkpoint and resolve manual review first.
+- Implementation commit: `a8bf1f87adf641d58e422e0683070843622a16cb`.
+- Remote: `https://github.com/rarjun07/Cab-Booking-Platform-Python-Stack.git`, branch `main`.
+- Push result: succeeded; exact remote implementation SHA verified. This record follows in a documentation commit; compare current HEAD with GitHub for the latest checkpoint.
+- Ready for Day 12: no; resolve the actual manual review or obtain explicit user deferral first. No browser pass is claimed.
 
 Day 10:
 

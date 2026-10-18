@@ -172,7 +172,7 @@ On 2026-10-18, the user explicitly chose to defer Stripe setup and real-provider
 
 Controlled provider tests and locally signed fixtures verify application logic; they do not satisfy the outstanding real-provider check. Wallet spending/refunds are outside Day 10's top-up scope. Day 11 has not started.
 
-## Day 11 checklist (code checks passed; manual/Git checks pending)
+## Day 11 checklist (code checkpoint verified; manual checks pending)
 
 - [x] Verify Day 10's final documentation checkpoint on GitHub (`5c93b72`) with a clean working tree.
 - [x] Polish role-aware navigation/copy, card spacing, controls, rider workspace layout and narrow-screen stacking/wrapping.
@@ -180,7 +180,7 @@ Controlled provider tests and locally signed fixtures verify application logic; 
 - [x] Add targeted component checks for guest/rider/driver structure and keyboard/account/promo/review behavior; 9 tests passed.
 - [x] Pass the React production build; preserve production dependency pins and backend/API/schema behavior.
 - [x] Document the implementation, test boundaries and desktop/mobile/zoom/keyboard/screen-reader checklist in `UI_POLISH.md`.
-- [ ] Review, commit, push and verify the Day 11 code checkpoint.
+- [x] Review, commit, push and verify the Day 11 code checkpoint (`a8bf1f8`).
 - [ ] Resolve actual browser/mobile/zoom/keyboard/screen-reader checks with observed results or explicit user deferral. Earlier browser automation remains unavailable; no simulated visual pass is claimed.
 
 Day 12 has not started. Carry earlier manual UI and explicitly deferred Stripe checks forward with their actual status.
