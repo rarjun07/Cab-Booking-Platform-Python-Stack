@@ -88,6 +88,14 @@ def test_register_limit_counts_invalid_payloads_before_hashing(client, limiter):
     assert client.post("/api/auth/register", json={}).status_code == 429
 
 
+def test_actual_get_estimates_are_limited_before_route_parsing(client, limiter, account):
+    assert client.post("/api/auth/register", json=account).status_code == 201
+    for _ in range(20):
+        assert client.get("/api/rides/estimate", params={"origin": "invalid", "dest": "invalid"}).status_code == 422
+    response = client.get("/api/rides/estimate", params={"origin": "invalid", "dest": "invalid"})
+    assert response.status_code == 429 and int(response.headers["Retry-After"]) > 0
+
+
 def test_redis_failure_closes_protected_http_but_health_and_stripe_verification_remain_available(client, limiter, monkeypatch):
     def broken(*args): raise RedisConnectionError("private-redis-details")
     monkeypatch.setattr(limiter.client, "eval", broken)

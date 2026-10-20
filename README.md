@@ -47,6 +47,7 @@ Learning preference: step-by-step guidance with explanations.
 - [Promo codes and test-wallet top-ups](docs/PROMOS_WALLET.md)
 - [UI polish, keyboard access and responsive layout](docs/UI_POLISH.md)
 - [Request protection and query performance](docs/SECURITY_PERFORMANCE.md)
+- [Multiple-account API journeys and regressions](docs/END_TO_END_TESTING.md)
 
 ## Current state
 
@@ -58,4 +59,6 @@ Day 10 adds server-priced promo discounts before invoice creation, discount snap
 
 Day 11 implementation adds role-aware navigation and copy, a responsive booking/wallet layout, consistent controls, keyboard focus after account actions, unique repeated payment-panel labels and accessible history disclosures. Nine focused React component/accessibility checks and the production build passed. Implementation commit `a8bf1f8` is pushed and verified against GitHub. Actual browser/mobile/zoom/screen-reader checks remain pending; the user requested continuation after the reminder. No visual or WCAG conformance pass is claimed.
 
-Day 12 adds atomic Redis quotas, bounded request bodies, explicit credentialed CORS, stricter inputs, targeted indexes and fewer driver-offer coordinate queries. The development schema is at `0009_query_indexes` with all existing application rows preserved. All 263 backend tests, 9 React checks, the build and dependency/schema checks passed. Implementation commit `713017c` is pushed and verified against GitHub; Day 13 has not started. Redis is now required for protected API requests. Follow the new walkthrough and restart the local backend with `--no-proxy-headers`.
+Day 12 adds atomic Redis quotas, bounded request bodies, explicit credentialed CORS, stricter inputs, targeted indexes and fewer driver-offer coordinate queries. Implementation commit `713017c` is pushed and verified against GitHub. Redis is required for protected API requests; use the documented `--no-proxy-headers` startup flag.
+
+Day 13 adds real local HTTP/WebSocket multi-account journeys, competing assignments, receipt-worker/SMTP delivery, private payment/review/wallet checks and two React booking-recovery tests. It also fixes the estimate-specific Redis quota to cover the actual GET endpoint. All 268 backend tests, 11 React checks, the build and dependency/schema checks passed; the schema remains `0009_query_indexes`. The Day 13 Git checkpoint is pending. Manual UI and actual Stripe-provider checks remain pending; Day 14 has not started.

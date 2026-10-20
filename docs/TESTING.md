@@ -1,5 +1,7 @@
 # Day 7: first-week testing
 
+For the later multiple-account HTTP/WebSocket/receipt-worker journeys and current full-suite commands, see [Day 13 testing](END_TO_END_TESTING.md). The results below record the original Day 7 checkpoint.
+
 Day 7 checks the features from Days 1-6 together. It adds no ride-history, receipt, review, or wallet features. The user explicitly deferred Stripe setup and real payment verification on 2026-10-18; the Day 6 code commit `d2e9e778969be525ee5ff1a7983b1e185ffbf63d` was pushed and verified against GitHub before Day 7 started.
 
 ## Step 1: understand the connected test

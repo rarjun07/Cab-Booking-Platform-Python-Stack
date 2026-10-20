@@ -20,6 +20,8 @@ Day 10 adds promo rules/redemptions and rider test-wallet top-ups. Apply `0008_p
 
 Day 12 adds Redis request quotas, body bounds, explicit CORS/Origin configuration, stricter inputs and index migration `0009_query_indexes`. **Redis is now required for protected API requests**; an outage returns 503 instead of bypassing quotas. Health and signed Stripe delivery retain their documented exceptions. Restart the server using `--no-proxy-headers` below so client-IP quotas cannot trust arbitrary local forwarded headers. See [security and performance](../docs/SECURITY_PERFORMANCE.md) for limits, setup, tests and query-plan evidence. No new package is needed.
 
+Day 13 connects accounts, quotes, matching, progression, promos, payments, reviews, wallet credits and receipt delivery through real temporary local services. It adds actual HTTP assignment races and fixes the estimate quota's GET classification. No migration or dependency changes are required. See [end-to-end API journeys](../docs/END_TO_END_TESTING.md) for commands, controlled-provider boundaries and cleanup. Actual Stripe and browser checks remain pending.
+
 ## What we added
 
 - `.venv/`: this project's isolated Python environment. It holds installed libraries locally and is ignored by Git.

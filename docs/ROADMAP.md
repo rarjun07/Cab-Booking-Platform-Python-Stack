@@ -197,7 +197,21 @@ Day 11's code checkpoint is verified. The user requested continuation; Day 12 pr
 - [x] Document limits, startup/proxy settings, test isolation, plan evidence and outstanding service/UI checks in `SECURITY_PERFORMANCE.md`.
 - [x] Review, commit, push and verify the Day 12 code checkpoint (`713017c`) before Day 13.
 
-Day 13 has not started. Pending manual UI and actual Stripe verification remain tracked.
+Day 12's code checkpoint is verified. Pending manual UI and actual Stripe verification remain tracked.
+
+## Day 13 checklist (checks passed; Git checkpoint pending)
+
+- [x] Verify Day 12's final documentation checkpoint (`75b0a6f`) against GitHub before implementation; retain pending UI/Stripe status.
+- [x] Add a real local HTTP/WebSocket multi-account journey with actual migrated PostgreSQL, Redis quotas/notifications and separate client cookies.
+- [x] Cover request retries, assignment/release, progression, private history, promo/invoice retries, signed fixture events, reviews and wallet credits.
+- [x] Deliver the discounted test-payment PDF through real local Celery/Redis/SMTP and verify receipt status, ownership and session revocation.
+- [x] Exercise actual HTTP competing-driver/competing-ride requests and stale, distant and declined-driver eligibility.
+- [x] Reproduce and fix the actual GET-estimate quota gap; add React booking-recovery/quota/session tests.
+- [x] Pass 268 backend tests, 11 React tests, production build and schema/dependency checks; verify owned test data/Redis keys were removed.
+- [x] Document API/service versus simulated/browser/provider boundaries in `END_TO_END_TESTING.md`.
+- [ ] Review, commit, push and verify Day 13 before Day 14.
+
+Day 14 has not started. Manual browser/UI and actual Stripe-provider checks remain pending.
 
 ## Choices to resolve at the relevant milestone
 

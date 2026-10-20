@@ -44,6 +44,8 @@ When a quota is reached, HTTP returns `429` with `Retry-After` in seconds. The c
 
 Redis key identities use HMAC-SHA256 with a purpose prefix and the existing secret; raw emails and IP addresses are not stored in key names. Rotating the secret or prefix creates fresh quota identities. Counter keys contain no passwords or request payloads. Tests use a unique test prefix and delete only that prefix's keys; they never flush shared Redis. The implementation targets the existing single Redis server, not a Redis Cluster multi-key script configuration.
 
+Day 13's connected regression found that the estimate-specific classification was inside the write-only branch even though estimates use GET. That classification is corrected; the actual GET endpoint now receives the twenty-per-minute bucket. See [the regression and journey evidence](END_TO_END_TESTING.md).
+
 The policy values live in `app/security.py`. Existing safe defaults also work without editing `.env`. Optional configuration is documented in `backend/.env.example`:
 
 ```dotenv
@@ -107,7 +109,7 @@ The synthetic query-plan test uses a rolled-back dedicated `_test` transaction w
 
 Rows/balances were compared across the index upgrade; the downgrade also retained the synthetic rows before rollback. These are fixture-specific plans and buffer counts, not production latency or capacity guarantees. To see the report, run `python -m pytest -q -s tests/test_query_performance.py`.
 
-From `frontend/`, `npm test` passed all **9 component checks** and `npm run build` passed. No frontend feature code or package pins changed on Day 12. Manual browser/UI checks and real Stripe verification remain pending. Day 13's broader end-to-end scenarios have not started.
+At the Day 12 checkpoint, `npm test` from `frontend/` passed all **9 component checks** and `npm run build` passed. No frontend feature code or package pins changed on Day 12. Manual browser/UI checks and real Stripe verification remain pending. Day 13's broader API scenarios and current results are recorded in [END_TO_END_TESTING.md](END_TO_END_TESTING.md).
 
 ## Files to read
 

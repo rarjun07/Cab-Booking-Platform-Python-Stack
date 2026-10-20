@@ -79,8 +79,9 @@ def request_policies(path, method, peer):
         policies.append(("writes", peer, 60, 60))
         if path == "/api/auth/login": policies.append(("login_ip", peer, 10, 60))
         elif path == "/api/auth/register": policies.append(("register", peer, 5, 60))
-        elif path == "/api/rides/estimate": policies.append(("estimates", peer, 20, 60))
         elif path.endswith("/payment-intent") or path == "/api/wallet/topups": policies.append(("checkout", peer, 15, 60))
+    if path == "/api/rides/estimate":
+        policies.append(("estimates", peer, 20, 60))
     if path.endswith("/receipt.pdf") or path.endswith("/receipt-email"):
         policies.append(("documents", peer, 20, 60))
     return policies

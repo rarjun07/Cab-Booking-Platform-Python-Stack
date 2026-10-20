@@ -20,6 +20,8 @@ Day 11 adds section navigation, role-aware instructions, a rider booking/wallet 
 
 Day 12 keeps the same frontend/API payloads, with server-side quotas and stricter validation. Keep local Redis running, restart FastAPI with `--no-proxy-headers`, and wait when the API reports too many requests. A Redis outage returns a safe unavailable message for protected reads/writes. See [the security walkthrough](../docs/SECURITY_PERFORMANCE.md); UI and real Stripe follow-ups remain pending.
 
+Day 13 adds two booking component journeys for a lost-response retry, completion controls, quota errors and session expiry. `npm test` now runs **11 tests** across the accessibility and booking-flow files. Backend journeys use actual local HTTP/WebSocket/worker services separately; these React tests use controlled HTTP fixtures. See [the testing walkthrough](../docs/END_TO_END_TESTING.md). No frontend feature code or package pin changes were needed.
+
 ## What each tool does
 
 - React builds the interactive page from components.
@@ -126,7 +128,7 @@ Vite writes generated output into `dist/`, which is ignored by Git. A successful
 npm test
 ```
 
-This runs nine focused tests using pinned development tools: Vitest, jsdom, Testing Library and axe-core. The tests contact no backend, database or Stripe service. Color contrast/layout are excluded from the simulated axe run; the [manual checklist](../docs/UI_POLISH.md) remains necessary. Day 13 retains broader end-to-end journeys.
+This originally introduced nine focused tests using pinned development tools: Vitest, jsdom, Testing Library and axe-core. Day 13 adds two booking-flow cases, for eleven total. The tests contact no backend, database or Stripe service. Color contrast/layout are excluded from the simulated axe run; the [manual checklist](../docs/UI_POLISH.md) remains necessary. See the separate [API journeys](../docs/END_TO_END_TESTING.md) for real local service coverage.
 
 ## Authentication and the Day 1 checkpoint
 
