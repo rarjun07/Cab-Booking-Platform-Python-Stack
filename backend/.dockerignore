@@ -1,0 +1,12 @@
+*
+!requirements.txt
+!app/
+!app/**
+!alembic/
+!alembic/**
+!alembic.ini
+!scripts/
+!scripts/container_health.py
+**/__pycache__
+**/*.pyc
+**/.env*

@@ -2,7 +2,7 @@
 
 ## Current checkpoint
 
-- Active milestone: Day 13 multi-account API journeys and regressions implemented, verified, reviewed, committed, pushed and verified against GitHub; awaiting the user's next instruction. The user repeatedly requested continuation after the Day 11 manual-review reminder; browser/mobile/zoom/screen-reader checks remain pending and are not claimed passed. The earlier explicit Stripe setup/real-provider/rendered-checkout deferral remains in effect.
+- Active milestone: Day 14 container/deployment setup in progress. Dockerfiles, isolated Compose services, a credential helper and smoke script are prepared. The build hit a Docker internal read-only filesystem error; container startup/smoke checks have not passed. Recovery may interrupt another project's running database and awaits the user's response. Browser/mobile/zoom/screen-reader checks remain pending; earlier Stripe setup/real-provider/rendered-checkout deferral remains in effect.
 - Completed: read all nine PDF pages, checked the daily schedule, confirmed stack compatibility, and prepared the roadmap.
 - Learning preference: guide the user step by step with explanations.
 - Day 1 implementation: complete; custom FastAPI + PostgreSQL authentication is verified with real database tests and browser flows.
@@ -38,7 +38,21 @@
 - Day 12 implementation checkpoint: `713017c28dc3812adcecabd765cddd381e23cf35`, pushed to `origin/main`; `git ls-remote` returned that exact SHA. This completion record follows in a documentation commit; compare current HEAD and GitHub for the latest checkpoint.
 - Day 12 documentation checkpoint: `75b0a6fbb9fd628c82f33273c58af70f79529940`, verified equal to GitHub before Day 13; working tree was clean at that boundary. Remote remained at this checkpoint when work resumed on 2026-10-20.
 - Day 13 implementation checkpoint: `97a992e7f4385b8e65f0de4889e7bd226ec09374`, pushed to `origin/main`; `git ls-remote` returned that exact SHA. This completion record follows in a documentation commit; compare current HEAD and GitHub for the latest checkpoint.
-- Next action: await the user's next instruction; Day 14 covers Docker, local Compose and deployment setup. Manual UI checks remain pending; actual Stripe provider verification remains deferred. Day 14 has not started.
+- Day 13 documentation checkpoint: `e91e92e6634004b058a07f537d283e881862e2cb`, verified equal to GitHub before Day 14 with a clean working tree.
+- Next action: resolve Docker storage/recovery, rebuild and run Compose and the restart smoke check; choose a hosting destination before any online deployment. Day 14 is incomplete. Manual UI/actual Stripe verification remain pending.
+
+## Day 14: container setup prepared; Docker storage recovery pending
+
+- Started on the user's “next” instruction after verifying the clean Day 13 documentation checkpoint `e91e92e` against GitHub.
+- Prepared a Python 3.14 backend image with pinned packages, Linux Pango/fonts, a non-root user and no development secrets/build context. Prepared a multi-stage Node 24/nginx React image with HTTP/WebSocket proxying, overwritten forwarded headers and a single explicitly trusted proxy address.
+- Added a PostgreSQL 17/PostGIS build based on the official multi-architecture PostgreSQL image rather than the currently amd64-only upstream PostGIS image. New-volume administrator initialization creates a separate database, PostGIS extension and a restricted application login. Native PostgreSQL and existing development data were not changed.
+- Added private Compose data services, persistent database/Redis AOF volumes, health/dependency conditions, a one-shot Alembic service, API/worker scratch space and a loopback-only web port 8080. No app/data host port or external deployment was configured.
+- Generated independent Docker configuration in ignored `.env.database`/`.env.compose`, both mode `0600`, without changing `backend/.env`. The helper refuses overwrite and symlinks. Three new safety regression tests passed with `python3 -m unittest discover -s tests -v`.
+- Static verification passed: Compose quiet validation; parsed Compose checks for private ports, secret separation, internal data network and migration ordering; Python syntax; shell syntax; source-secret scan across 19 candidate files; `git diff --check`. Native React production build passed (30 modules, 288.91 kB JS / 87.60 kB gzip). Existing application/API/schema code and dependency pins are unchanged; the prior 268 backend/11 frontend test result belongs to Day 13 and is not reported as a new Day 14 run.
+- Added `scripts/smoke_compose.py` for real proxy/auth/Origin/quota/WebSocket, SQL role/PostGIS, Linux PDF, Celery consumption and optional restart-persistence checks. **This script has not run against containers yet.** It cleans only its generated account/session data and makes no routing/Stripe/external email calls.
+- Docker Desktop 4.95.0/Engine 29.8.2 and Compose 5.6.0 are installed and reachable with required socket permission. The build successfully exported the dedicated database image and installed the pinned Python packages, then failed saving the backend layer: `write /var/lib/docker/buildkit/containerd-overlayfs/metadata_v2.db: read-only file system`. A complete image build and container startup are therefore unverified.
+- Read-only diagnosis: the Mac data volume had approximately **3.2 GiB free (99% used)**. Docker reported 1.652 GB images, 1.419 GB build cache and one existing non-project container (`piston-prime-local-db16`, published on loopback 5433). Low free space is observed; the exact cause of Docker's read-only transition is not proven. No pruning, reset, file deletion or Docker restart was performed. The user was asked about freeing space/restart because restarting Desktop would interrupt that other database.
+- Asked about hosting destination while preparing local files; no server/domain was supplied. Online deployment and deployed-URL smoke checks remain pending. `docs/DEPLOYMENT.md` explains the files/commands, backups, local limitations, Docker recovery and target-specific HTTPS/provider follow-ups. Day 14 is **not complete**.
 
 ## Day 1, step 1: local Git setup
 

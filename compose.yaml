@@ -1,0 +1,109 @@
+name: cab-booking-platform
+
+x-app: &app
+  image: cab-booking-backend:day14
+  build: ./backend
+  env_file: .env.compose
+  init: true
+  read_only: true
+  tmpfs:
+    - /tmp:mode=1777,size=128m
+  security_opt:
+    - no-new-privileges:true
+  cap_drop: [ALL]
+  networks: [data]
+
+services:
+  database:
+    build: ./deploy/database
+    image: cab-booking-database:day14
+    env_file: .env.database
+    volumes:
+      - database:/var/lib/postgresql/data
+    networks: [data]
+    healthcheck:
+      # TCP is unavailable during the entrypoint's temporary initialization server.
+      test: [CMD, pg_isready, -h, 127.0.0.1, -U, postgres, -d, cab_booking]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 15s
+    restart: unless-stopped
+
+  redis:
+    image: redis:8.2-alpine
+    command: [redis-server, --appendonly, 'yes', --appendfsync, everysec]
+    volumes:
+      - redis:/data
+    networks: [data]
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  migrate:
+    <<: *app
+    command: [python, -m, alembic, upgrade, head]
+    depends_on:
+      database: {condition: service_healthy}
+    restart: 'no'
+
+  backend:
+    <<: *app
+    # Only the fixed proxy address may supply client/scheme headers.
+    command: [python, -m, uvicorn, app.main:app, --host, 0.0.0.0, --port, '8000', --proxy-headers, --forwarded-allow-ips, 172.30.87.2, --no-access-log]
+    networks: [data, edge]
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+      redis: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, python, -m, scripts.container_health, --api]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
+
+  worker:
+    <<: *app
+    command: [python, -m, celery, -A, 'app.tasks:celery_app', worker, --pool=solo, --concurrency=1, --loglevel=WARNING, --without-gossip, --without-mingle]
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+      redis: {condition: service_healthy}
+    # Infrastructure readiness only; a task round-trip is checked separately.
+    healthcheck:
+      test: [CMD, python, -m, scripts.container_health]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    image: cab-booking-frontend:day14
+    ports:
+      - '127.0.0.1:8080:8080'
+    networks:
+      edge:
+        ipv4_address: 172.30.87.2
+    depends_on:
+      backend: {condition: service_healthy}
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+
+networks:
+  data:
+    internal: true
+  edge:
+    ipam:
+      config:
+        - subnet: 172.30.87.0/24
+
+volumes:
+  database:
+  redis:

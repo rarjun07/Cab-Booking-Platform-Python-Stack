@@ -12,7 +12,7 @@ An internship project based on the mentor's **Cab Booking Platform - Python Stac
 - Realtime: FastAPI WebSockets backed by Redis Pub/Sub.
 - Payments: Stripe sandbox integration is in progress; real provider verification remains pending.
 - Background jobs: Celery with the existing Redis broker; SMTP receipt delivery can be tested with a local mail catcher.
-- Docker remains scheduled for Day 14.
+- Docker: Day 14 adds an isolated local Compose setup; see [Docker and deployment](docs/DEPLOYMENT.md) for commands and current verification limits.
 
 ## How we will work
 
@@ -48,6 +48,7 @@ Learning preference: step-by-step guidance with explanations.
 - [UI polish, keyboard access and responsive layout](docs/UI_POLISH.md)
 - [Request protection and query performance](docs/SECURITY_PERFORMANCE.md)
 - [Multiple-account API journeys and regressions](docs/END_TO_END_TESTING.md)
+- [Docker startup and deployment follow-ups](docs/DEPLOYMENT.md)
 
 ## Current state
 
@@ -61,4 +62,6 @@ Day 11 implementation adds role-aware navigation and copy, a responsive booking/
 
 Day 12 adds atomic Redis quotas, bounded request bodies, explicit credentialed CORS, stricter inputs, targeted indexes and fewer driver-offer coordinate queries. Implementation commit `713017c` is pushed and verified against GitHub. Redis is required for protected API requests; use the documented `--no-proxy-headers` startup flag.
 
-Day 13 adds real local HTTP/WebSocket multi-account journeys, competing assignments, receipt-worker/SMTP delivery, private payment/review/wallet checks and two React booking-recovery tests. It also fixes the estimate-specific Redis quota to cover the actual GET endpoint. All 268 backend tests, 11 React checks, the build and dependency/schema checks passed; the schema remains `0009_query_indexes`. Implementation commit `97a992e` is pushed and verified against GitHub. Manual UI and actual Stripe-provider checks remain pending; Day 14 has not started.
+Day 13 adds real local HTTP/WebSocket multi-account journeys, competing assignments, receipt-worker/SMTP delivery, private payment/review/wallet checks and two React booking-recovery tests. It also fixes the estimate-specific Redis quota to cover the actual GET endpoint. All 268 backend tests, 11 React checks, the build and dependency/schema checks passed; the schema remains `0009_query_indexes`. Implementation commit `97a992e` is pushed and verified against GitHub. Manual UI and actual Stripe-provider checks remain pending.
+
+Day 14 adds Dockerfiles, separate local Compose services, safe configuration generation and a container smoke script. Runtime/online verification status is recorded in [the progress log](docs/PROGRESS.md). No public hosting destination is configured.

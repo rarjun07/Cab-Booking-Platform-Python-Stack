@@ -1,5 +1,7 @@
 # React frontend
 
+Day 14 packages the production build in nginx with same-origin `/api` HTTP/WebSocket forwarding on loopback port 8080. See [Docker and deployment](../docs/DEPLOYMENT.md) for startup instructions and verification limits. The Vite development workflow remains available below.
+
 The page now includes PostgreSQL-backed sign-up, sign-in, session restoration, verification, and sign-out. See [the authentication walkthrough](../docs/AUTHENTICATION.md).
 
 Day 3 adds a coordinate form, public Delhi sample, fare breakdown, ride request, and status refresh for signed-in riders. See [the ride-booking walkthrough](../docs/RIDE_BOOKING.md) for a step-by-step demo. The production build passes; the new form's visual/manual browser check remains pending.

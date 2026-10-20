@@ -1,5 +1,7 @@
 # FastAPI backend
 
+Day 14 provides a separate Docker image for FastAPI, Alembic and Celery with Linux PDF libraries. See [Docker and deployment](../docs/DEPLOYMENT.md) for setup commands and the current runtime-verification status. Native development commands below still use your existing database.
+
 The original health endpoint below is now joined by PostgreSQL-backed registration, login, session verification, and logout. See [the authentication walkthrough](../docs/AUTHENTICATION.md) for database setup, the new files, and tests.
 
 Day 2 adds the booking models, PostGIS, and Alembic migrations. Follow [the database walkthrough](../docs/DATABASE.md) to enable PostGIS, apply migrations, and inspect the schema. Database initialization is now handled by `python -m alembic upgrade head`.

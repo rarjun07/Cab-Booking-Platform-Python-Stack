@@ -211,7 +211,21 @@ Day 12's code checkpoint is verified. Pending manual UI and actual Stripe verifi
 - [x] Document API/service versus simulated/browser/provider boundaries in `END_TO_END_TESTING.md`.
 - [x] Review, commit, push and verify Day 13 (`97a992e`) before Day 14.
 
-Day 14 has not started. Manual browser/UI and actual Stripe-provider checks remain pending.
+Day 13's checkpoint is verified. Manual browser/UI and actual Stripe-provider checks remain pending.
+
+## Day 14 checklist (prepared; runtime verification pending)
+
+- [x] Verify Day 13's documentation checkpoint (`e91e92e`) against GitHub before implementation.
+- [x] Prepare backend/frontend Dockerfiles, build-context allowlists and an Apple Silicon-compatible PostgreSQL/PostGIS image.
+- [x] Prepare private Compose database/Redis, one-shot migrations, non-root API/worker, nginx HTTP/WebSocket proxy and independent ignored configuration.
+- [x] Add configuration-safety tests and a real-container smoke script with account cleanup and restart checks.
+- [x] Pass configuration-safety tests, static Compose validation and native React production build.
+- [ ] Resolve Docker's internal read-only storage error; rebuild all images successfully.
+- [ ] Verify startup, SQL role/migrations/PostGIS, authentication, forwarded-header quota, WebSockets, Linux PDF, worker task and restart persistence in containers.
+- [ ] Review, commit, push and verify the Day 14 checkpoint, explicitly retaining unfinished checks if storage recovery is still pending.
+- [ ] Choose/configure online hosting, HTTPS, routing/storage/provider settings and verify the actual deployed URL.
+
+No container runtime or online deployment pass is claimed. See `DEPLOYMENT.md` and `PROGRESS.md` for commands and the storage error evidence. Earlier manual UI and actual Stripe-provider checks remain pending.
 
 ## Choices to resolve at the relevant milestone
 
