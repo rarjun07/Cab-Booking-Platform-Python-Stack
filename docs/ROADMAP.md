@@ -222,7 +222,7 @@ Day 13's checkpoint is verified. Manual browser/UI and actual Stripe-provider ch
 - [x] Pass configuration-safety tests, static Compose validation and native React production build.
 - [ ] Resolve Docker's internal read-only storage error; rebuild all images successfully.
 - [ ] Verify startup, SQL role/migrations/PostGIS, authentication, forwarded-header quota, WebSockets, Linux PDF, worker task and restart persistence in containers.
-- [ ] Review, commit, push and verify the Day 14 checkpoint, explicitly retaining unfinished checks if storage recovery is still pending.
+- [x] Review, commit, push and verify the prepared Day 14 checkpoint (`8b2c2c2`), explicitly retaining unfinished storage/runtime/deployment checks.
 - [ ] Choose/configure online hosting, HTTPS, routing/storage/provider settings and verify the actual deployed URL.
 
 No container runtime or online deployment pass is claimed. See `DEPLOYMENT.md` and `PROGRESS.md` for commands and the storage error evidence. Earlier manual UI and actual Stripe-provider checks remain pending.

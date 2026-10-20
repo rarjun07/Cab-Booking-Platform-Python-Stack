@@ -39,6 +39,7 @@
 - Day 12 documentation checkpoint: `75b0a6fbb9fd628c82f33273c58af70f79529940`, verified equal to GitHub before Day 13; working tree was clean at that boundary. Remote remained at this checkpoint when work resumed on 2026-10-20.
 - Day 13 implementation checkpoint: `97a992e7f4385b8e65f0de4889e7bd226ec09374`, pushed to `origin/main`; `git ls-remote` returned that exact SHA. This completion record follows in a documentation commit; compare current HEAD and GitHub for the latest checkpoint.
 - Day 13 documentation checkpoint: `e91e92e6634004b058a07f537d283e881862e2cb`, verified equal to GitHub before Day 14 with a clean working tree.
+- Day 14 prepared-code checkpoint: `8b2c2c2665889ec063a086a6e5c6f640b16d166b`, committed/pushed and verified equal to GitHub `refs/heads/main`. This saves incomplete Day 14 work; it does not certify container startup or deployment. This verification record follows in a documentation commit.
 - Next action: resolve Docker storage/recovery, rebuild and run Compose and the restart smoke check; choose a hosting destination before any online deployment. Day 14 is incomplete. Manual UI/actual Stripe verification remain pending.
 
 ## Day 14: container setup prepared; Docker storage recovery pending
@@ -53,6 +54,7 @@
 - Docker Desktop 4.95.0/Engine 29.8.2 and Compose 5.6.0 are installed and reachable with required socket permission. The build successfully exported the dedicated database image and installed the pinned Python packages, then failed saving the backend layer: `write /var/lib/docker/buildkit/containerd-overlayfs/metadata_v2.db: read-only file system`. A complete image build and container startup are therefore unverified.
 - Read-only diagnosis: the Mac data volume had approximately **3.2 GiB free (99% used)**. Docker reported 1.652 GB images, 1.419 GB build cache and one existing non-project container (`piston-prime-local-db16`, published on loopback 5433). Low free space is observed; the exact cause of Docker's read-only transition is not proven. No pruning, reset, file deletion or Docker restart was performed. The user was asked about freeing space/restart because restarting Desktop would interrupt that other database.
 - Asked about hosting destination while preparing local files; no server/domain was supplied. Online deployment and deployed-URL smoke checks remain pending. `docs/DEPLOYMENT.md` explains the files/commands, backups, local limitations, Docker recovery and target-specific HTTPS/provider follow-ups. Day 14 is **not complete**.
+- Reviewed and saved prepared implementation as `8b2c2c2`; push succeeded and GitHub returned exact SHA `8b2c2c2665889ec063a086a6e5c6f640b16d166b`. No later day or additional milestone was started. Docker recovery/runtime verification is the next required work.
 
 ## Day 1, step 1: local Git setup
 
