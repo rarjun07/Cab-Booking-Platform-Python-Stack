@@ -2,7 +2,7 @@
 
 ## Current checkpoint
 
-- Active milestone: Day 13 multi-account API journeys and regressions implemented and verified; finishing review/documentation/Git checkpoint. The user repeatedly requested continuation after the Day 11 manual-review reminder; browser/mobile/zoom/screen-reader checks remain pending and are not claimed passed. The earlier explicit Stripe setup/real-provider/rendered-checkout deferral remains in effect.
+- Active milestone: Day 13 multi-account API journeys and regressions implemented, verified, reviewed, committed, pushed and verified against GitHub; awaiting the user's next instruction. The user repeatedly requested continuation after the Day 11 manual-review reminder; browser/mobile/zoom/screen-reader checks remain pending and are not claimed passed. The earlier explicit Stripe setup/real-provider/rendered-checkout deferral remains in effect.
 - Completed: read all nine PDF pages, checked the daily schedule, confirmed stack compatibility, and prepared the roadmap.
 - Learning preference: guide the user step by step with explanations.
 - Day 1 implementation: complete; custom FastAPI + PostgreSQL authentication is verified with real database tests and browser flows.
@@ -37,7 +37,8 @@
 - Day 11 documentation checkpoint: `caf8c1af22dec626aade98455052b5237d6327cf`, verified equal to GitHub before Day 12; working tree was clean.
 - Day 12 implementation checkpoint: `713017c28dc3812adcecabd765cddd381e23cf35`, pushed to `origin/main`; `git ls-remote` returned that exact SHA. This completion record follows in a documentation commit; compare current HEAD and GitHub for the latest checkpoint.
 - Day 12 documentation checkpoint: `75b0a6fbb9fd628c82f33273c58af70f79529940`, verified equal to GitHub before Day 13; working tree was clean at that boundary. Remote remained at this checkpoint when work resumed on 2026-10-20.
-- Next action: finish Day 13 journeys, relevant regressions, review and verified commit/push before Day 14. Manual UI checks remain pending; actual Stripe provider verification remains deferred. Day 14 has not started.
+- Day 13 implementation checkpoint: `97a992e7f4385b8e65f0de4889e7bd226ec09374`, pushed to `origin/main`; `git ls-remote` returned that exact SHA. This completion record follows in a documentation commit; compare current HEAD and GitHub for the latest checkpoint.
+- Next action: await the user's next instruction; Day 14 covers Docker, local Compose and deployment setup. Manual UI checks remain pending; actual Stripe provider verification remains deferred. Day 14 has not started.
 
 ## Day 1, step 1: local Git setup
 
@@ -264,7 +265,7 @@
 - Final source review passed across 36 changed/new candidates: actual local secrets absent, Python syntax/local Markdown links valid and whitespace clean. Local `.env` remains owner-only; configuration, dependencies, generated builds and sample PDFs remain ignored. Frontend feature code is unchanged.
 - Day 12 implementation commit `713017c28dc3812adcecabd765cddd381e23cf35` was pushed successfully; local HEAD and GitHub `refs/heads/main` matched exactly and the working tree was clean before this completion-record edit. Day 13 has not started.
 
-## Day 13: multiple-account API journeys (checks passed; Git checkpoint pending)
+## Day 13: multiple-account API journeys (implementation checkpoint verified)
 
 - User requested the next milestone and then continuation. Day 12's final documentation checkpoint was verified against GitHub before implementation; the same remote SHA was rechecked on 2026-10-20 when work resumed.
 - Added a temporary loopback HTTP/WebSocket fixture with migrated test-database sessions, real Redis quotas/notifications and independently registered client-cookie accounts. Routing metrics and Stripe provider calls remain controlled doubles. A separate Celery worker and loopback SMTP catcher delivered the discounted paid-test PDF to the correct account; no external email was sent.
@@ -274,18 +275,21 @@
 - Added two React component journeys for ambiguous booking-response recovery with the same signed quote, completed-trip payment controls, input retention after 429 and session-expiry handling after 401. These use controlled HTTP fixtures in jsdom; no browser/layout pass is inferred.
 - Final complete backend suite: **268 passed in 33.27s**, with the existing TestClient/HTTPX deprecation warning. Focused journey/GET-regression set: 5 passed in 7.30s after correcting the test's expected logout close code. React: **11 passed**, production build passed. Pip consistency and Alembic no-drift checks passed; schema remains `0009_query_indexes`.
 - Read-only cleanup verification found zero Day 13 journey accounts/campaigns and zero journey-prefixed Redis keys. Fixture teardown asserts the owned server thread stopped and terminates the owned worker/catcher; existing services and development records/configuration were not modified.
-- Added `docs/END_TO_END_TESTING.md` with commands, real-versus-controlled service boundaries and the remaining UI/provider checks. Git review/commit/push are pending. Day 14 has not started.
+- Added `docs/END_TO_END_TESTING.md` with commands, real-versus-controlled service boundaries and the remaining UI/provider checks. Day 14 has not started.
 - Final source review passed for all 13 changed/new candidates: actual local credentials absent, Python syntax and local Markdown links valid, whitespace clean and private/generated files remain ignored. Local `.env` retains owner-only permissions. No schema, package pin or frontend feature code changed.
+- Day 13 implementation commit `97a992e7f4385b8e65f0de4889e7bd226ec09374` was pushed successfully; local HEAD and GitHub `refs/heads/main` matched exactly and the working tree was clean before this completion-record edit. Day 14 has not started.
 
 ## Daily completion record
 
-Day 13 (checks passed; Git checkpoint pending):
+Day 13:
 
 - Scope delivered: multi-account API/service journeys, local PDF email, real HTTP assignment races, driver eligibility, booking-recovery component checks and the GET-estimate quota regression fix.
 - Verification: 268 backend tests, 11 React tests, production build, dependency/schema consistency and owned test-state cleanup passed.
 - Known limits: real OSRM/Stripe calls are controlled in the journeys, browser/manual UI and actual Stripe checks remain pending, local SMTP acceptance is not external inbox delivery, and the existing TestClient warning remains.
-- Commit / push / remote verification: pending.
-- Ready for Day 14: no; finish the reviewed Git checkpoint first.
+- Implementation commit: `97a992e7f4385b8e65f0de4889e7bd226ec09374`.
+- Remote: `https://github.com/rarjun07/Cab-Booking-Platform-Python-Stack.git`, branch `main`.
+- Push result: succeeded; exact remote implementation SHA verified. This record follows in a documentation commit; compare current HEAD and GitHub for the latest checkpoint.
+- Ready for Day 14: after this record is pushed and verified, await the user's next instruction while retaining the pending UI/Stripe checks.
 
 Day 12:
 

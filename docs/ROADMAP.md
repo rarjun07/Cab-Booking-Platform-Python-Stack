@@ -199,7 +199,7 @@ Day 11's code checkpoint is verified. The user requested continuation; Day 12 pr
 
 Day 12's code checkpoint is verified. Pending manual UI and actual Stripe verification remain tracked.
 
-## Day 13 checklist (checks passed; Git checkpoint pending)
+## Day 13 checklist (implementation checkpoint verified)
 
 - [x] Verify Day 12's final documentation checkpoint (`75b0a6f`) against GitHub before implementation; retain pending UI/Stripe status.
 - [x] Add a real local HTTP/WebSocket multi-account journey with actual migrated PostgreSQL, Redis quotas/notifications and separate client cookies.
@@ -209,7 +209,7 @@ Day 12's code checkpoint is verified. Pending manual UI and actual Stripe verifi
 - [x] Reproduce and fix the actual GET-estimate quota gap; add React booking-recovery/quota/session tests.
 - [x] Pass 268 backend tests, 11 React tests, production build and schema/dependency checks; verify owned test data/Redis keys were removed.
 - [x] Document API/service versus simulated/browser/provider boundaries in `END_TO_END_TESTING.md`.
-- [ ] Review, commit, push and verify Day 13 before Day 14.
+- [x] Review, commit, push and verify Day 13 (`97a992e`) before Day 14.
 
 Day 14 has not started. Manual browser/UI and actual Stripe-provider checks remain pending.
 
