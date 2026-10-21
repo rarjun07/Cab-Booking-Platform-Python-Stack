@@ -28,3 +28,13 @@ Optional public Vite build-time configuration: `VITE_MAP_TILE_URL` and `VITE_MAP
 Verification: backend authorization/geometry/cache tests, React coordinate conversion/selection/StrictMode cleanup tests, existing component/accessibility regressions, and production build. These do not establish actual browser tile rendering, mobile layout or screen-reader usability; those manual checks remain pending.
 
 References: [Leaflet API](https://leafletjs.com/reference.html), [OSRM API](https://project-osrm.org/docs/v5.24.0/api/), [OSM tile policy](https://operations.osmfoundation.org/policies/tiles/).
+
+## 2. ETA and device location
+
+The map checkpoint `338347524ce02d5bd98019325860ae492757a3ab` was pushed and verified before this milestone started.
+
+Both participants can read `/api/rides/{ride_id}/eta`. Before the trip starts it routes the driver's fresh server-confirmed position to pickup; during `in_progress` it routes to destination. Offline, expired, missing and unassigned locations yield no time; finished trips yield no ETA. An exact shared coordinate matching the stop returns zero without an upstream request. Invalid/missing road routes are errors, never invented driving times. Returned coordinates, timestamp, expiry and road geometry are private to participants. It does not change the trip fare.
+
+React refreshes approximately every 15 seconds, waits until the previous request finishes, pauses while the browser document is hidden, aborts on trip changes/unmount, hides an expired ETA and stops on completion. The initial small delay avoids contention with the saved-route preview. A dashed line shows the current driver-to-stop road route. Estimates exclude live traffic and can lag actual movement.
+
+Driver **Use my device location** requests browser permission and fills draft coordinates only. Go online/share still require explicit actions. After going online, **Start live GPS sharing** opts in to a browser watcher; successful updates go through the existing authenticated WebSocket with HTTP fallback when disconnected. Updates are limited to one per 15 seconds. Errors stop sharing. Stop/offline/logout/unmount clear the watcher; stopping alone leaves the last shared location until expiry, while Go offline clears it immediately. Device GPS requires localhost or HTTPS. Browser fixes, accuracy, permission dialogs and rendered tracking still need a real-device/manual check.

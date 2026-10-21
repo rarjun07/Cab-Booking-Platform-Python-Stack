@@ -11,7 +11,7 @@ export function validPoint(point) {
 
 const latLng = (point) => [Number(point.latitude), Number(point.longitude)]
 
-export default function JourneyMap({ pickup, destination, driver, selection, geometry, onPick,
+export default function JourneyMap({ pickup, destination, driver, selection, geometry, approachGeometry, onPick,
   pickMode, onPickMode, disabled = false, title = 'Journey map' }) {
   const id = useId()
   const container = useRef(null)
@@ -76,7 +76,10 @@ export default function JourneyMap({ pickup, destination, driver, selection, geo
       // GeoJSON longitude,latitude -> Leaflet latitude,longitude.
       L.polyline(geometry.coordinates.map(([lng, lat]) => [lat, lng]), { color: '#32543b', weight: 5, opacity: .9 }).addTo(group)
     }
-  }, [pickup, destination, driver, selection, geometry])
+    if (approachGeometry?.type === 'LineString' && approachGeometry.coordinates?.length >= 2) {
+      L.polyline(approachGeometry.coordinates.map(([lng, lat]) => [lat, lng]), { color: '#172a28', weight: 4, dashArray: '8 8' }).addTo(group)
+    }
+  }, [pickup, destination, driver, selection, geometry, approachGeometry])
 
   function fit() {
     const map = instance.current
@@ -93,7 +96,7 @@ export default function JourneyMap({ pickup, destination, driver, selection, geo
     {onPickMode && <div className="map-pick-controls" aria-label="Choose a location to set on the map">
       {['pickup', 'destination'].map((mode) => <button type="button" key={mode} disabled={disabled} aria-pressed={pickMode === mode} onClick={() => onPickMode(mode)}>Set {mode}</button>)}
     </div>}
-    <p id={`${id}-help`} className="fare-note">{onPick ? `Click the map to set ${pickMode || 'your location'}, or use the coordinate fields. ` : ''}Use arrow keys to pan and + / − to zoom. Markers: P pickup · A destination · D last shared driver · S selected location.</p>
+    <p id={`${id}-help`} className="fare-note">{onPick ? `Click the map to set ${pickMode || 'your location'}, or use the coordinate fields. ` : ''}Use arrow keys to pan and + / − to zoom. Markers: P pickup · A destination · D last shared driver · S selected location. Dashed line: driver route to the next stop.</p>
     <div className="journey-map" ref={container} role="region" aria-label={title} aria-describedby={`${id}-help`} />
     {(mapError || tileError) && <p role="status" className="fare-note">{mapError ? 'Map unavailable.' : 'Some map tiles could not load.'} Coordinate fields and ride controls remain available.</p>}
     <p className="fare-note map-disclosure">Map tiles load from OpenStreetMap and reveal the viewed area to the tile provider. Delhi is the default view, not your device location. <a href="https://www.openstreetmap.org/fixthemap" target="_blank" rel="noreferrer">Report a map issue</a>.</p>

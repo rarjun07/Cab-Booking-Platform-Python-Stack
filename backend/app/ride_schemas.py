@@ -30,6 +30,17 @@ class RoadRoute(RouteMetrics):
     geometry: RouteGeometry | None = None
 
 
+class TripETA(BaseModel):
+    available: bool
+    target: Literal["pickup", "destination"] | None = None
+    reason: Literal["waiting_for_driver", "location_unavailable", "trip_finished"] | None = None
+    distance_meters: int | None = Field(default=None, ge=0)
+    duration_secs: int | None = Field(default=None, ge=0)
+    geometry: RouteGeometry | None = None
+    location_updated_at: datetime | None = None
+    expires_at: datetime | None = None
+
+
 class FareBreakdown(BaseModel):
     base_fare: Decimal
     distance_charge: Decimal

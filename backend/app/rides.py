@@ -14,9 +14,9 @@ from sqlalchemy.exc import IntegrityError
 
 from app.auth import DB, ISSUER, check_origin, get_current_user
 from app.config import get_settings
-from app.models import Ride, User
+from app.models import Ride, User, Driver
 from app.events import Events
-from app.ride_schemas import Coordinate, FareBreakdown, FareEstimate, QuoteContents, RidePublic, RideRequest, RouteMetrics, RoadRoute
+from app.ride_schemas import Coordinate, FareBreakdown, FareEstimate, QuoteContents, RidePublic, RideRequest, RouteMetrics, RoadRoute, TripETA
 from app.routing import OSRMProvider, get_route_provider
 
 router = APIRouter(prefix="/api/rides", tags=["Rides"])
@@ -84,6 +84,37 @@ def saved_route(ride_id: UUID, user: Annotated[User, Depends(get_current_user)],
         raise HTTPException(404, "Ride not found.")
     saved = ride_response(ride, db)
     return provider.route(saved.pickup, saved.destination)
+
+
+@router.get("/{ride_id}/eta", response_model=TripETA)
+def trip_eta(ride_id: UUID, user: Annotated[User, Depends(get_current_user)], db: DB,
+             provider: Annotated[OSRMProvider, Depends(get_route_provider)]):
+    ride = db.get(Ride, ride_id)
+    if ride is None or user.id not in (ride.rider_id, ride.driver_id):
+        raise HTTPException(404, "Ride not found.")
+    if ride.status in ("completed", "cancelled"):
+        return TripETA(available=False, reason="trip_finished")
+    if ride.driver_id is None:
+        return TripETA(available=False, reason="waiting_for_driver")
+    target = "destination" if ride.status == "in_progress" else "pickup"
+    driver = db.get(Driver, ride.driver_id)
+    expires = (driver.location_updated_at + timedelta(seconds=get_settings().driver_location_max_age_seconds)
+               if driver and driver.location_updated_at else None)
+    if (not driver or driver.status != "active" or driver.current_location is None
+            or expires is None or expires <= datetime.now(timezone.utc)):
+        return TripETA(available=False, target=target, reason="location_unavailable")
+    lng, lat = db.execute(select(func.ST_X(Driver.current_location), func.ST_Y(Driver.current_location))
+                          .where(Driver.user_id == driver.user_id)).one()
+    location = Coordinate(latitude=lat, longitude=lng)
+    saved = ride_response(ride, db)
+    destination = saved.destination if target == "destination" else saved.pickup
+    if location == destination:
+        return TripETA(available=True, target=target, distance_meters=0, duration_secs=0,
+                       location_updated_at=driver.location_updated_at, expires_at=expires)
+    route = provider.route(location, destination)
+    return TripETA(available=True, target=target, distance_meters=route.distance_meters,
+                   duration_secs=route.duration_secs, geometry=getattr(route, "geometry", None),
+                   location_updated_at=driver.location_updated_at, expires_at=expires)
 
 
 def validate_quote(token: str, user: User):

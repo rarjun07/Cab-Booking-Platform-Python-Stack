@@ -1,6 +1,9 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import JourneyMap from './JourneyMap.jsx'
 import useRoadRoute from './useRoadRoute.js'
+import useTripETA from './useTripETA.js'
+import TripETA from './TripETA.jsx'
+import DeviceLocationControls from './DeviceLocationControls.jsx'
 
 const formatMoney = (value) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(Number(value))
 const tripSteps = { accepted: ['arriving', 'Head to pickup'], arriving: ['in_progress', 'Start trip'], in_progress: ['completed', 'Complete trip'] }
@@ -40,6 +43,8 @@ export default function DriverDashboard({ onSessionExpired, live }) {
   const fresh = profile?.status === 'active' && new Date(profile.location_expires_at).getTime() > now
   const nextStep = tripSteps[ride?.status]
   const roadRoute = useRoadRoute(ride, onSessionExpired)
+  const calculatedETA = useTripETA(ride, onSessionExpired)
+  const eta = calculatedETA?.available && !fresh ? { available: false } : calculatedETA
 
   useEffect(() => {
     mounted.current = true
@@ -150,6 +155,17 @@ export default function DriverDashboard({ onSessionExpired, live }) {
     perform(() => live.status === 'connected' ? live.sendLocation(point) : driverRequest('/location', { method: 'POST', body: { location: point } }), 'Location updated.')
   }
 
+  async function shareDevicePoint(point) {
+    try {
+      if (live.status === 'connected') await live.sendLocation(point)
+      else await driverRequest('/location', { method: 'POST', body: { location: point } })
+      await reloadDashboard()
+    } catch (error) {
+      if (error.status === 401) onSessionExpired(null)
+      throw error
+    }
+  }
+
   return (
     <section id="driver" tabIndex={-1} className="driver-card dashboard-module" aria-labelledby="driver-title" aria-busy={loading || busy}>
       <h2 id="driver-title" className="visually-hidden">Your driving workspace</h2>
@@ -195,6 +211,7 @@ export default function DriverDashboard({ onSessionExpired, live }) {
             </fieldset>
           <p className="fare-note driver-demo-note">Your location is shared with our backend for nearby matching. Refresh it before it expires{profile.location_expires_at ? ` at ${new Date(profile.location_expires_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : ''}. Going offline stops new offers and clears this location.</p>
           {profile.current_location && <p className="fare-note driver-demo-note">Last shared: {profile.current_location.latitude}, {profile.current_location.longitude}. Edit the coordinates above and choose Share updated location to send a new point.</p>}
+          <DeviceLocationControls online={profile.status === 'active'} disabled={busy} onSelect={setLocation} onShare={shareDevicePoint} />
           </form>
         </>}
         </div>
@@ -209,6 +226,7 @@ export default function DriverDashboard({ onSessionExpired, live }) {
               <p>Pickup: {ride.pickup.latitude}, {ride.pickup.longitude}</p>
               <p>Destination: {ride.destination.latitude}, {ride.destination.longitude}</p>
               <p>Estimated fare: {formatMoney(ride.fare_estimate)}</p>
+              <TripETA eta={eta} />
               <p className="fare-note">This ride is assigned to you. Update its progress when you reach each step. After completion, the rider can open test checkout.</p>
               {nextStep && <button type="button" disabled={busy} onClick={() => perform(() => driverRequest(`/rides/${ride.id}/status`, { method: 'POST', body: { status: nextStep[0] } }), 'Trip status updated.')}>{nextStep[1]}</button>}
             </div> : !fresh || offers.length === 0 ? <div className="dashboard-empty-state">
@@ -228,7 +246,7 @@ export default function DriverDashboard({ onSessionExpired, live }) {
           </div>
           <JourneyMap title="Driver journey map" pickup={ride?.pickup} destination={ride?.destination}
             driver={fresh ? profile.current_location : null} selection={profile ? location : null}
-            geometry={roadRoute?.geometry} disabled={busy || !profile} onPick={profile ? setLocation : undefined} />
+            geometry={roadRoute?.geometry} approachGeometry={eta?.available ? eta.geometry : null} disabled={busy || !profile} onPick={profile ? setLocation : undefined} />
           {roadRoute?.error && <p className="fare-note" role="status">Road preview unavailable: {roadRoute.error} Your trip controls remain available.</p>}
         </div>
       </>}

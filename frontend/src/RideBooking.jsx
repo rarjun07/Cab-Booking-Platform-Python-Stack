@@ -2,6 +2,8 @@ import { useEffect, useId, useRef, useState } from 'react'
 import RidePayment from './RidePayment.jsx'
 import JourneyMap from './JourneyMap.jsx'
 import useRoadRoute from './useRoadRoute.js'
+import useTripETA from './useTripETA.js'
+import TripETA from './TripETA.jsx'
 
 const emptyRoute = { pickupLat: '', pickupLng: '', destinationLat: '', destinationLng: '' }
 const sampleRoute = { pickupLat: '28.6139', pickupLng: '77.2090', destinationLat: '28.6129', destinationLng: '77.2295' }
@@ -45,6 +47,7 @@ export default function RideBooking({ user, onSessionExpired, liveRevision = 0 }
   const [isError, setIsError] = useState(false)
   const [pickMode, setPickMode] = useState('pickup')
   const savedRoute = useRoadRoute(ride, onSessionExpired)
+  const calculatedETA = useTripETA(ride, onSessionExpired)
   const hasDraft = Object.values(route).some((value) => value !== '')
   const showRide = ride && (!hasDraft || (Number(route.pickupLat) === ride.pickup.latitude &&
     Number(route.pickupLng) === ride.pickup.longitude && Number(route.destinationLat) === ride.destination.latitude &&
@@ -53,6 +56,8 @@ export default function RideBooking({ user, onSessionExpired, liveRevision = 0 }
   const pickup = mapTrip?.pickup ?? { latitude: route.pickupLat, longitude: route.pickupLng }
   const destination = mapTrip?.destination ?? { latitude: route.destinationLat, longitude: route.destinationLng }
   const [now, setNow] = useState(Date.now())
+  const sharedFresh = Boolean(driverLocation?.location && driverLocation.ride_id === ride?.id && new Date(driverLocation.expires_at).getTime() > now)
+  const eta = calculatedETA?.available && !sharedFresh ? { available: false } : calculatedETA
 
   useEffect(() => {
     setNow(Date.now())
@@ -225,7 +230,7 @@ export default function RideBooking({ user, onSessionExpired, liveRevision = 0 }
           <h3>Your trip at a glance</h3>
           <JourneyMap pickup={pickup} destination={destination}
             driver={ride && mapTrip === ride && driverLocation?.ride_id === ride.id && new Date(driverLocation.expires_at).getTime() > now ? driverLocation.location : null}
-            geometry={quote?.geometry ?? (showRide ? savedRoute?.geometry : null)} pickMode={pickMode} onPickMode={setPickMode} disabled={busy || restoring}
+            geometry={quote?.geometry ?? (showRide ? savedRoute?.geometry : null)} approachGeometry={mapTrip === ride && eta?.available ? eta.geometry : null} pickMode={pickMode} onPickMode={setPickMode} disabled={busy || restoring}
             onPick={(point) => {
               const prefix = pickMode === 'pickup' ? 'pickup' : 'destination'
               changeRoute({ ...route, [`${prefix}Lat`]: String(point.latitude), [`${prefix}Lng`]: String(point.longitude) })
@@ -253,6 +258,7 @@ export default function RideBooking({ user, onSessionExpired, liveRevision = 0 }
                 ? <p>{driverLocation.location.latitude}, {driverLocation.location.longitude} · Updated {new Date(driverLocation.updated_at).toLocaleTimeString()}</p>
                 : <p>Waiting for a fresh location. The driver may be offline.</p>}
             </div>}
+            <TripETA eta={eta} />
             {ride.status === 'completed' && <RidePayment key={ride.id} rideId={ride.id} liveRevision={liveRevision} onSessionExpired={onSessionExpired} />}
             <div className="auth-actions"><button type="button" disabled={busy} onClick={refreshStatus}>Refresh ride status</button>{ride.status === 'requested' && <button className="secondary-button" type="button" disabled={busy} onClick={findDrivers}>Find nearby drivers</button>}</div>
             {ride.status === 'requested' && matchingChecked && <div className="rider-matching">

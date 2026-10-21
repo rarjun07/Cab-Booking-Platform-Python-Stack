@@ -44,6 +44,13 @@
 - Day 14 prepared-code checkpoint: `8b2c2c2665889ec063a086a6e5c6f640b16d166b`, committed/pushed and verified equal to GitHub `refs/heads/main`. This saves incomplete Day 14 work; it does not certify container startup or deployment. This verification record follows in a documentation commit.
 - Next action: resolve Docker storage/recovery, rebuild and run Compose and the restart smoke check; choose a hosting destination before any online deployment. Day 14 is incomplete. Manual UI/actual Stripe verification remain pending.
 
+## Mentor-guide follow-up 2: ETA and opt-in device location — 2026-10-21
+
+- Began after the map commit `338347524ce02d5bd98019325860ae492757a3ab` was pushed and GitHub returned that exact SHA. This also records the preceding milestone's completed Git checkpoint.
+- Added participant-only road ETA to pickup/destination, location freshness/availability checks, safe no-ETA states, exact-stop handling and shared route quotas. Both dashboards show a timestamped estimate and dashed driver-to-stop route, with bounded background refresh, local expiry and finished-trip cleanup. Estimates exclude live traffic and never replace billing metrics.
+- Added driver opt-in one-shot device selection and separately enabled live sharing through existing authenticated location APIs. Permission/error handling, 15-second send spacing and watcher cleanup/offline/logout preserve manual coordinate fallback. No device location was collected by the agent.
+- Verification: **34 backend ETA/realtime tests passed**, all **32 frontend tests passed**, production build and `git diff --check` passed. Cases cover private access, target changes, offline/expired/missing positions, zero-distance arrival, upstream errors, ETA expiry/retry/cleanup, explicit device selection, opt-in GPS throttling and offline cleanup. Real browser GPS/permission/map/mobile/screen-reader checks remain pending; this is not a Day 14/provider completion. Git checkpoint is recorded after its actual push/verification.
+
 ## Mentor-guide follow-up 1: interactive maps — 2026-10-21
 
 - Continued from clean local `75a30c2`, verified equal to GitHub before completing this follow-up. Installed pinned Leaflet 1.9.4 after an initial DNS failure; no paid map account/key is needed.
@@ -51,7 +58,7 @@
 - OSRM now supplies bounded/validated simplified GeoJSON with its existing cache/throttle/timeouts. Fare tokens exclude geometry. Saved-route access checks rider/assigned-driver ownership before requesting OSRM and uses shared route quotas. Stale driver markers are hidden on expiry. Tile errors retain usable forms/ride controls; attribution, referrer behavior, provider disclosure and production-service limitations are documented.
 - Verification: full backend suite **274 passed** (including PostgreSQL, Redis, WebSockets and worker regressions); this run preceded the final additional null-geometry case, which is checked separately below. All **27 frontend tests** and production build passed. `git diff --check` passed. Existing TestClient deprecation warning remains.
 - Actual rendered-browser map/mobile/zoom/screen-reader checks remain unverified under the prior browser policy restriction. No real Stripe/email/deployment pass is claimed. ETA, device GPS and editable profile are not included in this first checkpoint.
-- Final routing checks (including rejection of null geometry): **15 passed**; pip consistency passed. Implementation commit/push/remote verification: pending until the checkpoint below is performed; do not begin follow-up 2 before remote verification.
+- Final routing checks (including rejection of null geometry): **15 passed**; pip consistency passed. Committed/pushed as `338347524ce02d5bd98019325860ae492757a3ab`, verified equal to GitHub before follow-up 2.
 
 ## User-requested removal of duplicate Account tab — 2026-10-21
 
