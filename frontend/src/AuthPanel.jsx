@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { authRequest } from './authRequest.js'
+import ProfileEditor from './ProfileEditor.jsx'
 
 export default function AuthPanel({ user, onUserChange, onAuthenticated, mode: selectedMode, onModeChange, focusRequest = 0 }) {
   const formId = useId()
@@ -111,10 +112,10 @@ export default function AuthPanel({ user, onUserChange, onAuthenticated, mode: s
       <p className="auth-description">{user ? `${user.email} · ${user.role}` : 'Create an account or sign in to get started.'}</p>
 
       {restoring ? <p role="status">Checking your session…</p> : user ? (
-        <div className="auth-actions">
+        <><ProfileEditor key={user.id} user={user} onUserChange={setUser} /><div className="auth-actions">
           <button type="button" disabled={busy} onClick={() => sessionAction('session')}>Verify my session</button>
           <button className="secondary-button" type="button" disabled={busy} onClick={() => sessionAction('logout')}>Sign out</button>
-        </div>
+        </div></>
       ) : (
         <>
           <div className="auth-modes" role="group" aria-label="Choose account action">

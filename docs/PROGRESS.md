@@ -2,7 +2,7 @@
 
 ## Current checkpoint
 
-- User-requested feature completion: the user asked to build all audited gaps one at a time. Sequence and verification boundaries are in `FEATURE_COMPLETION.md`. First implementation milestone: interactive maps; later ETA/profile/provider/infrastructure work remains outstanding. This does not complete or advance Day 14.
+- User-requested feature completion: follow-ups 1 (maps) and 2 (ETA/GPS) are pushed and verified; follow-up 3 (profiles/operator review) has passed checks and awaits its Git checkpoint below. Sequence is in `FEATURE_COMPLETION.md`. Next is real Stripe setup/verification, requiring the user's account access. Email, backend maintenance/presence, Docker/hosting and manual rendered checks remain outstanding. This does not complete or advance Day 14.
 
 - Active milestone: Day 14 container/deployment setup in progress. Dockerfiles, isolated Compose services, a credential helper and smoke script are prepared. The build hit a Docker internal read-only filesystem error; container startup/smoke checks have not passed. Recovery may interrupt another project's running database and awaits the user's response. Browser/mobile/zoom/screen-reader checks remain pending; earlier Stripe setup/real-provider/rendered-checkout deferral remains in effect.
 - Completed: read all nine PDF pages, checked the daily schedule, confirmed stack compatibility, and prepared the roadmap.
@@ -44,12 +44,21 @@
 - Day 14 prepared-code checkpoint: `8b2c2c2665889ec063a086a6e5c6f640b16d166b`, committed/pushed and verified equal to GitHub `refs/heads/main`. This saves incomplete Day 14 work; it does not certify container startup or deployment. This verification record follows in a documentation commit.
 - Next action: resolve Docker storage/recovery, rebuild and run Compose and the restart smoke check; choose a hosting destination before any online deployment. Day 14 is incomplete. Manual UI/actual Stripe verification remain pending.
 
+## Mentor-guide follow-up 3: profiles and operator review — 2026-10-21
+
+- Started after `3d3b9d64f7acac2cf02fc5121246b3ba754d9889` was committed/pushed and verified equal to GitHub. This records follow-up 2's completed Git checkpoint.
+- Added owned account editing for name, optional normalized international phone and optional HTTPS image URL; safe public-self responses include these fields. No role/ID/email/password/wallet/verification changes are accepted. Profile picture is loaded directly by the browser with no-referrer and initials fallback; no server URL fetching or file-upload storage was introduced.
+- Added a trusted-terminal vehicle review command with a dry-run default, exact plate confirmation, row locking, approve/revoke actions and a durable Alembic review log. Vehicle edits invalidate approval and record a revocation. No real driver was approved by the agent; the existing labeled demo policy still applies. These flags do not constitute external identity/document verification.
+- Verification: **297 backend tests passed**, all **35 frontend tests passed**, production build and `git diff --check` passed. Added cases cover owned updates, immutable identity/roles, bad phone/URL input, duplicate phones, failed-save rollback/draft retention, image fallback, approval audit and vehicle-change revocation. Existing TestClient warning remains. Operator CLI help ran successfully; no real driver approval was performed.
+- Applied additive migration `0010_driver_verifications` to development in a transaction, compared before/after fingerprints for all 8 checked existing account/session/driver/ride/payment/review/wallet tables, and verified no data changes and no Alembic drift. New review log is empty in development. Source scan found no actual configured local secrets in the 17 candidate files.
+- Stripe/email/hosting account information was requested while local implementation continued; no credentials have been solicited in chat or external service configured. Read-only disk check now reports approximately **897 MiB available** on the Mac data volume; Docker recovery/build remains pending. No cleanup, deletion, restart or unrelated database interruption was performed. Git checkpoint follows after its actual push/verification.
+
 ## Mentor-guide follow-up 2: ETA and opt-in device location — 2026-10-21
 
 - Began after the map commit `338347524ce02d5bd98019325860ae492757a3ab` was pushed and GitHub returned that exact SHA. This also records the preceding milestone's completed Git checkpoint.
 - Added participant-only road ETA to pickup/destination, location freshness/availability checks, safe no-ETA states, exact-stop handling and shared route quotas. Both dashboards show a timestamped estimate and dashed driver-to-stop route, with bounded background refresh, local expiry and finished-trip cleanup. Estimates exclude live traffic and never replace billing metrics.
 - Added driver opt-in one-shot device selection and separately enabled live sharing through existing authenticated location APIs. Permission/error handling, 15-second send spacing and watcher cleanup/offline/logout preserve manual coordinate fallback. No device location was collected by the agent.
-- Verification: **34 backend ETA/realtime tests passed**, all **32 frontend tests passed**, production build and `git diff --check` passed. Cases cover private access, target changes, offline/expired/missing positions, zero-distance arrival, upstream errors, ETA expiry/retry/cleanup, explicit device selection, opt-in GPS throttling and offline cleanup. Real browser GPS/permission/map/mobile/screen-reader checks remain pending; this is not a Day 14/provider completion. Git checkpoint is recorded after its actual push/verification.
+- Verification: **34 backend ETA/realtime tests passed**, all **32 frontend tests passed**, production build and `git diff --check` passed. Cases cover private access, target changes, offline/expired/missing positions, zero-distance arrival, upstream errors, ETA expiry/retry/cleanup, explicit device selection, opt-in GPS throttling and offline cleanup. Real browser GPS/permission/map/mobile/screen-reader checks remain pending; this is not a Day 14/provider completion. Committed/pushed as `3d3b9d64f7acac2cf02fc5121246b3ba754d9889`, verified equal to GitHub before follow-up 3.
 
 ## Mentor-guide follow-up 1: interactive maps — 2026-10-21
 

@@ -38,3 +38,22 @@ Both participants can read `/api/rides/{ride_id}/eta`. Before the trip starts it
 React refreshes approximately every 15 seconds, waits until the previous request finishes, pauses while the browser document is hidden, aborts on trip changes/unmount, hides an expired ETA and stops on completion. The initial small delay avoids contention with the saved-route preview. A dashed line shows the current driver-to-stop road route. Estimates exclude live traffic and can lag actual movement.
 
 Driver **Use my device location** requests browser permission and fills draft coordinates only. Go online/share still require explicit actions. After going online, **Start live GPS sharing** opts in to a browser watcher; successful updates go through the existing authenticated WebSocket with HTTP fallback when disconnected. Updates are limited to one per 15 seconds. Errors stop sharing. Stop/offline/logout/unmount clear the watcher; stopping alone leaves the last shared location until expiry, while Go offline clears it immediately. Device GPS requires localhost or HTTPS. Browser fixes, accuracy, permission dialogs and rendered tracking still need a real-device/manual check.
+
+## 3. Account details and operator vehicle review
+
+The ETA/GPS checkpoint `3d3b9d64f7acac2cf02fc5121246b3ba754d9889` was pushed and verified before this milestone began.
+
+Open the profile dropdown, then **View profile**. Both roles can save a display name, optional international phone and optional HTTPS profile-picture URL. Blank phone/photo fields remove those values; image failures show initials. The backend selects the signed-in account, checks Origin and validates/normalizes inputs. IDs, roles, email, passwords, balances and verified flags cannot be changed through this form. Phone is contact data only, not phone verification or a login identifier. The backend never fetches the photo URL; the browser loads the saved image directly, without a referrer. This is URL-based pictures, not uploaded-file storage.
+
+Alembic `0010_driver_verifications` adds a review log without changing existing accounts, sessions or vehicles. Operators with trusted terminal/database access can record a vehicle review, including the outcome, vehicle snapshot, OS account, reason and timestamp. Ordinary browser accounts cannot approve themselves. Review the actual vehicle/driver evidence separately: this command only records the operator's decision and performs no government/KYC check. Existing learning-demo matching still permits clearly labeled unverified profiles; recording this flag does not introduce production compliance or force active trips to end.
+
+From `backend/` with the virtual environment active:
+
+```bash
+python -m alembic upgrade head
+python -m app.verify_driver --driver-id '<driver UUID>' --status approved --plate '<reviewed number plate>' --reason 'Reviewed the current demo vehicle'
+```
+
+The second command is a dry-run. Confirm the correct driver/plate and review outcome, then add `--apply` to save it. Use `--status revoked` to withdraw approval. Do not include identity-document numbers or secrets in reasons. The command locks the driver row and checks the reviewed plate; if the vehicle changed, review again. A later vehicle edit automatically revokes approval and records that event. Re-saving identical details preserves approval. Decisions publish a normal live invalidation; a Redis outage does not roll back a saved review. This is a local operator workflow, not a new browser admin role or dashboard.
+
+External Stripe/email setup, Docker recovery/hosting and actual rendered-browser/provider verification remain separate pending steps. Do not paste secrets into chat.

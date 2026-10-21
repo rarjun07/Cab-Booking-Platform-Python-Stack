@@ -59,6 +59,21 @@ class Driver(Base):
     status: Mapped[str] = mapped_column(String(20), server_default="offline")
 
 
+class DriverVerification(Base):
+    __tablename__ = "driver_verifications"
+    __table_args__ = (
+        CheckConstraint("length(operator) BETWEEN 1 AND 100", name="ck_driver_verifications_operator"),
+        CheckConstraint("length(reason) BETWEEN 1 AND 500", name="ck_driver_verifications_reason"),
+    )
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
+    driver_id: Mapped[UUID] = mapped_column(ForeignKey("drivers.user_id", ondelete="RESTRICT"), index=True)
+    approved: Mapped[bool] = mapped_column(Boolean)
+    vehicle_info: Mapped[dict] = mapped_column(JSONB)
+    operator: Mapped[str] = mapped_column(String(100))
+    reason: Mapped[str] = mapped_column(String(500))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
 class Ride(Base):
     __tablename__ = "rides"
     __table_args__ = (

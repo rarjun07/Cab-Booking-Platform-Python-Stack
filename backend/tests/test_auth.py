@@ -14,7 +14,7 @@ from app.models import User
 def test_register_persists_only_hash_and_sets_private_cookie(client, db, account):
     response = client.post("/api/auth/register", json=account)
     assert response.status_code == 201
-    assert set(response.json()) == {"id", "name", "email", "role"}
+    assert set(response.json()) == {"id", "name", "email", "role", "phone", "profile_pic"}
     stored = db.scalar(select(User).where(User.email == account["email"]))
     assert stored.password_hash.startswith("$argon2id$")
     assert password_hasher.verify(account["password"], stored.password_hash)

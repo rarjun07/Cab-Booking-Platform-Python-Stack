@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 from app.config import get_settings
 from app.database import get_db
 from app.models import AuthSession, User
-from app.schemas import LoginInput, RegisterInput, UserPublic
+from app.schemas import LoginInput, RegisterInput, UserPublic, ProfileInput
 from app import security
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
@@ -122,6 +122,22 @@ def login(data: LoginInput, response: Response, db: DB):
 @router.get("/me", response_model=UserPublic)
 def current_user(user: Annotated[User, Depends(get_current_user)]):
     return user
+
+
+@router.post("/profile", response_model=UserPublic, dependencies=[Depends(check_origin)])
+def update_profile(data: ProfileInput, user: Annotated[User, Depends(get_current_user)], db: DB):
+    # The session chooses the account; clients cannot submit an ID or role.
+    current = db.scalar(select(User).where(User.id == user.id).with_for_update())
+    current.name = data.name
+    current.phone = data.phone
+    current.profile_pic = str(data.profile_pic) if data.profile_pic else None
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "That phone number is already in use.") from None
+    db.refresh(current)
+    return current
 
 
 @router.post("/session", response_model=UserPublic, dependencies=[Depends(check_origin)])

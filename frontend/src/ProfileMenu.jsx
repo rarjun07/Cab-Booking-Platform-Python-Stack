@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { authRequest } from './authRequest.js'
+import Avatar from './Avatar.jsx'
 
 export default function ProfileMenu({ user, onNavigate, onHelp, onSignedOut }) {
   const panelId = useId()
@@ -9,7 +10,6 @@ export default function ProfileMenu({ user, onNavigate, onHelp, onSignedOut }) {
   const [open, setOpen] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
-  const initials = user.name.trim().split(/\s+/).slice(0, 2).map((name) => [...name][0]).join('')
 
   useEffect(() => {
     if (!open) return
@@ -52,13 +52,13 @@ export default function ProfileMenu({ user, onNavigate, onHelp, onSignedOut }) {
     }
   }}>
     <button className="profile-trigger" type="button" aria-label="My account" aria-expanded={open} aria-controls={panelId} ref={trigger} onClick={() => setOpen((value) => !value)}>
-      <span className="workspace-avatar" aria-hidden="true">{initials}</span>
+      <Avatar user={user} />
       <span className="profile-trigger-name">{user.name}</span>
       <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true" focusable="false"><path d="m5 7 5 5 5-5" /></svg>
     </button>
     <section className="profile-dropdown" id={panelId} hidden={!open} aria-label="Account options" aria-busy={busy}>
       <div className="profile-summary">
-        <span className="workspace-avatar" aria-hidden="true">{initials}</span>
+        <Avatar user={user} />
         <div>
           <h2>{user.name}</h2>
           <span className="profile-role">{user.role === 'driver' ? 'Driver account' : 'Rider account'}</span>

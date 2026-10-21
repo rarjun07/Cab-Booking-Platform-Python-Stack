@@ -14,7 +14,7 @@ from app.auth import DB, check_origin, get_current_user
 from app.config import get_settings
 from app.driver_schemas import AvailabilityInput, DriverProfileInput, DriverPublic, NearbyDriver, RideOffer, VehicleInfo, DriverLocationInput, DriverLocationPublic, TripStatusInput
 from app.events import Events
-from app.models import Driver, Ride, RideDecline, User
+from app.models import Driver, DriverVerification, Ride, RideDecline, User
 from app.ride_schemas import Coordinate, RidePublic
 from app.rides import RiderUser, ride_response
 
@@ -85,6 +85,9 @@ def save_profile(data: DriverProfileInput, user: DriverUser, db: DB, events: Eve
         driver = Driver(user_id=user.id, vehicle_info=vehicle)
         db.add(driver)
     elif driver.vehicle_info != vehicle:
+        if driver.verified:
+            db.add(DriverVerification(driver_id=user.id, approved=False, vehicle_info=vehicle,
+                                      operator=f"driver:{user.id}", reason="Vehicle details changed; operator review is required again."))
         driver.vehicle_info = vehicle
         driver.verified = False
     db.commit()
