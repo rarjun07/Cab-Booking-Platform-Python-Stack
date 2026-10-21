@@ -18,9 +18,11 @@ async function authRequest(path, body, signal) {
   return data
 }
 
-export default function AuthPanel({ user, onUserChange }) {
+export default function AuthPanel({ user, onUserChange, mode: selectedMode, onModeChange, focusRequest = 0 }) {
   const formId = useId()
-  const [mode, setMode] = useState('register')
+  const [localMode, setLocalMode] = useState('register')
+  const mode = selectedMode ?? localMode
+  const setMode = onModeChange ?? setLocalMode
   const setUser = onUserChange
   const [restoring, setRestoring] = useState(true)
   const [busy, setBusy] = useState(false)
@@ -29,6 +31,20 @@ export default function AuthPanel({ user, onUserChange }) {
   const heading = useRef(null)
   const feedback = useRef(null)
   const focusAfterAction = useRef(null)
+  const formElement = useRef(null)
+  const lastFocusRequest = useRef(0)
+
+  useEffect(() => {
+    if (!focusRequest || focusRequest === lastFocusRequest.current || restoring || busy) return
+    lastFocusRequest.current = focusRequest
+    if (!user) {
+      setMessage('')
+      setIsError(false)
+    }
+    const target = user ? heading.current : formElement.current?.querySelector('input')
+    target?.focus()
+    target?.scrollIntoView?.({ block: 'center' })
+  }, [focusRequest, restoring, busy, user?.id])
 
   useEffect(() => {
     if (focusAfterAction.current === 'heading') heading.current?.focus()
@@ -121,7 +137,7 @@ export default function AuthPanel({ user, onUserChange }) {
             <button type="button" disabled={busy} aria-pressed={mode === 'register'} onClick={() => { setMode('register'); setMessage('') }}>Create account</button>
             <button type="button" disabled={busy} aria-pressed={mode === 'login'} onClick={() => { setMode('login'); setMessage('') }}>Sign in</button>
           </div>
-          <form key={mode} onSubmit={submit} aria-busy={busy}>
+          <form key={mode} ref={formElement} onSubmit={submit} aria-busy={busy}>
             <fieldset disabled={busy}>
               {mode === 'register' && <div className="form-field"><label htmlFor={`${formId}-name`}>Name</label><input id={`${formId}-name`} name="name" autoComplete="name" maxLength={100} required /></div>}
               <div className="form-field"><label htmlFor={`${formId}-email`}>Email</label><input id={`${formId}-email`} name="email" type="email" autoComplete="email" autoCapitalize="none" spellCheck={false} maxLength={254} required /></div>

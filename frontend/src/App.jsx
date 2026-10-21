@@ -16,7 +16,14 @@ const connectionMessages = {
 export default function App() {
   const [connection, setConnection] = useState('idle')
   const [user, setUser] = useState(null)
+  const [authMode, setAuthMode] = useState('register')
+  const [accountFocusRequest, setAccountFocusRequest] = useState(0)
   const live = useRealtime(user, setUser)
+
+  function openAccount(mode = authMode) {
+    setAuthMode(mode)
+    setAccountFocusRequest((request) => request + 1)
+  }
 
   async function checkConnection() {
     setConnection('checking')
@@ -49,7 +56,21 @@ export default function App() {
           <span className="brand-mark" aria-hidden="true">C</span>
           Cab Booking Platform
         </a>
-        <span className="demo-label">Learning project · Test payments</span>
+        <div className="header-actions">
+          <span className="demo-label">Learning project · Test payments</span>
+          <nav className="account-nav" aria-label="Account navigation">
+            {!user && <>
+              <button type="button" aria-controls="account" onClick={() => openAccount('login')}>Login</button>
+              <button className="nav-register" type="button" aria-controls="account" onClick={() => openAccount('register')}>Register</button>
+            </>}
+            <button className="nav-account" type="button" aria-label={user ? 'My account' : 'Account'} title={user ? `Account: ${user.name}` : 'Your account'} aria-controls="account" onClick={() => openAccount()}>
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+                <circle cx="12" cy="8" r="3.5" />
+                <path d="M5 21v-2a7 7 0 0 1 14 0v2" />
+              </svg>
+            </button>
+          </nav>
+        </div>
       </header>
 
       <main id="main" tabIndex={-1}>
@@ -67,7 +88,7 @@ export default function App() {
           {user?.role === 'rider' && <a href="#wallet">Wallet</a>}
           {user && <a href="#history">Ride history</a>}
         </nav>
-        <AuthPanel user={user} onUserChange={setUser} />
+        <AuthPanel user={user} onUserChange={setUser} mode={authMode} onModeChange={setAuthMode} focusRequest={accountFocusRequest} />
         {user && <p className={`live-connection${live.status === 'connected' ? ' live-connected' : ''}`} role="status" aria-live="polite">{live.status === 'connected' ? 'Live updates connected' : live.status === 'connecting' ? 'Connecting live updates…' : 'Live updates reconnecting. Refresh is still available.'}</p>}
         <div className={`workspace${user?.role === 'rider' ? ' rider-workspace' : ''}`}>
         {user?.role === 'driver'

@@ -105,6 +105,38 @@ test('keyboard entry begins with the skip link and can activate the account mode
   expect(screen.getByLabelText('Password').autocomplete).toBe('current-password')
 })
 
+test('header Login, Register and account controls open and focus the matching existing form', async () => {
+  await ready(null)
+  const user = userEvent.setup()
+  const navigation = within(screen.getByRole('navigation', { name: 'Account navigation' }))
+  await user.click(navigation.getByRole('button', { name: 'Login', exact: true }))
+  expect(screen.queryByLabelText('Name')).toBeNull()
+  expect(screen.getByLabelText('Password').autocomplete).toBe('current-password')
+  await waitFor(() => expect(document.activeElement).toBe(screen.getByLabelText('Email')))
+  await user.click(navigation.getByRole('button', { name: 'Register', exact: true }))
+  expect(screen.getByLabelText('Password').autocomplete).toBe('new-password')
+  await waitFor(() => expect(document.activeElement).toBe(screen.getByLabelText('Name')))
+  await user.click(navigation.getByRole('button', { name: 'Account', exact: true }))
+  expect(document.activeElement).toBe(screen.getByLabelText('Name'))
+  await user.click(navigation.getByRole('button', { name: 'Login', exact: true }))
+  await user.click(navigation.getByRole('button', { name: 'Login', exact: true }))
+  expect(document.activeElement).toBe(screen.getByLabelText('Email'))
+})
+
+test('a restored account gets a profile shortcut and guest header actions return after logout', async () => {
+  await ready('rider')
+  const user = userEvent.setup()
+  const navigation = within(screen.getByRole('navigation', { name: 'Account navigation' }))
+  expect(navigation.queryByRole('button', { name: 'Login', exact: true })).toBeNull()
+  expect(navigation.queryByRole('button', { name: 'Register', exact: true })).toBeNull()
+  await user.click(navigation.getByRole('button', { name: 'My account', exact: true }))
+  expect(document.activeElement).toBe(screen.getByRole('heading', { name: 'Welcome, Test Rider.' }))
+  await user.click(screen.getByRole('button', { name: 'Sign out', exact: true }))
+  await waitFor(() => expect(document.activeElement).toBe(screen.getByRole('heading', { name: 'Your journey, your account.' })))
+  expect(navigation.getByRole('button', { name: 'Login', exact: true })).toBeTruthy()
+  expect(navigation.getByRole('button', { name: 'Register', exact: true })).toBeTruthy()
+})
+
 function AccountHarness() {
   const [user, setUser] = useState(null)
   return <AuthPanel user={user} onUserChange={setUser} />

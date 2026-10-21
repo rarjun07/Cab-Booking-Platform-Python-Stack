@@ -42,6 +42,13 @@
 - Day 14 prepared-code checkpoint: `8b2c2c2665889ec063a086a6e5c6f640b16d166b`, committed/pushed and verified equal to GitHub `refs/heads/main`. This saves incomplete Day 14 work; it does not certify container startup or deployment. This verification record follows in a documentation commit.
 - Next action: resolve Docker storage/recovery, rebuild and run Compose and the restart smoke check; choose a hosting destination before any online deployment. Day 14 is incomplete. Manual UI/actual Stripe verification remain pending.
 
+## User-requested header update — 2026-10-21
+
+- The user supplied current-page screenshots and a reference header, requesting top Login/Register/profile controls while retaining the current UI and colors. This is an explicitly requested UI follow-up; it does not advance or complete Day 14.
+- Added a named account navigation in the existing header. Guest Login/Register buttons select the existing account form, focus its first field and bring it into view; repeated clicks work. The profile icon opens the current account section. Restored/signed-in accounts show the profile shortcut instead of guest actions; signing out restores those actions.
+- Reused the existing cream, dark-green, lime and border colors, brand, project label, focus ring and typography. Responsive header wrapping affects only the header; existing page sections/styles remain intact. Authentication endpoints, cookie handling, backend/schema and dependencies are unchanged.
+- Verification: all **13 frontend tests passed**, including new form-selection/focus, restored-account and logout navigation checks; existing guest/rider/driver structural accessibility and keyboard tests still pass. The production build and `git diff --check` passed. No rendered-browser/mobile/visual pass is claimed; earlier browser automation restriction and manual UI follow-ups remain pending.
+
 ## Day 14: container setup prepared; Docker storage recovery pending
 
 - Started on the user's “next” instruction after verifying the clean Day 13 documentation checkpoint `e91e92e` against GitHub.
