@@ -4,6 +4,8 @@ On 2026-10-21 the user asked to build the remaining audited features one at a ti
 
 ## Sequence
 
+Current status: milestones 1–3 are implemented, checked and pushed (`3383475`, `3d3b9d6`, `77205c7`). Their manual rendered/device checks remain pending. Milestone 4 is next and awaits the user's Stripe test-account access. Milestones 5–8 remain outstanding; existing provider and browser deferrals remain explicit.
+
 1. Interactive Leaflet maps in both dashboards, marker selection, OSRM road geometry and private saved-route access.
 2. Driver pickup/destination ETA and visual tracking from fresh location updates; optional device location sharing with explicit browser consent.
 3. Editable account details (existing name/phone/photo fields) and an operator-controlled driver-verification process. The guide does not require a new public admin dashboard.
