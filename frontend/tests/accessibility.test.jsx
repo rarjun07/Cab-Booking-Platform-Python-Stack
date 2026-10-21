@@ -104,12 +104,18 @@ test.each(['rider', 'driver'])('%s account, history and allowed wallet views ret
   const { container } = await ready(role)
   const user = userEvent.setup()
   const navigation = within(screen.getByRole('navigation', { name: 'Workspace sections' }))
-  for (const label of [...(role === 'rider' ? ['Wallet'] : []), 'Ride history', 'Account']) {
+  for (const label of [...(role === 'rider' ? ['Wallet'] : []), 'Ride history']) {
     await user.click(navigation.getByRole('link', { name: label, exact: true }))
     expect(navigation.getByRole('link', { name: label, exact: true }).getAttribute('aria-current')).toBe('page')
     checkReferences(container)
     await auditStructure(container)
   }
+  expect(navigation.queryByRole('link', { name: 'Account', exact: true })).toBeNull()
+  await user.click(screen.getByRole('button', { name: 'My account', exact: true }))
+  await user.click(within(screen.getByRole('region', { name: 'Account options' })).getByRole('link', { name: 'View profile' }))
+  expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Your account')
+  checkReferences(container)
+  await auditStructure(container)
 })
 
 test('keyboard entry begins with the skip link and can activate the account mode buttons', async () => {

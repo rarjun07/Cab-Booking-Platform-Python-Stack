@@ -42,6 +42,11 @@
 - Day 14 prepared-code checkpoint: `8b2c2c2665889ec063a086a6e5c6f640b16d166b`, committed/pushed and verified equal to GitHub `refs/heads/main`. This saves incomplete Day 14 work; it does not certify container startup or deployment. This verification record follows in a documentation commit.
 - Next action: resolve Docker storage/recovery, rebuild and run Compose and the restart smoke check; choose a hosting destination before any online deployment. Day 14 is incomplete. Manual UI/actual Stripe verification remain pending.
 
+## User-requested removal of duplicate Account tab — 2026-10-21
+
+- Removed the screenshot-marked top-level Account tab for both riders and drivers. Profile dropdown links and direct account bookmarks remain available; existing styling is unchanged.
+- Updated the existing role/accessibility checks to reach account details through the dropdown and confirm the duplicate tab is absent. All 25 frontend tests, production build and `git diff --check` passed. Day 14 and other pending service/manual checks retain their previous status.
+
 ## User-requested top navigation and profile dropdown — 2026-10-21
 
 - The user supplied screenshots clarifying that dashboard links should align across the top header like the reference, with a name/avatar dropdown on the right. Continued from the clean, verified dashboard checkpoint `c695c90`; the existing palette constraint remains in force.
