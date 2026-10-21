@@ -1,6 +1,8 @@
 # React frontend
 
-The header includes Login, Register and a profile shortcut in the existing cream/green/lime palette. Guest buttons select and focus the corresponding account form; signed-in users get a shortcut to their account. The existing workspace navigation and page sections remain in place.
+The header includes Login, Register and a profile shortcut in the existing cream/green/lime palette. Guest buttons select and focus the corresponding account form; signed-in users get a shortcut to their account.
+
+Signed-in riders and drivers use a sidebar with focused workspace, history and account views; riders also have a wallet view. The rider booking form sits beside its estimate/current ride on desktop. The driver dashboard places vehicle/availability settings beside requests. Signing in opens the correct role's workspace; switching views keeps form drafts and live state mounted. The guest page pairs its introduction with the account form. See [the layout and accessibility walkthrough](../docs/UI_POLISH.md) for breakpoints, navigation behavior and pending visual checks.
 
 Day 14 packages the production build in nginx with same-origin `/api` HTTP/WebSocket forwarding on loopback port 8080. See [Docker and deployment](../docs/DEPLOYMENT.md) for startup instructions and verification limits. The Vite development workflow remains available below.
 

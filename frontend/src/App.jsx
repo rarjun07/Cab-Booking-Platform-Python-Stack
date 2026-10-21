@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import AuthPanel from './AuthPanel.jsx'
 import RideBooking from './RideBooking.jsx'
 import DriverDashboard from './DriverDashboard.jsx'
 import useRealtime from './useRealtime.js'
 import RideHistory from './RideHistory.jsx'
 import Wallet from './Wallet.jsx'
+import WorkspaceNavigation from './WorkspaceNavigation.jsx'
 
 const connectionMessages = {
   idle: 'Ready when you are. Start FastAPI, then check the connection.',
@@ -18,11 +19,58 @@ export default function App() {
   const [user, setUser] = useState(null)
   const [authMode, setAuthMode] = useState('register')
   const [accountFocusRequest, setAccountFocusRequest] = useState(0)
+  const [section, setSection] = useState(() => window.location.hash.slice(1))
+  const [viewFocus, setViewFocus] = useState(null)
   const live = useRealtime(user, setUser)
+  const primarySection = user?.role === 'driver' ? 'driver' : 'booking'
+  const sections = [primarySection, 'account', 'history', ...(user?.role === 'rider' ? ['wallet'] : [])]
+  const activeSection = sections.includes(section) ? section : primarySection
+  const titles = { booking: 'Book your next ride', driver: 'Driver dashboard', wallet: 'Your wallet', history: 'Your ride history', account: 'Your account' }
+  const descriptions = {
+    booking: 'Set your route, check the fare, and follow your journey.',
+    driver: 'Manage your vehicle, availability and nearby ride requests.',
+    wallet: 'View your balance and keep track of test top-ups.',
+    history: 'Find your previous trips, documents and reviews.',
+    account: 'Manage your session and account details.',
+  }
+
+  useEffect(() => {
+    function restoreSection() {
+      setSection(window.location.hash.slice(1))
+      setViewFocus({ id: 'page-title' })
+    }
+    window.addEventListener('hashchange', restoreSection)
+    window.addEventListener('popstate', restoreSection)
+    return () => {
+      window.removeEventListener('hashchange', restoreSection)
+      window.removeEventListener('popstate', restoreSection)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!viewFocus) return
+    const target = document.getElementById(viewFocus.id)
+    target?.focus()
+    target?.scrollIntoView?.({ block: 'start' })
+  }, [viewFocus])
+
+  function navigateTo(id) {
+    setSection(id)
+    if (window.location.hash !== `#${id}`) window.history.pushState(null, '', `#${id}`)
+    if (id === 'account') setAccountFocusRequest((request) => request + 1)
+    else setViewFocus({ id })
+  }
 
   function openAccount(mode = authMode) {
     setAuthMode(mode)
-    setAccountFocusRequest((request) => request + 1)
+    navigateTo('account')
+  }
+
+  function openAuthenticatedWorkspace(account) {
+    const id = account.role === 'driver' ? 'driver' : 'booking'
+    setSection(id)
+    window.history.replaceState(null, '', `#${id}`)
+    setViewFocus({ id: 'page-title' })
   }
 
   async function checkConnection() {
@@ -51,7 +99,7 @@ export default function App() {
   return (
     <>
       <a className="skip-link" href="#main">Skip to content</a>
-      <header className="site-header">
+      <header className={`site-header${user ? ' signed-in-header' : ''}`}>
         <a className="brand" href="/" aria-label="Cab Booking Platform home">
           <span className="brand-mark" aria-hidden="true">C</span>
           Cab Booking Platform
@@ -73,30 +121,42 @@ export default function App() {
         </div>
       </header>
 
-      <main id="main" tabIndex={-1}>
+      <main id="main" tabIndex={-1} className={user ? 'dashboard-shell' : 'landing-shell'}>
+        <aside className="dashboard-sidebar" hidden={!user} aria-label="Your workspace">
+          {user && <WorkspaceNavigation user={user} activeSection={activeSection} onNavigate={navigateTo} />}
+        </aside>
+        <div className="page-content">
         <section className="intro" aria-labelledby="page-title">
-          <p className="eyebrow">{user?.role === 'driver' ? 'YOUR DRIVER WORKSPACE' : 'YOUR NEXT JOURNEY'}</p>
-          <h1 id="page-title">{user?.role === 'driver' ? 'Ready for your next pickup?' : 'Where would you like to go?'}</h1>
+          <p className="eyebrow">{user ? `${user.role.toUpperCase()} WORKSPACE` : 'YOUR NEXT JOURNEY'}</p>
+          <h1 id="page-title" tabIndex={-1}>{user ? titles[activeSection] : 'Where would you like to go?'}</h1>
           <p className="intro-copy">
-            {user?.role === 'driver' ? 'Save your vehicle, share your location, and manage your next trip.' : 'Choose your pickup and destination, check the fare, and request your ride.'}
+            {user ? descriptions[activeSection] : 'Choose your pickup and destination, check the fare, and request your ride.'}
           </p>
+          {!user && <section className="journey" aria-labelledby="journey-title">
+            <h2 id="journey-title">A simpler way to get going</h2>
+            <ol>
+              <li><span className="step-number" aria-hidden="true">01</span><div><h3>Create your account</h3><p>Join as a rider or a driver.</p></div></li>
+              <li><span className="step-number" aria-hidden="true">02</span><div><h3>Plan your journey</h3><p>Check your route and fare before requesting.</p></div></li>
+              <li><span className="step-number" aria-hidden="true">03</span><div><h3>Keep everything together</h3><p>Follow your trip and find your documents.</p></div></li>
+            </ol>
+          </section>}
+          {user && <p className={`live-connection${live.status === 'connected' ? ' live-connected' : ''}`} role="status" aria-live="polite">{live.status === 'connected' ? 'Live updates connected' : live.status === 'connecting' ? 'Connecting live updates…' : 'Live updates reconnecting. Refresh is still available.'}</p>}
         </section>
 
-        <nav className="section-nav" aria-label="Workspace sections">
-          <a href="#account">Account</a>
-          <a href={user?.role === 'driver' ? '#driver' : '#booking'}>{user?.role === 'driver' ? 'Driver dashboard' : 'Book a ride'}</a>
-          {user?.role === 'rider' && <a href="#wallet">Wallet</a>}
-          {user && <a href="#history">Ride history</a>}
-        </nav>
-        <AuthPanel user={user} onUserChange={setUser} mode={authMode} onModeChange={setAuthMode} focusRequest={accountFocusRequest} />
-        {user && <p className={`live-connection${live.status === 'connected' ? ' live-connected' : ''}`} role="status" aria-live="polite">{live.status === 'connected' ? 'Live updates connected' : live.status === 'connecting' ? 'Connecting live updates…' : 'Live updates reconnecting. Refresh is still available.'}</p>}
-        <div className={`workspace${user?.role === 'rider' ? ' rider-workspace' : ''}`}>
+        <div className="account-pane" hidden={Boolean(user) && activeSection !== 'account'}>
+        <AuthPanel user={user} onUserChange={setUser} onAuthenticated={openAuthenticatedWorkspace} mode={authMode} onModeChange={setAuthMode} focusRequest={accountFocusRequest} />
+        </div>
+        <div className="workspace" hidden={!user || activeSection !== primarySection}>
         {user?.role === 'driver'
           ? <DriverDashboard key={user.id} onSessionExpired={setUser} live={live} />
           : <RideBooking key={user?.id ?? 'signed-out'} user={user} onSessionExpired={setUser} liveRevision={live.revision} />}
+        </div>
+        <div className="wallet-pane" hidden={!user || activeSection !== 'wallet'}>
         {user?.role === 'rider' && <Wallet key={user.id} liveRevision={live.revision} onSessionExpired={setUser} />}
         </div>
+        <div className="history-pane" hidden={!user || activeSection !== 'history'}>
         {user && <RideHistory key={user.id} user={user} liveRevision={live.revision} onSessionExpired={setUser} />}
+        </div>
 
         <details className="connection-details">
         <summary>Check the app connection</summary>
@@ -118,14 +178,7 @@ export default function App() {
         </section>
         </details>
 
-        <section className="journey" aria-labelledby="journey-title">
-          <h2 id="journey-title">{user?.role === 'driver' ? 'Your driver checklist' : 'Your booking route'}</h2>
-          <ol>
-            <li><span className="step-number" aria-hidden="true">01</span><div><h3>{user?.role === 'driver' ? 'Your vehicle' : 'Your account'}</h3><p>{user?.role === 'driver' ? 'Save your vehicle details before going online.' : 'Create an account or sign in as a rider.'}</p></div></li>
-            <li><span className="step-number" aria-hidden="true">02</span><div><h3>{user?.role === 'driver' ? 'Your availability' : 'Your estimate'}</h3><p>{user?.role === 'driver' ? 'Go online with a fresh location to find requests.' : 'Check road distance, travel time, and fare.'}</p></div></li>
-            <li><span className="step-number" aria-hidden="true">03</span><div><h3>{user?.role === 'driver' ? 'Your trip' : 'Your driver'}</h3><p>{user?.role === 'driver' ? 'Accept a request and update each trip step.' : 'A nearby driver accepts your saved request.'}</p></div></li>
-          </ol>
-        </section>
+        </div>
       </main>
       <footer><span>Cab Booking Platform</span><span>Learning project · Test payments only</span></footer>
     </>

@@ -148,20 +148,23 @@ export default function DriverDashboard({ onSessionExpired, live }) {
   }
 
   return (
-    <section id="driver" tabIndex={-1} className="auth-card driver-card" aria-labelledby="driver-title" aria-busy={loading || busy}>
-      <p className="eyebrow">DRIVER DASHBOARD</p>
-      <h2 id="driver-title">Your next pickup starts here.</h2>
-      <p className="auth-description">Save your vehicle, go online, and choose a nearby request. Connected dashboards update automatically.</p>
+    <section id="driver" tabIndex={-1} className="driver-card dashboard-module" aria-labelledby="driver-title" aria-busy={loading || busy}>
+      <h2 id="driver-title" className="visually-hidden">Your driving workspace</h2>
       {loading ? <p role="status">Loading your driver dashboard…</p> : <>
-        <div className="driver-toolbar">
+        <div className="auth-card driver-toolbar">
+          <div className="driver-status">
           <span className={`availability-badge${fresh && !ride ? ' availability-online' : ''}`}>
             {ride ? 'On a ride' : fresh ? 'Online' : profile?.status === 'active' ? 'Location expired' : 'Offline'}
           </span>
+          <span className="fare-note">{ride ? 'Your current trip is assigned to you.' : fresh ? 'Ready for nearby requests.' : 'Go online when you’re ready to drive.'}</span>
+          </div>
           <button className="secondary-button" type="button" disabled={busy} onClick={() => perform(async () => {}, 'Dashboard refreshed.')}>Refresh dashboard</button>
         </div>
-        <form onSubmit={saveVehicle}>
+        <div className="driver-layout">
+        <div className="driver-settings">
+        <form className="auth-card driver-vehicle-card" onSubmit={saveVehicle}>
           <fieldset disabled={busy}>
-            <legend className="driver-section-title">1. Your vehicle</legend>
+            <legend className="driver-section-title">Your vehicle</legend>
             <div className="vehicle-grid">
               {[['make', 'Make', 2, 50], ['model', 'Model', 1, 50], ['plate', 'Number plate', 3, 20]].map(([key, label, min, max]) => (
                 <div className="form-field" key={key}><label htmlFor={`${formId}-${key}`}>{label}</label><input id={`${formId}-${key}`} value={vehicle[key]} minLength={min} maxLength={max} onChange={(event) => setVehicle({ ...vehicle, [key]: event.target.value })} required /></div>
@@ -169,12 +172,12 @@ export default function DriverDashboard({ onSessionExpired, live }) {
             </div>
             <button className="submit-button" type="submit">Save vehicle profile</button>
           </fieldset>
+          {profile && <p className="fare-note driver-demo-note">{profile.verified ? 'Vehicle marked verified.' : 'Vehicle not verified. This learning demo allows unverified profiles; saving a vehicle does not verify it.'}</p>}
         </form>
         {profile && <>
-          <p className="fare-note driver-demo-note">{profile.verified ? 'Vehicle marked verified.' : 'Vehicle not verified. This learning demo allows unverified profiles; saving a vehicle does not verify it.'}</p>
-          <form className="driver-location-form" onSubmit={goOnline}>
+          <form className="auth-card driver-location-form" onSubmit={goOnline}>
             <fieldset disabled={busy}>
-              <legend className="driver-section-title">2. Your availability</legend>
+              <legend className="driver-section-title">Your availability</legend>
               <div className="route-grid">
                 {[['latitude', 'Current latitude', -90, 90], ['longitude', 'Current longitude', -180, 180]].map(([key, label, min, max]) => (
                   <div className="form-field" key={key}><label htmlFor={`${formId}-${key}`}>{label}</label><input id={`${formId}-${key}`} type="number" step="any" min={min} max={max} value={location[key]} onChange={(event) => setLocation({ ...location, [key]: event.target.value })} required /></div>
@@ -187,11 +190,16 @@ export default function DriverDashboard({ onSessionExpired, live }) {
                 <button className="secondary-button" type="button" onClick={() => perform(() => driverRequest('/availability', { method: 'POST', body: { status: 'offline' } }), 'You are offline. Any accepted ride stays assigned.')}>Go offline</button>
               </div>
             </fieldset>
-          </form>
           <p className="fare-note driver-demo-note">Your location is shared with our backend for nearby matching. Refresh it before it expires{profile.location_expires_at ? ` at ${new Date(profile.location_expires_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : ''}. Going offline stops new offers and clears this location.</p>
           {profile.current_location && <p className="fare-note driver-demo-note">Last shared: {profile.current_location.latitude}, {profile.current_location.longitude}. Edit the coordinates above and choose Share updated location to send a new point.</p>}
-          <div className="driver-requests">
-            <h3>3. {ride ? 'Your accepted ride' : 'Nearby ride requests'}</h3>
+          </form>
+        </>}
+        </div>
+          <div className="auth-card driver-requests">
+            <div className="matching-title">
+              <h3>{ride ? 'Your accepted ride' : 'Nearby ride requests'}</h3>
+              <span>{ride ? '1 current trip' : `${offers.length} ${offers.length === 1 ? 'request' : 'requests'}`}</span>
+            </div>
             {ride ? <div className="fare-summary" role="status">
               <p className="eyebrow">{ride.status.replaceAll('_', ' ')}</p>
               <p className="ride-reference">Reference: {ride.id}</p>
@@ -200,7 +208,11 @@ export default function DriverDashboard({ onSessionExpired, live }) {
               <p>Estimated fare: {formatMoney(ride.fare_estimate)}</p>
               <p className="fare-note">This ride is assigned to you. Update its progress when you reach each step. After completion, the rider can open test checkout.</p>
               {nextStep && <button type="button" disabled={busy} onClick={() => perform(() => driverRequest(`/rides/${ride.id}/status`, { method: 'POST', body: { status: nextStep[0] } }), 'Trip status updated.')}>{nextStep[1]}</button>}
-            </div> : !fresh ? <p className="auth-description">Go online with a fresh location to see nearby requests.</p> : offers.length === 0 ? <p className="auth-description">No nearby requests right now. Refresh the dashboard to check again.</p> : <ul className="matching-list">
+            </div> : !fresh || offers.length === 0 ? <div className="dashboard-empty-state">
+              <span className="empty-state-mark" aria-hidden="true">↗</span>
+              <h4>{!profile ? 'Set up your vehicle to get started' : !fresh ? 'You’re not receiving requests yet' : 'You’re ready for your next pickup'}</h4>
+              <p>{!profile ? 'Save your vehicle details, then share your location and go online.' : !fresh ? 'Go online with a fresh location to see nearby requests.' : 'No nearby requests right now. Refresh the dashboard to check again.'}</p>
+            </div> : <ul className="matching-list">
               {offers.map(({ ride: offer, pickup_distance_meters: distance }) => <li key={offer.id}>
                 <div className="matching-title"><h4>{formatMoney(offer.fare_estimate)}</h4><span>{(distance / 1000).toFixed(2)} km to pickup</span></div>
                 <p>Pickup: {offer.pickup.latitude}, {offer.pickup.longitude}</p>
@@ -211,7 +223,7 @@ export default function DriverDashboard({ onSessionExpired, live }) {
             </ul>}
             {fresh && !ride && <p className="fare-note driver-demo-note">Pickup distances are geographic distances, not driving distances or traffic ETAs.</p>}
           </div>
-        </>}
+        </div>
       </>}
       <p className={`auth-message${isError ? ' auth-error' : ''}`} role="status" aria-live="polite" aria-atomic="true">{message}</p>
     </section>

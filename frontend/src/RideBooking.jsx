@@ -177,28 +177,38 @@ export default function RideBooking({ user, onSessionExpired, liveRevision = 0 }
   }
 
   return (
-    <section id="booking" tabIndex={-1} className="auth-card booking-card" aria-labelledby="booking-title">
-      <p className="eyebrow">PLAN YOUR RIDE</p>
-      <h2 id="booking-title">A destination. An estimate. Let’s go.</h2>
+    <section id="booking" tabIndex={-1} className="booking-card dashboard-module" aria-labelledby="booking-title">
+      <h2 id="booking-title" className="visually-hidden">Plan your ride</h2>
       {!user ? <p className="auth-description">Sign in above to estimate and request a ride.</p> : user.role !== 'rider' ? <p className="auth-description">You’re signed in as a driver. Ride requests are available to rider accounts.</p> : (
-        <>
+        <div className="booking-layout">
+          <div className="auth-card booking-route-card">
+          <p className="eyebrow">PLAN YOUR RIDE</p>
+          <h3>Pickup & destination</h3>
           <p className="auth-description">Enter coordinates, or try our public Delhi sample route.</p>
           <form onSubmit={estimate} aria-busy={busy}>
             <fieldset disabled={busy || restoring}>
-              <div className="route-grid">
-                {[
-                  ['pickupLat', 'Pickup latitude', -90, 90],
-                  ['pickupLng', 'Pickup longitude', -180, 180],
-                  ['destinationLat', 'Destination latitude', -90, 90],
-                  ['destinationLng', 'Destination longitude', -180, 180],
-                ].map(([key, label, min, max]) => (
+              {[
+                ['Pickup location', [['pickupLat', 'Pickup latitude', -90, 90], ['pickupLng', 'Pickup longitude', -180, 180]]],
+                ['Destination', [['destinationLat', 'Destination latitude', -90, 90], ['destinationLng', 'Destination longitude', -180, 180]]],
+              ].map(([title, fields], index) => <fieldset className="route-stop" key={title}>
+                <legend><span className="route-stop-number" aria-hidden="true">{index + 1}</span>{title}</legend>
+                <div className="route-grid">{fields.map(([key, label, min, max]) => (
                   <div className="form-field" key={key}><label htmlFor={`${formId}-${key}`}>{label}</label><input id={`${formId}-${key}`} name={key} type="number" step="any" min={min} max={max} value={route[key]} onChange={(event) => changeRoute({ ...route, [key]: event.target.value })} required /></div>
-                ))}
-              </div>
-              <div className="auth-actions"><button className="secondary-button" type="button" onClick={() => changeRoute(sampleRoute)}>Use Delhi sample</button><button type="submit">{busy ? 'Please wait…' : 'Get fare estimate'}</button></div>
+                ))}</div>
+              </fieldset>)}
+              <div className="auth-actions booking-actions"><button className="secondary-button" type="button" onClick={() => changeRoute(sampleRoute)}>Use Delhi sample</button><button type="submit">{busy ? 'Please wait…' : 'Get fare estimate'}</button></div>
             </fieldset>
           </form>
           <p className="route-attribution">Routing by <a href="https://project-osrm.org/" target="_blank" rel="noreferrer">OSRM</a> · Data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors</a> · <a href="https://www.openstreetmap.org/fixthemap" target="_blank" rel="noreferrer">Fix the map</a>. These coordinates are sent to the public routing service when you request an estimate.</p>
+          </div>
+          <aside className="auth-card booking-summary-card" aria-label="Estimate and current ride">
+          <p className="eyebrow">YOUR JOURNEY</p>
+          <h3>Your trip at a glance</h3>
+          {!quote && !ride && !restoring && <div className="dashboard-empty-state">
+            <span className="empty-state-mark" aria-hidden="true">↗</span>
+            <h4>Your next journey starts here</h4>
+            <p>Choose your pickup and destination to see the route estimate and fare. Your saved ride will appear here.</p>
+          </div>}
           {quote && <div className="fare-summary">
             <p className="eyebrow">YOUR ESTIMATE</p>
             <p className="fare-total">{formatMoney(quote.fare_estimate)}</p>
@@ -226,7 +236,8 @@ export default function RideBooking({ user, onSessionExpired, liveRevision = 0 }
               </ul>}
             </div>}
           </div>}
-        </>
+          </aside>
+        </div>
       )}
       <p className={`auth-message${isError ? ' auth-error' : ''}`} role="status" aria-live="polite" aria-atomic="true">{message}</p>
     </section>

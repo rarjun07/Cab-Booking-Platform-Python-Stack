@@ -18,7 +18,7 @@ async function authRequest(path, body, signal) {
   return data
 }
 
-export default function AuthPanel({ user, onUserChange, mode: selectedMode, onModeChange, focusRequest = 0 }) {
+export default function AuthPanel({ user, onUserChange, onAuthenticated, mode: selectedMode, onModeChange, focusRequest = 0 }) {
   const formId = useId()
   const [localMode, setLocalMode] = useState('register')
   const mode = selectedMode ?? localMode
@@ -86,6 +86,7 @@ export default function AuthPanel({ user, onUserChange, mode: selectedMode, onMo
       focusAfterAction.current = 'heading'
       setUser(data)
       setMessage(mode === 'register' ? 'Account created. You are signed in.' : 'Welcome back. You are signed in.')
+      onAuthenticated?.(data)
     } catch (error) {
       focusAfterAction.current = 'error'
       setIsError(true)

@@ -16,10 +16,12 @@ const driver = { ...rider, id: 'driver-fixture', name: 'Test Driver', role: 'dri
 const trip = { id: 'trip-fixture', status: 'completed', driver_id: null, created_at: '2026-10-18T08:00:00Z',
   pickup: { latitude: 28.6, longitude: 77.2 }, destination: { latitude: 28.7, longitude: 77.3 },
   fare_estimate: '104.38', fare_actual: null, payment_amount: null, payment_status: null, receipt_available: true }
-let account, currentRide, discount, submitted, unexpected
+let account, signInAccount, currentRide, discount, submitted, unexpected
 
 beforeEach(() => {
+  window.history.replaceState(null, '', '/')
   account = null
+  signInAccount = rider
   currentRide = null
   discount = null
   submitted = null
@@ -29,7 +31,7 @@ beforeEach(() => {
     let data = null
     let status = 200
     if (path === '/api/auth/me') { data = account ?? { detail: 'Sign in required.' }; status = account ? 200 : 401 }
-    else if (path === '/api/auth/login' || path === '/api/auth/register') { account = rider; data = rider }
+    else if (path === '/api/auth/login' || path === '/api/auth/register') { account = signInAccount; data = signInAccount }
     else if (path === '/api/auth/logout') { account = null; return new Response(null, { status: 204 }) }
     else if (path === '/api/rides/current') data = currentRide
     else if (path === '/api/rides/history') data = { items: [trip], next_cursor: null }
@@ -61,7 +63,8 @@ afterEach(() => {
 async function ready(role) {
   account = role === 'rider' ? rider : role === 'driver' ? driver : null
   const result = render(<App />)
-  await screen.findByRole('button', { name: role ? 'Sign out' : 'Create my account' })
+  if (role) await screen.findByRole('navigation', { name: 'Workspace sections' })
+  else await screen.findByRole('button', { name: 'Create my account' })
   await waitFor(() => expect(result.container.querySelector('[aria-busy="true"]')).toBeNull())
   return result
 }
@@ -77,19 +80,36 @@ function checkReferences(container) {
   for (const label of container.querySelectorAll('label[for]')) expect(document.getElementById(label.htmlFor)).not.toBeNull()
 }
 
-test.each([null, 'rider', 'driver'])('%s workspace has named controls, valid references and no detected structural WCAG violations', async (role) => {
-  const { container } = await ready(role)
-  checkReferences(container)
-  const links = within(screen.getByRole('navigation', { name: 'Workspace sections' })).getAllByRole('link')
-  for (const link of links) expect(document.querySelector(link.getAttribute('href'))?.tabIndex).toBe(-1)
-  expect(links.some((link) => link.textContent === 'Wallet')).toBe(role === 'rider')
+async function auditStructure(container) {
   const audit = await axe.run(container, {
     runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'] },
-    // jsdom has no layout/painting engine. Contrast, reflow and focus visibility
-    // need the manual browser checklist, not a simulated pass here.
+    // jsdom cannot check rendered contrast, reflow or visible keyboard focus.
     rules: { 'color-contrast': { enabled: false } },
   })
   expect(audit.violations.map(({ id, nodes }) => ({ id, count: nodes.length }))).toEqual([])
+}
+
+test.each([null, 'rider', 'driver'])('%s workspace has named controls, valid references and no detected structural WCAG violations', async (role) => {
+  const { container } = await ready(role)
+  checkReferences(container)
+  const links = role ? within(screen.getByRole('navigation', { name: 'Workspace sections' })).getAllByRole('link') : []
+  for (const link of links) expect(document.querySelector(link.getAttribute('href'))?.tabIndex).toBe(-1)
+  expect(links.some((link) => link.textContent === 'Wallet')).toBe(role === 'rider')
+  expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1)
+  expect(screen.queryByRole('button', { name: 'Sign out' })).toBeNull()
+  await auditStructure(container)
+})
+
+test.each(['rider', 'driver'])('%s account, history and allowed wallet views retain valid accessible structure', async (role) => {
+  const { container } = await ready(role)
+  const user = userEvent.setup()
+  const navigation = within(screen.getByRole('navigation', { name: 'Workspace sections' }))
+  for (const label of [...(role === 'rider' ? ['Wallet'] : []), 'Ride history', 'Account']) {
+    await user.click(navigation.getByRole('link', { name: label, exact: true }))
+    expect(navigation.getByRole('link', { name: label, exact: true }).getAttribute('aria-current')).toBe('page')
+    checkReferences(container)
+    await auditStructure(container)
+  }
 })
 
 test('keyboard entry begins with the skip link and can activate the account mode buttons', async () => {
@@ -137,6 +157,73 @@ test('a restored account gets a profile shortcut and guest header actions return
   expect(navigation.getByRole('button', { name: 'Register', exact: true })).toBeTruthy()
 })
 
+test('rider navigation separates booking, wallet and history while preserving an unfinished route', async () => {
+  await ready('rider')
+  const user = userEvent.setup()
+  const navigation = within(screen.getByRole('navigation', { name: 'Workspace sections' }))
+  expect(navigation.getByRole('link', { name: 'Book a ride' }).getAttribute('aria-current')).toBe('page')
+  expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Book your next ride')
+  await user.click(screen.getByRole('button', { name: 'Use Delhi sample' }))
+  const pickup = screen.getByLabelText('Pickup latitude')
+  await user.clear(pickup)
+  await user.type(pickup, '28.62')
+  await user.click(navigation.getByRole('link', { name: 'Wallet' }))
+  expect(screen.queryByRole('button', { name: 'Get fare estimate' })).toBeNull()
+  expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Your wallet')
+  expect(document.activeElement).toBe(document.getElementById('wallet'))
+  expect(window.location.hash).toBe('#wallet')
+  await user.click(navigation.getByRole('link', { name: 'Ride history' }))
+  expect(screen.getByRole('button', { name: 'Refresh history' })).toBeTruthy()
+  expect(screen.queryByRole('button', { name: 'Refresh wallet' })).toBeNull()
+  await user.click(navigation.getByRole('link', { name: 'Book a ride' }))
+  expect(screen.getByLabelText('Pickup latitude').value).toBe('28.62')
+  expect(document.activeElement).toBe(document.getElementById('booking'))
+})
+
+test('driver navigation preserves vehicle edits and exposes only driver sections', async () => {
+  await ready('driver')
+  const user = userEvent.setup()
+  const navigation = within(screen.getByRole('navigation', { name: 'Workspace sections' }))
+  expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Driver dashboard')
+  expect(navigation.queryByRole('link', { name: 'Wallet' })).toBeNull()
+  expect(navigation.queryByRole('link', { name: 'Book a ride' })).toBeNull()
+  await user.clear(screen.getByLabelText('Make'))
+  await user.type(screen.getByLabelText('Make'), 'My vehicle draft')
+  await user.click(navigation.getByRole('link', { name: 'Ride history' }))
+  expect(screen.queryByRole('button', { name: 'Save vehicle profile' })).toBeNull()
+  const dashboard = navigation.getByRole('link', { name: 'Driver dashboard' })
+  dashboard.focus()
+  await user.keyboard('{Enter}')
+  expect(screen.getByLabelText('Make').value).toBe('My vehicle draft')
+  expect(document.activeElement).toBe(document.getElementById('driver'))
+})
+
+test.each(['rider', 'driver'])('%s restores a bookmarked history view and handles browser navigation', async (role) => {
+  window.history.replaceState(null, '', '/#history')
+  await ready(role)
+  expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Your ride history')
+  expect(screen.getByRole('link', { name: 'Ride history' }).getAttribute('aria-current')).toBe('page')
+  window.history.replaceState(null, '', role === 'driver' ? '/#wallet' : '/#booking')
+  window.dispatchEvent(new PopStateEvent('popstate'))
+  await waitFor(() => expect(screen.getByRole('heading', { level: 1 }).textContent).toBe(role === 'driver' ? 'Driver dashboard' : 'Book your next ride'))
+  expect(document.activeElement).toBe(screen.getByRole('heading', { level: 1 }))
+})
+
+test.each(['rider', 'driver'])('successful %s sign-in opens the correct workspace and focuses its visible heading', async (role) => {
+  await ready(null)
+  signInAccount = role === 'driver' ? driver : rider
+  const user = userEvent.setup()
+  await user.click(screen.getByRole('button', { name: 'Login', exact: true }))
+  await user.type(screen.getByLabelText('Email'), signInAccount.email)
+  await user.type(screen.getByLabelText('Password'), 'fixture-password')
+  await user.keyboard('{Enter}')
+  const title = await screen.findByRole('heading', { level: 1, name: role === 'driver' ? 'Driver dashboard' : 'Book your next ride' })
+  await waitFor(() => expect(document.activeElement).toBe(title))
+  expect(window.location.hash).toBe(role === 'driver' ? '#driver' : '#booking')
+  expect(screen.queryByRole('button', { name: 'Sign out' })).toBeNull()
+  expect(screen.getByRole('navigation', { name: 'Workspace sections' })).toBeTruthy()
+})
+
 function AccountHarness() {
   const [user, setUser] = useState(null)
   return <AuthPanel user={user} onUserChange={setUser} />
@@ -175,6 +262,7 @@ test('the same trip can have current and history checkout panels without duplica
   currentRide = trip
   const { container } = await ready('rider')
   const user = userEvent.setup()
+  await user.click(screen.getByRole('link', { name: 'Ride history', exact: true }))
   await user.click(screen.getByRole('button', { name: 'View payment details' }))
   await waitFor(() => expect(screen.getAllByLabelText('Promo code (optional, before checkout)')).toHaveLength(2))
   checkReferences(container)
