@@ -42,6 +42,15 @@
 - Day 14 prepared-code checkpoint: `8b2c2c2665889ec063a086a6e5c6f640b16d166b`, committed/pushed and verified equal to GitHub `refs/heads/main`. This saves incomplete Day 14 work; it does not certify container startup or deployment. This verification record follows in a documentation commit.
 - Next action: resolve Docker storage/recovery, rebuild and run Compose and the restart smoke check; choose a hosting destination before any online deployment. Day 14 is incomplete. Manual UI/actual Stripe verification remain pending.
 
+## User-requested top navigation and profile dropdown — 2026-10-21
+
+- The user supplied screenshots clarifying that dashboard links should align across the top header like the reference, with a name/avatar dropdown on the right. Continued from the clean, verified dashboard checkpoint `c695c90`; the existing palette constraint remains in force.
+- Moved role-specific workspace/history/wallet/account links from the sidebar into the header and removed the sidebar column. Both dashboards now use the full shared content container. Desktop uses logo/links/profile columns; narrower widths move links to a second header row and then a compact grid.
+- Added `ProfileMenu.jsx`: actual account name/email/role, profile and trip-document links, rider wallet, connection help and backend-confirmed sign-out. The dropdown supports ordinary Tab order, expanded/control attributes, Escape with trigger focus, outside dismissal, and bounded scrolling/wrapping. It does not introduce unrelated search/notification/administration features from the reference.
+- Extracted unchanged cookie-based request logic into `authRequest.js` for the header and existing account form. Failed header logout preserves the account and focuses feedback; successful logout removes private views and returns to sign-in. The helper still uses the same endpoints, JSON body, credentials and timeout; no backend/schema/config/dependency change was made.
+- All **25 frontend tests passed**, including each role's header placement, open-dropdown structural accessibility/keyboard/outside behavior, menu destinations, help focus and failed/successful logout, plus existing navigation/draft/booking/account regressions. Production build passed (33 modules, 298.19 kB JS / 90.04 kB gzip); source palette comparison and `git diff --check` passed.
+- New rendered desktop/mobile/dropdown/zoom/screen-reader checks remain pending under the earlier browser automation restriction. The supplied driver screenshot is evidence of the preceding layout, not verification of this replacement. Day 14 container/online deployment and actual Stripe checks retain their previous pending status.
+
 ## User-requested dashboard layout — 2026-10-21
 
 - The user requested better aligned rider and driver dashboards comparable to a finished website, carrying forward the existing UI-color constraint. The working tree was clean at the verified header checkpoint `2a3c7fe` before these edits. This is a requested UI follow-up; Day 14 container/deployment verification remains incomplete.

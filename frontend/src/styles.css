@@ -31,6 +31,32 @@ section[id], main[id] { scroll-margin-block: 24px; }
 .account-nav button { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 10px 22px; border: 1px solid #aab8aa; border-radius: 999px; background: #fffef9; color: #172a28; font-size: 14px; font-weight: 650; cursor: pointer; }
 .account-nav .nav-register { background: #e5ee9d; border-color: #c4d174; }
 .account-nav .nav-account { width: 44px; height: 44px; flex-shrink: 0; padding: 0; }
+.signed-in-header { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 24px; }
+.signed-in-header .header-actions { flex-wrap: nowrap; }
+.profile-menu { position: relative; min-width: 0; }
+.account-nav .profile-trigger { max-width: 220px; gap: 10px; padding: 6px 10px 6px 6px; }
+.profile-trigger .workspace-avatar { width: 34px; height: 34px; }
+.profile-trigger-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.profile-trigger svg { flex-shrink: 0; }
+.profile-dropdown { position: absolute; top: calc(100% + 12px); right: 0; z-index: 20; width: 360px; max-width: calc(100vw - 32px); max-height: calc(100dvh - 132px); overflow-y: auto; border: 1px solid #dcded4; border-radius: 18px; background: #fffef9; box-shadow: 0 18px 48px rgb(23 42 40 / .14); }
+.profile-summary { display: flex; align-items: flex-start; gap: 14px; padding: 24px; background: #edf1df; }
+.profile-summary > div { min-width: 0; }
+.profile-summary .workspace-avatar { width: 48px; height: 48px; }
+.profile-summary h2 { margin: 0 0 8px; font-size: 19px; line-height: 1.3; letter-spacing: -.4px; }
+.profile-role { display: inline-block; padding: 3px 9px; border-radius: 999px; background: #e5ee9d; font-size: 12px; font-weight: 650; }
+.profile-summary p { margin: 10px 0 16px; font-size: 13px; color: #596660; }
+.profile-view { display: inline-flex; align-items: center; gap: 12px; min-height: 44px; padding: 8px 14px; border: 1px solid #aab8aa; border-radius: 999px; background: #fffef9; font-size: 13px; font-weight: 650; text-decoration: none; }
+.profile-options { display: grid; }
+.profile-options > a, .account-nav .profile-options > button { display: grid; justify-content: stretch; gap: 4px; width: 100%; min-height: 44px; padding: 16px 24px; border: 0; border-top: 1px solid #dcded4; border-radius: 0; background: transparent; color: #172a28; text-align: left; text-decoration: none; font-size: 14px; }
+.profile-options > a:hover, .account-nav .profile-options > button:hover { background: #edf0e8; filter: none; }
+.profile-options strong { font-weight: 650; }
+.profile-options span { color: #596660; font-size: 12px; font-weight: 400; line-height: 1.6; }
+.account-nav .profile-options .profile-signout { color: #a02b1d; }
+.profile-options button:disabled { opacity: .65; cursor: wait; }
+.profile-demo-label { margin: 0; padding: 12px 24px; border-top: 1px solid #dcded4; color: #596660; font-size: 11px; }
+.profile-error { margin: 16px 24px; color: #a02b1d; font-size: 13px; }
+.profile-error:empty, .account-notice:empty { display: none; }
+.account-notice { margin: 0 0 16px; padding: 12px 16px; border-radius: 10px; background: #edf1df; color: #32543b; font-size: 14px; }
 .intro { padding: 48px 0 28px; }
 .eyebrow { margin: 0 0 16px; font-size: 11px; font-weight: 750; letter-spacing: 1.8px; }
 h1 { margin: 0; max-width: 800px; font-size: clamp(34px, 5.5vw, 56px); font-weight: 650; line-height: 1.12; letter-spacing: -2px; text-wrap: balance; }
@@ -134,19 +160,14 @@ footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16
 .skip-link { position: fixed; top: -150px; left: 16px; max-width: calc(100% - 32px); padding: 12px 18px; border-radius: 5px; background: #e5ee9d; z-index: 10; }
 .skip-link:focus { top: 16px; }
 
-.dashboard-shell { display: grid; grid-template-columns: 216px minmax(0, 1fr); gap: 32px; align-items: start; padding-block: 32px 48px; min-height: calc(100vh - 180px); }
-.page-content, .page-content > *, .dashboard-sidebar, .booking-layout > *, .driver-layout > *, .workspace-profile > div { min-width: 0; }
-.dashboard-sidebar { position: sticky; top: 24px; padding: 20px 16px; border: 1px solid #dcded4; border-radius: 18px; background: #fffef9; }
-.workspace-profile { display: flex; gap: 10px; align-items: center; padding: 0 4px 20px; margin-bottom: 16px; border-bottom: 1px solid #dcded4; }
+.dashboard-shell { padding-block: 32px 48px; min-height: calc(100vh - 180px); }
+.page-content, .page-content > *, .booking-layout > *, .driver-layout > * { min-width: 0; }
 .workspace-avatar { display: grid; place-items: center; width: 40px; height: 40px; flex-shrink: 0; border-radius: 50%; background: #e5ee9d; color: #172a28; font-size: 14px; font-weight: 750; }
-.workspace-name { margin: 0; font-size: 14px; font-weight: 700; }
-.workspace-role { margin: 2px 0 0; font-size: 12px; color: #596660; }
-.workspace-note { margin: 24px 8px 4px; font-size: 12px; line-height: 1.7; color: #596660; }
-.dashboard-sidebar .section-nav { flex-direction: column; gap: 6px; padding: 0; }
-.dashboard-sidebar .section-nav a { gap: 12px; padding: 11px 12px; border-color: transparent; border-radius: 10px; background: transparent; font-size: 13px; }
-.dashboard-sidebar .section-nav a svg { flex-shrink: 0; }
-.dashboard-sidebar .section-nav a:hover { background: #edf0e8; }
-.dashboard-sidebar .section-nav a[aria-current="page"] { background: #e5ee9d; border-color: #c4d174; }
+.workspace-top-nav { justify-content: center; align-items: center; gap: 4px; padding: 0; }
+.workspace-top-nav a { gap: 8px; padding: 10px 12px; border-color: transparent; background: transparent; font-size: 13px; }
+.workspace-top-nav a svg { flex-shrink: 0; }
+.workspace-top-nav a:hover { background: #edf0e8; }
+.workspace-top-nav a[aria-current="page"] { background: #e5ee9d; border-color: #c4d174; }
 .dashboard-shell .intro { padding: 0 0 28px; }
 .dashboard-shell .intro .eyebrow { margin-bottom: 10px; }
 .dashboard-shell h1 { max-width: none; font-size: clamp(28px, 3vw, 36px); letter-spacing: -1px; line-height: 1.2; }
@@ -193,12 +214,14 @@ footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16
   .driver-layout { grid-template-columns: minmax(280px, .9fr) minmax(0, 1.15fr); }
 }
 
+@media (max-width: 1050px) {
+  .signed-in-header { grid-template-columns: minmax(0, 1fr) auto; gap: 16px; }
+  .signed-in-header .brand { grid-column: 1; grid-row: 1; }
+  .signed-in-header .header-actions { grid-column: 2; grid-row: 1; }
+  .workspace-top-nav { grid-column: 1 / -1; grid-row: 2; justify-content: flex-start; }
+}
+
 @media (max-width: 900px) {
-  .dashboard-shell { grid-template-columns: minmax(0, 1fr); gap: 28px; }
-  .dashboard-sidebar { position: static; padding: 16px; }
-  .workspace-profile { border-bottom: 0; padding: 0; margin-bottom: 16px; }
-  .dashboard-sidebar .section-nav { flex-direction: row; flex-wrap: wrap; }
-  .workspace-note { display: none; }
   .landing-shell .page-content { grid-template-columns: minmax(0, 1fr); gap: 32px; }
   .landing-shell .intro { padding: 0; }
   .landing-shell .journey { max-width: none; }
@@ -210,9 +233,8 @@ footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16
   .brand { font-size: 13px; gap: 8px; }
   .header-actions { width: 100%; flex-direction: column; align-items: flex-start; gap: 12px; }
   .header-actions .demo-label { order: 1; }
-  .signed-in-header { flex-wrap: nowrap; }
   .signed-in-header .header-actions { width: auto; flex-direction: row; }
-  .signed-in-header .demo-label { display: none; }
+  .signed-in-header .brand-name { display: none; }
   .intro { padding-top: 40px; }
   h1 { letter-spacing: -1.2px; }
   .connection-card { padding: 24px 20px; }
@@ -220,8 +242,8 @@ footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16
   .landing-shell { padding-top: 32px; }
   .landing-shell .auth-card { padding: 24px 16px; }
   .dashboard-shell { padding-top: 24px; }
-  .dashboard-sidebar .section-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .dashboard-sidebar .section-nav a { gap: 8px; padding-inline: 8px; }
+  .workspace-top-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .workspace-top-nav a { gap: 8px; padding-inline: 8px; }
   .driver-toolbar { padding: 16px; }
   .driver-toolbar > button { width: 100%; }
   .auth-actions, .auth-modes { flex-direction: column; align-items: stretch; }

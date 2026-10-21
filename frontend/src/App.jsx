@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import AuthPanel from './AuthPanel.jsx'
 import RideBooking from './RideBooking.jsx'
 import DriverDashboard from './DriverDashboard.jsx'
@@ -6,6 +6,7 @@ import useRealtime from './useRealtime.js'
 import RideHistory from './RideHistory.jsx'
 import Wallet from './Wallet.jsx'
 import WorkspaceNavigation from './WorkspaceNavigation.jsx'
+import ProfileMenu from './ProfileMenu.jsx'
 
 const connectionMessages = {
   idle: 'Ready when you are. Start FastAPI, then check the connection.',
@@ -21,6 +22,8 @@ export default function App() {
   const [accountFocusRequest, setAccountFocusRequest] = useState(0)
   const [section, setSection] = useState(() => window.location.hash.slice(1))
   const [viewFocus, setViewFocus] = useState(null)
+  const [authNotice, setAuthNotice] = useState('')
+  const connectionDetails = useRef(null)
   const live = useRealtime(user, setUser)
   const primarySection = user?.role === 'driver' ? 'driver' : 'booking'
   const sections = [primarySection, 'account', 'history', ...(user?.role === 'rider' ? ['wallet'] : [])]
@@ -67,10 +70,25 @@ export default function App() {
   }
 
   function openAuthenticatedWorkspace(account) {
+    setAuthNotice('')
     const id = account.role === 'driver' ? 'driver' : 'booking'
     setSection(id)
     window.history.replaceState(null, '', `#${id}`)
     setViewFocus({ id: 'page-title' })
+  }
+
+  function signedOutFromHeader() {
+    setUser(null)
+    setAuthMode('login')
+    setAuthNotice('You have been signed out.')
+    navigateTo('account')
+  }
+
+  function openConnectionHelp() {
+    if (!connectionDetails.current) return
+    connectionDetails.current.open = true
+    connectionDetails.current.querySelector('summary')?.focus()
+    connectionDetails.current.scrollIntoView?.({ block: 'start' })
   }
 
   async function checkConnection() {
@@ -102,29 +120,27 @@ export default function App() {
       <header className={`site-header${user ? ' signed-in-header' : ''}`}>
         <a className="brand" href="/" aria-label="Cab Booking Platform home">
           <span className="brand-mark" aria-hidden="true">C</span>
-          Cab Booking Platform
+          <span className="brand-name">Cab Booking Platform</span>
         </a>
+        {user && <WorkspaceNavigation user={user} activeSection={activeSection} onNavigate={navigateTo} />}
         <div className="header-actions">
-          <span className="demo-label">Learning project · Test payments</span>
+          {!user && <span className="demo-label">Learning project · Test payments</span>}
           <nav className="account-nav" aria-label="Account navigation">
-            {!user && <>
+            {user ? <ProfileMenu key={user.id} user={user} onNavigate={navigateTo} onHelp={openConnectionHelp} onSignedOut={signedOutFromHeader} /> : <>
               <button type="button" aria-controls="account" onClick={() => openAccount('login')}>Login</button>
               <button className="nav-register" type="button" aria-controls="account" onClick={() => openAccount('register')}>Register</button>
-            </>}
-            <button className="nav-account" type="button" aria-label={user ? 'My account' : 'Account'} title={user ? `Account: ${user.name}` : 'Your account'} aria-controls="account" onClick={() => openAccount()}>
+            <button className="nav-account" type="button" aria-label="Account" title="Your account" aria-controls="account" onClick={() => openAccount()}>
               <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
                 <circle cx="12" cy="8" r="3.5" />
                 <path d="M5 21v-2a7 7 0 0 1 14 0v2" />
               </svg>
             </button>
+            </>}
           </nav>
         </div>
       </header>
 
       <main id="main" tabIndex={-1} className={user ? 'dashboard-shell' : 'landing-shell'}>
-        <aside className="dashboard-sidebar" hidden={!user} aria-label="Your workspace">
-          {user && <WorkspaceNavigation user={user} activeSection={activeSection} onNavigate={navigateTo} />}
-        </aside>
         <div className="page-content">
         <section className="intro" aria-labelledby="page-title">
           <p className="eyebrow">{user ? `${user.role.toUpperCase()} WORKSPACE` : 'YOUR NEXT JOURNEY'}</p>
@@ -144,6 +160,7 @@ export default function App() {
         </section>
 
         <div className="account-pane" hidden={Boolean(user) && activeSection !== 'account'}>
+        <p className="account-notice" role="status">{authNotice}</p>
         <AuthPanel user={user} onUserChange={setUser} onAuthenticated={openAuthenticatedWorkspace} mode={authMode} onModeChange={setAuthMode} focusRequest={accountFocusRequest} />
         </div>
         <div className="workspace" hidden={!user || activeSection !== primarySection}>
@@ -158,7 +175,7 @@ export default function App() {
         {user && <RideHistory key={user.id} user={user} liveRevision={live.revision} onSessionExpired={setUser} />}
         </div>
 
-        <details className="connection-details">
+        <details className="connection-details" ref={connectionDetails}>
         <summary>Check the app connection</summary>
         <section className="connection-card" aria-labelledby="connection-title">
           <div>

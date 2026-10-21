@@ -9,14 +9,7 @@ const paths = {
 export default function WorkspaceNavigation({ user, activeSection, onNavigate }) {
   const primary = user.role === 'driver' ? ['driver', 'Driver dashboard'] : ['booking', 'Book a ride']
   const links = [primary, ...(user.role === 'rider' ? [['wallet', 'Wallet']] : []), ['history', 'Ride history'], ['account', 'Account']]
-  const initials = user.name.trim().split(/\s+/).slice(0, 2).map((name) => name[0]).join('')
-
-  return <>
-    <div className="workspace-profile">
-      <span className="workspace-avatar" aria-hidden="true">{initials}</span>
-      <div><p className="workspace-name">{user.name}</p><p className="workspace-role">{user.role === 'driver' ? 'Driver workspace' : 'Rider workspace'}</p></div>
-    </div>
-    <nav className="section-nav" aria-label="Workspace sections">
+  return <nav className="section-nav workspace-top-nav" aria-label="Workspace sections">
       {links.map(([id, label]) => <a key={id} href={`#${id}`} aria-current={activeSection === id ? 'page' : undefined} onClick={(event) => {
         if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
         event.preventDefault()
@@ -26,6 +19,4 @@ export default function WorkspaceNavigation({ user, activeSection, onNavigate })
         {label}
       </a>)}
     </nav>
-    <p className="workspace-note">Your trips, documents and account, together in one place.</p>
-  </>
 }
