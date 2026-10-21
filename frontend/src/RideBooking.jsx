@@ -1,5 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import RidePayment from './RidePayment.jsx'
+import JourneyMap from './JourneyMap.jsx'
+import useRoadRoute from './useRoadRoute.js'
 
 const emptyRoute = { pickupLat: '', pickupLng: '', destinationLat: '', destinationLng: '' }
 const sampleRoute = { pickupLat: '28.6139', pickupLng: '77.2090', destinationLat: '28.6129', destinationLng: '77.2295' }
@@ -41,6 +43,23 @@ export default function RideBooking({ user, onSessionExpired, liveRevision = 0 }
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
   const [isError, setIsError] = useState(false)
+  const [pickMode, setPickMode] = useState('pickup')
+  const savedRoute = useRoadRoute(ride, onSessionExpired)
+  const hasDraft = Object.values(route).some((value) => value !== '')
+  const showRide = ride && (!hasDraft || (Number(route.pickupLat) === ride.pickup.latitude &&
+    Number(route.pickupLng) === ride.pickup.longitude && Number(route.destinationLat) === ride.destination.latitude &&
+    Number(route.destinationLng) === ride.destination.longitude))
+  const mapTrip = quote || (showRide ? ride : null)
+  const pickup = mapTrip?.pickup ?? { latitude: route.pickupLat, longitude: route.pickupLng }
+  const destination = mapTrip?.destination ?? { latitude: route.destinationLat, longitude: route.destinationLng }
+  const [now, setNow] = useState(Date.now())
+
+  useEffect(() => {
+    setNow(Date.now())
+    if (!driverLocation?.expires_at) return
+    const timer = setTimeout(() => setNow(Date.now()), Math.max(0, new Date(driverLocation.expires_at).getTime() - Date.now()) + 10)
+    return () => clearTimeout(timer)
+  }, [driverLocation])
 
   useEffect(() => {
     if (user?.role !== 'rider') return
@@ -204,6 +223,14 @@ export default function RideBooking({ user, onSessionExpired, liveRevision = 0 }
           <aside className="auth-card booking-summary-card" aria-label="Estimate and current ride">
           <p className="eyebrow">YOUR JOURNEY</p>
           <h3>Your trip at a glance</h3>
+          <JourneyMap pickup={pickup} destination={destination}
+            driver={ride && mapTrip === ride && driverLocation?.ride_id === ride.id && new Date(driverLocation.expires_at).getTime() > now ? driverLocation.location : null}
+            geometry={quote?.geometry ?? (showRide ? savedRoute?.geometry : null)} pickMode={pickMode} onPickMode={setPickMode} disabled={busy || restoring}
+            onPick={(point) => {
+              const prefix = pickMode === 'pickup' ? 'pickup' : 'destination'
+              changeRoute({ ...route, [`${prefix}Lat`]: String(point.latitude), [`${prefix}Lng`]: String(point.longitude) })
+            }} />
+          {!quote && savedRoute?.error && <p className="fare-note" role="status">Road preview unavailable: {savedRoute.error} Your saved ride is unchanged.</p>}
           {!quote && !ride && !restoring && <div className="dashboard-empty-state">
             <span className="empty-state-mark" aria-hidden="true">↗</span>
             <h4>Your next journey starts here</h4>
@@ -222,7 +249,7 @@ export default function RideBooking({ user, onSessionExpired, liveRevision = 0 }
             {ride.driver_id && <p className="ride-reference">Assigned driver: {ride.driver_id}</p>}
             {ride.driver_id && ['accepted', 'arriving', 'in_progress'].includes(ride.status) && <div className="driver-location-card">
               <strong>Driver’s last shared location</strong>
-              {driverLocation?.ride_id === ride.id && driverLocation.location && new Date(driverLocation.expires_at).getTime() > Date.now()
+              {driverLocation?.ride_id === ride.id && driverLocation.location && new Date(driverLocation.expires_at).getTime() > now
                 ? <p>{driverLocation.location.latitude}, {driverLocation.location.longitude} · Updated {new Date(driverLocation.updated_at).toLocaleTimeString()}</p>
                 : <p>Waiting for a fresh location. The driver may be offline.</p>}
             </div>}

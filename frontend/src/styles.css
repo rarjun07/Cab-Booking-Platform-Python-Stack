@@ -202,6 +202,22 @@ footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16
 .driver-requests .dashboard-empty-state { padding-block: 48px; }
 .driver-requests .fare-summary { margin-top: 0; }
 .driver-demo-note:last-child { margin-bottom: 0; }
+.journey-map-card { min-width: 0; margin: 20px 0; }
+.driver-layout > .journey-map-card { grid-column: 1 / -1; margin: 0; padding: 24px; border: 1px solid #dcded4; border-radius: 18px; background: #fffef9; }
+.journey-map-card h4 { margin: 0; font-size: 17px; }
+.journey-map-card .matching-title { gap: 12px; flex-wrap: wrap; }
+.journey-map-card .matching-title button { padding: 8px 14px; }
+.journey-map { height: clamp(280px, 35vw, 400px); width: 100%; border: 1px solid #aab8aa; border-radius: 12px; z-index: 0; background: #edf0e8; font-family: inherit; }
+.journey-map .leaflet-control-attribution { background: #fffef9; color: #172a28; font-size: 11px; }
+.journey-map .leaflet-control-attribution a { color: #32543b; }
+.journey-map .leaflet-bar a { min-width: 44px; min-height: 44px; line-height: 44px; background: #fffef9; color: #172a28; }
+.journey-marker { display: grid; place-items: center; border: 2px solid #172a28; border-radius: 50% 50% 50% 0; transform-origin: center; background: #e5ee9d; color: #172a28; font-weight: 750; }
+.journey-marker-destination, .journey-marker-driver { background: #172a28; color: #e5ee9d; }
+.journey-marker-selection { background: #fffef9; border-style: dashed; }
+.map-pick-controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.map-pick-controls button { padding: 8px 12px; background: #fffef9; color: #172a28; border: 1px solid #aab8aa; border-radius: 999px; }
+.map-pick-controls button[aria-pressed="true"] { background: #e5ee9d; border-color: #c4d174; }
+.map-disclosure { font-size: 11px; }
 .landing-shell { padding-block: 56px 48px; }
 .landing-shell .page-content { display: grid; grid-template-columns: minmax(0, 1fr) minmax(340px, .85fr); gap: 48px; align-items: start; }
 .landing-shell .intro { padding: 24px 0 0; }

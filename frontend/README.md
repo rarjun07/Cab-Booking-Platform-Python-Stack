@@ -1,5 +1,7 @@
 # React frontend
 
+The mentor-guide [map follow-up](../docs/FEATURE_COMPLETION.md) adds `JourneyMap.jsx` (Leaflet, road/driver markers, map selection and coordinate fallback) and `useRoadRoute.js` (private saved-route preview). Run `npm ci` after pulling its dependency update. Both dashboards retain the existing palette; map tiles have their own geographic colours. Actual rendered-browser/mobile checks remain pending.
+
 The header includes Login/Register for guests and a name/avatar profile dropdown for signed-in accounts, using the existing cream/green/lime palette. The dropdown opens profile, trips/receipts, rider wallet and connection help, and signs out through the backend.
 
 Signed-in riders and drivers use horizontal navigation in the top header, with focused workspace, history and account views; riders also have a wallet view. The dashboard content uses the full shared container below the header. The rider booking form sits beside its estimate/current ride on desktop. The driver dashboard places vehicle/availability settings beside requests. Signing in opens the correct role's workspace; switching views keeps form drafts and live state mounted. The guest page pairs its introduction with the account form. See [the layout and accessibility walkthrough](../docs/UI_POLISH.md) for breakpoints, navigation behavior and pending visual checks.

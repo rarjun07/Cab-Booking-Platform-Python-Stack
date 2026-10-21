@@ -1,4 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
+import JourneyMap from './JourneyMap.jsx'
+import useRoadRoute from './useRoadRoute.js'
 
 const formatMoney = (value) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(Number(value))
 const tripSteps = { accepted: ['arriving', 'Head to pickup'], arriving: ['in_progress', 'Start trip'], in_progress: ['completed', 'Complete trip'] }
@@ -37,6 +39,7 @@ export default function DriverDashboard({ onSessionExpired, live }) {
   const [now, setNow] = useState(Date.now())
   const fresh = profile?.status === 'active' && new Date(profile.location_expires_at).getTime() > now
   const nextStep = tripSteps[ride?.status]
+  const roadRoute = useRoadRoute(ride, onSessionExpired)
 
   useEffect(() => {
     mounted.current = true
@@ -223,6 +226,10 @@ export default function DriverDashboard({ onSessionExpired, live }) {
             </ul>}
             {fresh && !ride && <p className="fare-note driver-demo-note">Pickup distances are geographic distances, not driving distances or traffic ETAs.</p>}
           </div>
+          <JourneyMap title="Driver journey map" pickup={ride?.pickup} destination={ride?.destination}
+            driver={fresh ? profile.current_location : null} selection={profile ? location : null}
+            geometry={roadRoute?.geometry} disabled={busy || !profile} onPick={profile ? setLocation : undefined} />
+          {roadRoute?.error && <p className="fare-note" role="status">Road preview unavailable: {roadRoute.error} Your trip controls remain available.</p>}
         </div>
       </>}
       <p className={`auth-message${isError ? ' auth-error' : ''}`} role="status" aria-live="polite" aria-atomic="true">{message}</p>

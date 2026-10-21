@@ -31,6 +31,7 @@ beforeEach(() => {
       if (requests.length === 1) throw new TypeError('Controlled response loss')
       data = ride
     } else if (url.pathname === '/api/rides/saved-ride-fixture/status') data = ride
+    else if (url.pathname === '/api/rides/saved-ride-fixture/route') data = { distance_meters: 3982, duration_secs: 396, geometry: null }
     else if (url.pathname === '/api/payments/config') data = { configured: false }
     else if (url.pathname.endsWith('/payment') || url.pathname.endsWith('/promo')) data = null
     else { unexpected.push(url.pathname); throw new Error('Unexpected fixture request') }

@@ -8,6 +8,8 @@ The user subsequently chose custom FastAPI + PostgreSQL authentication instead o
 
 ## Daily plan
 
+The user requested completion of audited gaps on 2026-10-21. Follow the sequential [feature follow-ups](FEATURE_COMPLETION.md), retaining individual Git checkpoints and all existing Day 14/provider/manual verification limits.
+
 | Day | Scope from the guide | Evidence before the daily Git checkpoint |
 | --- | --- | --- |
 | 1 | Initialize `backend/` and `frontend/`; FastAPI scaffold; custom PostgreSQL-backed authentication and signed session verification (user's adaptation). | Both apps run; real registration/login/logout work; FastAPI rejects invalid, missing, expired, and revoked sessions. |

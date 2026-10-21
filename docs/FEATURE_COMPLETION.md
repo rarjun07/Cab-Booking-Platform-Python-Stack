@@ -1,0 +1,30 @@
+# Mentor-guide follow-ups
+
+On 2026-10-21 the user asked to build the remaining audited features one at a time, preserving the existing UI/palette and free-routing choice. These are explicit follow-ups to the existing days, not a claim that Day 14 is finished. Finish checks and a verified Git checkpoint for each implementation milestone before the next.
+
+## Sequence
+
+1. Interactive Leaflet maps in both dashboards, marker selection, OSRM road geometry and private saved-route access.
+2. Driver pickup/destination ETA and visual tracking from fresh location updates; optional device location sharing with explicit browser consent.
+3. Editable account details (existing name/phone/photo fields) and an operator-controlled driver-verification process. The guide does not require a new public admin dashboard.
+4. Real Stripe sandbox ride-payment and wallet-top-up verification. Account/test keys must be configured locally, never pasted in chat or committed; this remains dependent on the user's account access.
+5. External receipt-email setup and delivery verification. Provider/sender credentials and permission to send a specific verification message are required; local SMTP testing is not an external inbox pass.
+6. Background cleanup/reconciliation and Redis presence follow-ups, with bounded/idempotent jobs and tests. These are backend tasks, not invented dashboard tabs.
+7. Docker storage recovery and complete Compose smoke checks; select a hosting destination, then prepare a concrete deployment. Do not restart the other project's database, prune data or purchase services implicitly.
+8. Manual rendered desktop/mobile/zoom/keyboard/screen-reader and configured-provider verification. Previous browser policy restrictions remain in effect. Keep unverified checks visible.
+
+The PDF lists Tailwind, React Query/SWR and Redux/Recoil; current styling/fetch/state differs. This is a tooling-alignment decision separate from missing business features. React is the user's choice and Next.js is optional. Do not replace the working UI wholesale just to change libraries.
+
+## 1. Maps
+
+`JourneyMap.jsx` wraps Leaflet 1.9.4 for both roles. Riders select **Set pickup** or **Set destination**, then click the map; keyboard-accessible numeric fields remain available. Drivers can select a draft coordinate; clicking does not automatically go online or publish it. **S** is an unsent selection; **D** is a fresh server-confirmed driver location. Availability and **Share updated location** remain explicit actions.
+
+Fare estimates now include a bounded GeoJSON LineString. Geometry is excluded from the signed fare token and is not used as client-supplied billing input. Restored rides load `/api/rides/{ride_id}/route`; only the owning rider or assigned driver can access this endpoint, checked before any upstream request. Existing Redis route quotas, OSRM throttling/cache/timeouts and safe errors apply. A route is a current road preview, not a persisted historical path or a live-traffic ETA. A failed route preview leaves trip controls usable; no fake straight-line road is drawn.
+
+Map tiles use `https://tile.openstreetmap.org/{z}/{x}/{y}.png`, visible attribution, normal browser caching and an origin referrer. No tile prefetching/offline downloads are implemented. Viewed areas go to the tile provider; route coordinates go to OSRM when estimating or restoring a preview. Default Delhi view does not use device GPS. The public tile/routing services are best effort for learning; choose production-appropriate providers before public launch.
+
+Optional public Vite build-time configuration: `VITE_MAP_TILE_URL` and `VITE_MAP_ATTRIBUTION` (trusted operator-controlled HTML attribution, never user input). Rebuild after changing them. These values are public; never put a secret API key in Vite variables. Changing the tile host also requires updating the on-screen provider disclosure.
+
+Verification: backend authorization/geometry/cache tests, React coordinate conversion/selection/StrictMode cleanup tests, existing component/accessibility regressions, and production build. These do not establish actual browser tile rendering, mobile layout or screen-reader usability; those manual checks remain pending.
+
+References: [Leaflet API](https://leafletjs.com/reference.html), [OSRM API](https://project-osrm.org/docs/v5.24.0/api/), [OSM tile policy](https://operations.osmfoundation.org/policies/tiles/).

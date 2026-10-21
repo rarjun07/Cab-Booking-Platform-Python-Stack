@@ -10,7 +10,7 @@ import httpx
 from pydantic import ValidationError
 
 from app.config import get_settings
-from app.ride_schemas import Coordinate, RouteMetrics
+from app.ride_schemas import Coordinate, RoadRoute, RouteGeometry
 
 USER_AGENT = "CabBookingInternship/0.3 (https://github.com/rarjun07/Cab-Booking-Platform-Python-Stack)"
 
@@ -22,7 +22,7 @@ class OSRMProvider:
         self.cache = OrderedDict()
         self.next_request_at = 0.0
 
-    def route(self, pickup: Coordinate, destination: Coordinate) -> RouteMetrics:
+    def route(self, pickup: Coordinate, destination: Coordinate) -> RoadRoute:
         key = (pickup.latitude, pickup.longitude, destination.latitude, destination.longitude)
         with self.lock:
             now = time.monotonic()
@@ -37,7 +37,7 @@ class OSRMProvider:
         try:
             response = httpx.get(
                 f"{self.base_url}/route/v1/driving/{coordinates}",
-                params={"overview": "false", "steps": "false", "radiuses": "250;250", "generate_hints": "false"},
+                params={"overview": "simplified", "geometries": "geojson", "steps": "false", "radiuses": "250;250", "generate_hints": "false"},
                 headers={"User-Agent": USER_AGENT}, timeout=10.0, follow_redirects=False,
             )
             data = response.json()
@@ -46,8 +46,9 @@ class OSRMProvider:
             if response.status_code != 200 or data.get("code") != "Ok":
                 raise HTTPException(503, "The routing service is unavailable. Please try again later.")
             route = data["routes"][0]
-            metrics = RouteMetrics(distance_meters=math.ceil(float(route["distance"])),
-                                   duration_secs=math.ceil(float(route["duration"])))
+            metrics = RoadRoute(distance_meters=math.ceil(float(route["distance"])),
+                                duration_secs=math.ceil(float(route["duration"])),
+                                geometry=RouteGeometry.model_validate(route["geometry"]))
         except httpx.RequestError:
             raise HTTPException(503, "Could not reach the routing service. Please try again later.") from None
         except (ValueError, TypeError, KeyError, IndexError, AttributeError, OverflowError, ValidationError):

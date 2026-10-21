@@ -13,7 +13,8 @@ def test_osrm_request_coordinate_order_rounding_and_cache(monkeypatch):
     calls = []
     def get(url, **kwargs):
         calls.append((url, kwargs))
-        return httpx.Response(200, json={"code": "Ok", "routes": [{"distance": 3981.4, "duration": 395.5}]})
+        return httpx.Response(200, json={"code": "Ok", "routes": [{"distance": 3981.4, "duration": 395.5,
+            "geometry": {"type": "LineString", "coordinates": [[77.209, 28.6139], [77.2295, 28.6129]]}}]})
     monkeypatch.setattr(httpx, "get", get)
     provider = OSRMProvider("https://router.project-osrm.org/")
     first, second = provider.route(PICKUP, DESTINATION), provider.route(PICKUP, DESTINATION)
@@ -21,6 +22,9 @@ def test_osrm_request_coordinate_order_rounding_and_cache(monkeypatch):
     assert first.distance_meters == 3982 and first.duration_secs == 396
     assert calls[0][0].endswith("/77.209,28.6139;77.2295,28.6129")
     assert calls[0][1]["params"]["radiuses"] == "250;250"
+    assert calls[0][1]["params"]["geometries"] == "geojson"
+    assert calls[0][1]["params"]["overview"] == "simplified"
+    assert first.geometry.coordinates == [(77.209, 28.6139), (77.2295, 28.6129)]
     with pytest.raises(HTTPException) as error:
         provider.route(PICKUP, Coordinate(latitude=28.62, longitude=77.23))
     assert error.value.status_code == 429 and len(calls) == 1
@@ -48,3 +52,23 @@ def test_routing_timeout_is_not_a_fake_estimate(monkeypatch):
         OSRMProvider("https://router.project-osrm.org").route(PICKUP, DESTINATION)
     assert error.value.status_code == 503
     assert "private" not in error.value.detail
+
+
+@pytest.mark.parametrize("geometry", [
+    None,
+    {"type": "Polygon", "coordinates": [[77, 28], [78, 29]]},
+    {"type": "LineString", "coordinates": [[181, 28], [78, 29]]},
+    {"type": "LineString", "coordinates": [[77, float("inf")], [78, 29]]},
+    {"type": "LineString", "coordinates": [[77, 28]]},
+    {"type": "LineString", "coordinates": [[77, 28]] * 20001},
+])
+def test_unusable_map_geometry_is_rejected(monkeypatch, geometry):
+    # Use a response stub: a nonfinite upstream number must never reach the UI.
+    class Response:
+        status_code = 200
+        def json(self):
+            return {"code": "Ok", "routes": [{"distance": 100, "duration": 60, "geometry": geometry}]}
+    monkeypatch.setattr(httpx, "get", lambda *args, **kwargs: Response())
+    with pytest.raises(HTTPException) as error:
+        OSRMProvider("https://router.project-osrm.org").route(PICKUP, DESTINATION)
+    assert error.value.status_code == 502

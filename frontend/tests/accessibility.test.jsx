@@ -34,6 +34,7 @@ beforeEach(() => {
     else if (path === '/api/auth/login' || path === '/api/auth/register') { account = signInAccount; data = signInAccount }
     else if (path === '/api/auth/logout') { account = null; return new Response(null, { status: 204 }) }
     else if (path === '/api/rides/current') data = currentRide
+    else if (path.endsWith('/route')) data = { distance_meters: 3982, duration_secs: 396, geometry: null }
     else if (path === '/api/rides/history') data = { items: [trip], next_cursor: null }
     else if (path === '/api/receipts/config') data = { email_enabled: false }
     else if (path === '/api/ratings/me') data = { average: null, count: 0 }

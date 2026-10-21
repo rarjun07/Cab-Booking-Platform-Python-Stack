@@ -1,7 +1,7 @@
 """Validated coordinates, signed quote contents, and ride responses."""
 from datetime import datetime
 from decimal import Decimal
-from typing import Literal
+from typing import Annotated, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -16,6 +16,18 @@ class Coordinate(BaseModel):
 class RouteMetrics(BaseModel):
     distance_meters: int = Field(gt=0, le=10_000_000)
     duration_secs: int = Field(gt=0, le=604800)
+
+
+class RouteGeometry(BaseModel):
+    """Bounded GeoJSON: OSRM uses longitude,latitude, unlike Leaflet."""
+    model_config = ConfigDict(allow_inf_nan=False, extra="forbid")
+    type: Literal["LineString"] = "LineString"
+    coordinates: list[tuple[Annotated[float, Field(ge=-180, le=180)],
+                            Annotated[float, Field(ge=-90, le=90)]]] = Field(min_length=2, max_length=20000)
+
+
+class RoadRoute(RouteMetrics):
+    geometry: RouteGeometry | None = None
 
 
 class FareBreakdown(BaseModel):
@@ -34,6 +46,7 @@ class QuoteContents(RouteMetrics):
 
 
 class FareEstimate(QuoteContents):
+    geometry: RouteGeometry | None = None
     quote_token: str
     expires_at: datetime
     breakdown: FareBreakdown

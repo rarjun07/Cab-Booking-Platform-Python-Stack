@@ -2,6 +2,8 @@
 
 ## Current checkpoint
 
+- User-requested feature completion: the user asked to build all audited gaps one at a time. Sequence and verification boundaries are in `FEATURE_COMPLETION.md`. First implementation milestone: interactive maps; later ETA/profile/provider/infrastructure work remains outstanding. This does not complete or advance Day 14.
+
 - Active milestone: Day 14 container/deployment setup in progress. Dockerfiles, isolated Compose services, a credential helper and smoke script are prepared. The build hit a Docker internal read-only filesystem error; container startup/smoke checks have not passed. Recovery may interrupt another project's running database and awaits the user's response. Browser/mobile/zoom/screen-reader checks remain pending; earlier Stripe setup/real-provider/rendered-checkout deferral remains in effect.
 - Completed: read all nine PDF pages, checked the daily schedule, confirmed stack compatibility, and prepared the roadmap.
 - Learning preference: guide the user step by step with explanations.
@@ -41,6 +43,15 @@
 - Day 13 documentation checkpoint: `e91e92e6634004b058a07f537d283e881862e2cb`, verified equal to GitHub before Day 14 with a clean working tree.
 - Day 14 prepared-code checkpoint: `8b2c2c2665889ec063a086a6e5c6f640b16d166b`, committed/pushed and verified equal to GitHub `refs/heads/main`. This saves incomplete Day 14 work; it does not certify container startup or deployment. This verification record follows in a documentation commit.
 - Next action: resolve Docker storage/recovery, rebuild and run Compose and the restart smoke check; choose a hosting destination before any online deployment. Day 14 is incomplete. Manual UI/actual Stripe verification remain pending.
+
+## Mentor-guide follow-up 1: interactive maps — 2026-10-21
+
+- Continued from clean local `75a30c2`, verified equal to GitHub before completing this follow-up. Installed pinned Leaflet 1.9.4 after an initial DNS failure; no paid map account/key is needed.
+- Added shared rider/driver maps, pickup/destination/last-shared/draft markers, road-route previews, fit controls, rider pickup/destination selection and driver draft-location selection. Numeric fields remain the keyboard fallback; map clicks never automatically publish driver location. Both roles reuse the cream/green/lime UI palette. Public tiles have their normal geographic colors.
+- OSRM now supplies bounded/validated simplified GeoJSON with its existing cache/throttle/timeouts. Fare tokens exclude geometry. Saved-route access checks rider/assigned-driver ownership before requesting OSRM and uses shared route quotas. Stale driver markers are hidden on expiry. Tile errors retain usable forms/ride controls; attribution, referrer behavior, provider disclosure and production-service limitations are documented.
+- Verification: full backend suite **274 passed** (including PostgreSQL, Redis, WebSockets and worker regressions); this run preceded the final additional null-geometry case, which is checked separately below. All **27 frontend tests** and production build passed. `git diff --check` passed. Existing TestClient deprecation warning remains.
+- Actual rendered-browser map/mobile/zoom/screen-reader checks remain unverified under the prior browser policy restriction. No real Stripe/email/deployment pass is claimed. ETA, device GPS and editable profile are not included in this first checkpoint.
+- Final routing checks (including rejection of null geometry): **15 passed**; pip consistency passed. Implementation commit/push/remote verification: pending until the checkpoint below is performed; do not begin follow-up 2 before remote verification.
 
 ## User-requested removal of duplicate Account tab — 2026-10-21
 

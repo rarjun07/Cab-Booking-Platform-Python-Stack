@@ -16,7 +16,7 @@ from app.auth import DB, ISSUER, check_origin, get_current_user
 from app.config import get_settings
 from app.models import Ride, User
 from app.events import Events
-from app.ride_schemas import Coordinate, FareBreakdown, FareEstimate, QuoteContents, RidePublic, RideRequest, RouteMetrics
+from app.ride_schemas import Coordinate, FareBreakdown, FareEstimate, QuoteContents, RidePublic, RideRequest, RouteMetrics, RoadRoute
 from app.routing import OSRMProvider, get_route_provider
 
 router = APIRouter(prefix="/api/rides", tags=["Rides"])
@@ -63,13 +63,27 @@ def estimate(origin: str, dest: str, user: RiderUser,
     metrics = provider.route(pickup, destination)
     breakdown = calculate_fare(metrics)
     contents = QuoteContents(pickup=pickup, destination=destination,
-                             **metrics.model_dump(), fare_estimate=breakdown.total)
+                             distance_meters=metrics.distance_meters, duration_secs=metrics.duration_secs,
+                             fare_estimate=breakdown.total)
     now = datetime.now(timezone.utc)
     expires_at = now + timedelta(seconds=get_settings().quote_lifetime_seconds)
     token = jwt.encode({**contents.model_dump(mode="json"), "sub": str(user.id), "jti": str(uuid4()),
                         "iat": now, "exp": expires_at, "iss": ISSUER, "aud": QUOTE_AUDIENCE},
                        get_settings().jwt_secret.get_secret_value(), algorithm="HS256")
-    return FareEstimate(**contents.model_dump(), quote_token=token, expires_at=expires_at, breakdown=breakdown)
+    return FareEstimate(**contents.model_dump(), geometry=getattr(metrics, "geometry", None),
+                        quote_token=token, expires_at=expires_at, breakdown=breakdown)
+
+
+@router.get("/{ride_id}/route", response_model=RoadRoute)
+def saved_route(ride_id: UUID, user: Annotated[User, Depends(get_current_user)], db: DB,
+                provider: Annotated[OSRMProvider, Depends(get_route_provider)]):
+    # Authorize before contacting OSRM. Exact saved coordinates are already
+    # available to these participants, never to another rider/unassigned driver.
+    ride = db.get(Ride, ride_id)
+    if ride is None or user.id not in (ride.rider_id, ride.driver_id):
+        raise HTTPException(404, "Ride not found.")
+    saved = ride_response(ride, db)
+    return provider.route(saved.pickup, saved.destination)
 
 
 def validate_quote(token: str, user: User):

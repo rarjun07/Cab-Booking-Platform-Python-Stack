@@ -8,8 +8,8 @@ from sqlalchemy import func, select
 from app.auth import COOKIE_NAME, ISSUER
 from app.config import get_settings
 from app.main import app
-from app.models import Ride
-from app.ride_schemas import RouteMetrics
+from app.models import Ride, Driver
+from app.ride_schemas import RouteMetrics, RoadRoute, RouteGeometry
 from app.rides import QUOTE_AUDIENCE, calculate_fare
 from app.routing import get_route_provider
 
@@ -22,7 +22,8 @@ def routing(client):
         calls = 0
         def route(self, pickup, destination):
             self.calls += 1
-            return RouteMetrics(distance_meters=4500, duration_secs=900)
+            return RoadRoute(distance_meters=4500, duration_secs=900, geometry=RouteGeometry(
+                coordinates=[(pickup.longitude, pickup.latitude), (destination.longitude, destination.latitude)]))
     provider = FakeProvider()
     app.dependency_overrides[get_route_provider] = lambda: provider
     yield provider
@@ -57,6 +58,11 @@ def test_estimate_does_not_create_a_ride(client, rider, db):
     assert data["distance_meters"] == 4500 and data["duration_secs"] == 900
     assert data["routing_provider"] == "OSRM" and data["currency"] == "INR"
     assert db.scalar(select(func.count()).select_from(Ride)) == 0
+    assert data["geometry"]["type"] == "LineString"
+    # Geometry is display data, not a large signed token or a trusted fare input.
+    claims = jwt.decode(data["quote_token"], get_settings().jwt_secret.get_secret_value(),
+                        algorithms=["HS256"], audience=QUOTE_AUDIENCE, issuer=ISSUER)
+    assert "geometry" not in claims
 
 
 def test_booking_persists_server_quote_with_correct_postgis_coordinate_order(client, rider, db):
@@ -141,3 +147,31 @@ def test_auth_and_quote_tokens_are_not_interchangeable(client, rider):
 def test_booking_rejects_cross_origin_request(client, rider):
     payload = {"quote_token": estimate(client)["quote_token"]}
     assert client.post("/api/rides/request", json=payload, headers={"Origin": "https://untrusted.example"}).status_code == 403
+
+
+def test_saved_road_route_is_private_to_rider_and_assigned_driver(client, rider, account, routing, db):
+    ride = client.post("/api/rides/request", json={"quote_token": estimate(client)["quote_token"]}).json()
+    path = f'/api/rides/{ride["id"]}/route'
+    response = client.get(path)
+    assert response.status_code == 200
+    assert response.json()["geometry"]["coordinates"] == [[77.209, 28.6139], [77.2295, 28.6129]]
+    calls = routing.calls
+    client.post("/api/auth/logout")
+    assert client.get(path).status_code == 401
+    account.update(email="other-route@example.com")
+    client.post("/api/auth/register", json=account)
+    assert client.get(path).status_code == 404
+    client.post("/api/auth/logout")
+    account.update(email="route-driver@example.com", role="driver")
+    driver = client.post("/api/auth/register", json=account).json()
+    assert client.get(path).status_code == 404
+    assert routing.calls == calls  # No upstream call before authorization.
+    from uuid import UUID
+    driver_id = UUID(driver["id"])
+    db.add(Driver(user_id=driver_id, vehicle_info={"make": "Test", "model": "Car", "plate": "TEST123"}))
+    db.flush()
+    stored = db.get(Ride, UUID(ride["id"]))
+    stored.driver_id = driver_id
+    stored.status = "accepted"
+    db.flush()
+    assert client.get(path).status_code == 200

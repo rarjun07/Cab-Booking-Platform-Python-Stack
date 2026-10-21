@@ -13,7 +13,7 @@ The goal is to turn two locations into a road-route estimate, then save an authe
 7. Click **Request this ride** before the estimate expires. The page should show the saved ride reference and status `requested`.
 8. Click **Refresh ride status** to read that ride from the API.
 
-The form uses coordinates for this milestone. Latitude comes first in the form and API query; OSRM and PostGIS use longitude first internally. Coordinates are sent to the public routing service only when an estimate is requested. Routing attribution and a link to fix OpenStreetMap data appear below the form.
+The original Day 3 form used coordinates. The later [map follow-up](FEATURE_COMPLETION.md) adds Leaflet selection and OSRM route previews in both dashboards. Latitude comes first in the form and API query; OSRM and PostGIS use longitude first internally. Coordinates go to the public routing service for estimates and saved-route previews. Viewed map areas also go to the tile provider. Attribution and a map-issue link remain visible.
 
 Editing the locations clears the previous estimate. Changing accounts clears the booking state. Quotes expire after five minutes by default. If saving fails because of a network interruption, retrying the same valid quote returns the same ride instead of creating a duplicate.
 
